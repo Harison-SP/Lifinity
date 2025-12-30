@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Habit Details &amp; Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "Noto Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-50 font-display antialiased overflow-x-hidden transition-colors duration-200">
+<div class="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+<header class="flex items-center justify-between h-16">
+<div class="flex items-center gap-3">
+<div class="text-primary">
+<span class="material-symbols-outlined !text-3xl">loop</span>
+</div>
+<h2 class="text-lg font-bold tracking-tight">Loop Habit Tracker</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-bold text-primary" href="#">Habits</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden sm:flex items-center justify-center px-4 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    Log Out
+                </button>
+<div class="bg-center bg-cover rounded-full size-9 ring-2 ring-primary/20" data-alt="User profile avatar gradient" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDYyJclnIM1z82OpcvC2qA2dv5pqqukD0lHR8yCyJLCBT32uued9txUsQV_m88OOsbLk24OAEDMA2l4nUhOvpQL2YzOpQfTIRPsf8YqurSL5wN9Wgx-MUKW6Nao20jgQZT62tEL7rViua6qoQMwKSvTMKoApJCkF4jRNWcjhqLGfncs1vaWgIleGBonM6t9FOZ7Qz2sFciePkYdPxdmDwfE9dNCHes8JvTsaxP3lTJ4EkGkC3xRV4zUmE-N_PUjVE3gA1Jxm2unZkcI");'>
+</div>
+</div>
+</header>
+</div>
+</div>
+<main class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-slate-200 dark:border-slate-800">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<div class="size-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary-dark dark:text-primary">
+<span class="material-symbols-outlined !text-3xl">directions_run</span>
+</div>
+<div>
+<h1 class="text-3xl md:text-4xl font-black tracking-tight">Morning Jog</h1>
+<p class="text-slate-500 dark:text-slate-400 font-medium">Daily goal: 30 minutes</p>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<button class="flex items-center gap-2 px-5 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+                Edit
+            </button>
+<button class="flex items-center gap-2 px-5 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+                Delete
+            </button>
+<button class="flex items-center gap-2 px-6 h-12 rounded-xl bg-primary text-slate-900 hover:brightness-110 font-bold shadow-[0_0_15px_rgba(19,236,91,0.4)] transition-all">
+<span class="material-symbols-outlined text-[20px]">check</span>
+                Mark Complete Today
+            </button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="flex flex-col gap-1 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+<div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined !text-6xl text-primary">local_fire_department</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Current Streak</p>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">12</p>
+<span class="text-sm font-bold text-slate-400">Days</span>
+</div>
+<div class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md w-fit">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                +2 this week
+            </div>
+</div>
+<div class="flex flex-col gap-1 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+<div class="absolute right-0 top-0 p-4 opacity-10">
+<span class="material-symbols-outlined !text-6xl text-slate-400">emoji_events</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Best Streak</p>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">45</p>
+<span class="text-sm font-bold text-slate-400">Days</span>
+</div>
+<p class="mt-2 text-xs font-medium text-slate-400">Achieved in Oct 2023</p>
+</div>
+<div class="flex flex-col gap-1 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+<div class="absolute right-0 top-0 p-4 opacity-10">
+<span class="material-symbols-outlined !text-6xl text-slate-400">check_circle</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Completions</p>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">128</p>
+<span class="text-sm font-bold text-slate-400">Times</span>
+</div>
+<div class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md w-fit">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+                Top 10%
+            </div>
+</div>
+<div class="flex flex-col gap-1 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+<div class="absolute right-0 top-0 p-4 opacity-10">
+<span class="material-symbols-outlined !text-6xl text-slate-400">pie_chart</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Completion Rate</p>
+<div class="flex items-baseline gap-2">
+<p class="text-3xl font-black">85%</p>
+</div>
+<div class="mt-2 w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[85%] rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<div class="xl:col-span-2 flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold">Activity Log (2023)</h3>
+<div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+<span>Less</span>
+<div class="size-3 bg-slate-100 dark:bg-slate-800 rounded-sm"></div>
+<div class="size-3 bg-primary/30 rounded-sm"></div>
+<div class="size-3 bg-primary/60 rounded-sm"></div>
+<div class="size-3 bg-primary rounded-sm"></div>
+<span>More</span>
+</div>
+</div>
+<div class="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
+<div class="grid grid-rows-7 gap-1 text-[10px] text-slate-400 font-medium pr-2">
+<span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span><span>Sun</span>
+</div>
+<div class="flex gap-1 flex-1">
+<script>
+                            for(let w=0; w<24; w++) {
+                                document.write('<div class="grid grid-rows-7 gap-1">');
+                                for(let d=0; d<7; d++) {
+                                    const rand = Math.random();
+                                    let bgClass = "bg-slate-100 dark:bg-slate-800";
+                                    if (rand > 0.7) bgClass = "bg-primary";
+                                    else if (rand > 0.5) bgClass = "bg-primary/60";
+                                    else if (rand > 0.3) bgClass = "bg-primary/30";
+                                    document.write(`<div class="size-3.5 sm:size-4 rounded-sm ${bgClass}" title="Activity recorded"></div>`);
+                                }
+                                document.write('</div>');
+                            }
+                        </script>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Score</h3>
+<div class="relative">
+<button class="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                            Week
+                            <span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+</button>
+</div>
+</div>
+<div class="relative h-64 w-full">
+<div class="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-xs text-slate-400 font-medium text-right pr-2">
+<span>100%</span>
+<span>80%</span>
+<span>60%</span>
+<span>40%</span>
+<span>20%</span>
+</div>
+<div class="absolute left-10 right-0 top-2 bottom-8">
+<div class="w-full h-full flex flex-col justify-between">
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+</div>
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+<defs>
+<linearGradient id="scoreGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#13ec5b" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#13ec5b" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 110 L 40 120 L 80 125 L 120 140 L 160 145 L 200 120 L 240 70 L 280 80 L 320 90 L 360 95 L 400 115 L 440 100 L 480 80 L 520 70" fill="none" stroke="#13ec5b" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<circle cx="0" cy="110" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="40" cy="120" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="80" cy="125" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="120" cy="140" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="160" cy="145" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="200" cy="120" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="240" cy="70" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="280" cy="80" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="320" cy="90" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="360" cy="95" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="400" cy="115" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="440" cy="100" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="480" cy="80" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="520" cy="70" fill="#13ec5b" r="4" stroke="white" stroke-width="2"></circle>
+</svg>
+</div>
+<div class="absolute left-10 right-0 bottom-0 flex justify-between text-xs text-slate-400 font-medium pt-2 border-t border-slate-100 dark:border-slate-800">
+<span>Jan 21</span>
+<span>31</span>
+<span>Feb</span>
+<span>14</span>
+<span>21</span>
+<span>28</span>
+<span>Mar</span>
+<span>14</span>
+<span>21</span>
+<span>28</span>
+<span>Apr</span>
+<span>11</span>
+<span>18</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">History</h3>
+<div class="relative">
+<button class="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                            Month
+                            <span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+</button>
+</div>
+</div>
+<div class="h-64 w-full flex items-end justify-between gap-2 pt-6">
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">20</span>
+<div class="w-full max-w-[24px] bg-primary h-[45%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Mar</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">12</span>
+<div class="w-full max-w-[24px] bg-primary h-[25%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Apr</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">13</span>
+<div class="w-full max-w-[24px] bg-primary h-[28%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">May</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">18</span>
+<div class="w-full max-w-[24px] bg-primary h-[40%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Jun</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">25</span>
+<div class="w-full max-w-[24px] bg-primary h-[55%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Jul</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">28</span>
+<div class="w-full max-w-[24px] bg-primary h-[75%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Aug</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">29</span>
+<div class="w-full max-w-[24px] bg-primary h-[85%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Sep</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">28</span>
+<div class="w-full max-w-[24px] bg-primary h-[75%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Oct</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">28</span>
+<div class="w-full max-w-[24px] bg-primary h-[75%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Nov</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">12</span>
+<div class="w-full max-w-[24px] bg-primary h-[25%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Dec</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">20</span>
+<div class="w-full max-w-[24px] bg-primary h-[45%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Jan</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">14</span>
+<div class="w-full max-w-[24px] bg-primary h-[30%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Feb</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">23</span>
+<div class="w-full max-w-[24px] bg-primary h-[50%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Mar</span>
+</div>
+<div class="flex flex-col items-center gap-2 group flex-1">
+<span class="text-xs font-bold text-primary mb-1 opacity-0 group-hover:opacity-100 transition-opacity">20</span>
+<div class="w-full max-w-[24px] bg-primary h-[45%] rounded-t-sm transition-all hover:brightness-110"></div>
+<span class="text-[10px] sm:text-xs text-slate-400 font-medium">Apr</span>
+</div>
+</div>
+<div class="flex justify-between text-[10px] text-slate-300 dark:text-slate-600 mt-1 px-2">
+<span>2020</span>
+<span>2021</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<h3 class="text-lg font-bold mb-6">Weekly Frequency</h3>
+<div class="h-48 flex items-end justify-between gap-2">
+<div class="w-full flex flex-col justify-end items-center gap-2 group cursor-pointer">
+<div class="w-full bg-primary/30 h-[40%] rounded-t-md group-hover:bg-primary transition-colors relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">40%</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">M</span>
+</div>
+<div class="w-full flex flex-col justify-end items-center gap-2 group cursor-pointer">
+<div class="w-full bg-primary h-[80%] rounded-t-md relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">80%</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">T</span>
+</div>
+<div class="w-full flex flex-col justify-end items-center gap-2 group cursor-pointer">
+<div class="w-full bg-primary h-[100%] rounded-t-md relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">100%</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">W</span>
+</div>
+<div class="w-full flex flex-col justify-end items-center gap-2 group cursor-pointer">
+<div class="w-full bg-primary/60 h-[60%] rounded-t-md group-hover:bg-primary transition-colors relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">60%</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">T</span>
+</div>
+<div class="w-full flex flex-col justify-end items-center gap-2 group cursor-pointer">
+<div class="w-full bg-primary/20 h-[20%] rounded-t-md group-hover:bg-primary transition-colors relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">20%</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">F</span>
+</div>
+<div class="w-full flex flex-col justify-end items-center gap-2 group cursor-pointer">
+<div class="w-full bg-primary h-[90%] rounded-t-md relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">90%</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">S</span>
+</div>
+<div class="w-full flex flex-col justify-end items-center gap-2 group cursor-pointer">
+<div class="w-full bg-primary/50 h-[50%] rounded-t-md group-hover:bg-primary transition-colors relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">50%</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">S</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<h3 class="text-lg font-bold">Completion Trend</h3>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">+15% vs last month</span>
+</div>
+<div class="h-48 w-full relative">
+<div class="absolute inset-0 flex flex-col justify-between text-xs text-slate-300 dark:text-slate-700">
+<div class="border-b border-dashed border-slate-100 dark:border-slate-800 w-full h-px"></div>
+<div class="border-b border-dashed border-slate-100 dark:border-slate-800 w-full h-px"></div>
+<div class="border-b border-dashed border-slate-100 dark:border-slate-800 w-full h-px"></div>
+<div class="border-b border-dashed border-slate-100 dark:border-slate-800 w-full h-px"></div>
+<div class="border-b border-dashed border-slate-100 dark:border-slate-800 w-full h-px"></div>
+</div>
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 50">
+<defs>
+<linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#13ec5b" stop-opacity="0.5"></stop>
+<stop offset="100%" stop-color="#13ec5b" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 40 Q 10 35, 20 20 T 40 25 T 60 10 T 80 15 T 100 5 L 100 50 L 0 50 Z" fill="url(#gradient)"></path>
+<path d="M0 40 Q 10 35, 20 20 T 40 25 T 60 10 T 80 15 T 100 5" fill="none" stroke="#13ec5b" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+<span>Week 1</span>
+<span>Week 4</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col h-full">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold">November 2023</h3>
+<div class="flex gap-2">
+<button class="size-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-1 text-center mb-2">
+<span class="text-xs font-bold text-slate-400">S</span>
+<span class="text-xs font-bold text-slate-400">M</span>
+<span class="text-xs font-bold text-slate-400">T</span>
+<span class="text-xs font-bold text-slate-400">W</span>
+<span class="text-xs font-bold text-slate-400">T</span>
+<span class="text-xs font-bold text-slate-400">F</span>
+<span class="text-xs font-bold text-slate-400">S</span>
+</div>
+<div class="grid grid-cols-7 gap-2 flex-1 content-start">
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">1</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">2</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">3</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">4</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">5</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">6</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">7</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-primary/40 text-primary">8</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">9</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">10</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">11</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">12</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">13</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">14</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">15</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">16</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold">17</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium bg-primary text-slate-900 shadow-sm font-bold relative">
+                        18
+                        <span class="absolute bottom-1 w-1 h-1 bg-slate-900 rounded-full"></span>
+</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">19</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">20</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-slate-900 font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900">21</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 opacity-40">22</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 opacity-40">23</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 opacity-40">24</button>
+<button class="aspect-square rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 opacity-40">25</button>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+<p class="text-xs font-medium text-slate-500 text-center mb-3">Today is Nov 21</p>
+<button class="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all text-sm font-bold flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+                        Add Note for Today
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="text-lg font-bold">Recent History</h3>
+<button class="text-sm font-bold text-primary hover:text-primary/80">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 dark:bg-slate-900/50">
+<tr>
+<th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400">Date</th>
+<th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400">Status</th>
+<th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400">Value</th>
+<th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400">Note</th>
+<th class="px-6 py-4 font-semibold text-slate-500 dark:text-slate-400 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium">Today, Nov 21</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">
+                            Pending
+                        </span>
+</td>
+<td class="px-6 py-4 font-medium text-slate-400">-</td>
+<td class="px-6 py-4 text-slate-400 italic">No notes</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-bold">Check-in</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium">Yesterday, Nov 20</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-primary/20 text-green-700 dark:text-green-400">
+<span class="size-1.5 rounded-full bg-green-500"></span>
+                            Completed
+                        </span>
+</td>
+<td class="px-6 py-4 font-medium">35 mins</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-300">Felt great, extra 5 mins!</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium">Nov 18, 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-primary/20 text-green-700 dark:text-green-400">
+<span class="size-1.5 rounded-full bg-green-500"></span>
+                            Completed
+                        </span>
+</td>
+<td class="px-6 py-4 font-medium">30 mins</td>
+<td class="px-6 py-4 text-slate-400 italic">No notes</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 font-medium">Nov 17, 2023</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-primary/20 text-green-700 dark:text-green-400">
+<span class="size-1.5 rounded-full bg-green-500"></span>
+                            Completed
+                        </span>
+</td>
+<td class="px-6 py-4 font-medium">30 mins</td>
+<td class="px-6 py-4 text-slate-600 dark:text-slate-300">Morning run in the rain</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+
+</body></html>
