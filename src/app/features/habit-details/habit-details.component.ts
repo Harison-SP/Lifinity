@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HabitService } from '../../services/habit.service';
 
@@ -24,11 +24,11 @@ import { HabitService } from '../../services/habit.service';
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-[#0d1b12] dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <button class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-[#0d1b12] dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" (click)="editHabit()">
                         <span class="material-symbols-outlined text-[20px]">edit</span>
                         Edit
                     </button>
-                    <button class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-[#0d1b12] dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <button class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-[#0d1b12] dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" (click)="deleteHabit()">
                         <span class="material-symbols-outlined text-[20px]">delete</span>
                         Delete
                     </button>
@@ -321,6 +321,7 @@ import { HabitService } from '../../services/habit.service';
 export class HabitDetailsComponent implements OnInit {
     location = inject(Location);
     route = inject(ActivatedRoute);
+    routerNavigate = inject(Router);
     habitService = inject(HabitService);
 
     habitId = computed(() => this.route.snapshot.paramMap.get('id'));
@@ -359,6 +360,21 @@ export class HabitDetailsComponent implements OnInit {
         const id = this.habitId();
         if (id) {
             this.habitService.toggleCompletion(id, new Date().toISOString().split('T')[0]);
+        }
+    }
+
+    deleteHabit() {
+        const id = this.habitId();
+        if (id && confirm('Are you sure you want to delete this habit?')) {
+            this.habitService.deleteHabit(id);
+            this.routerNavigate.navigate(['/']);
+        }
+    }
+
+    editHabit() {
+        const id = this.habitId();
+        if (id) {
+            this.routerNavigate.navigate(['/edit', id]);
         }
     }
 

@@ -10,6 +10,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/add-habit/add-habit.component').then(m => m.AddHabitComponent)
     },
     {
+        path: 'edit/:id',
+        loadComponent: () => import('./features/add-habit/add-habit.component').then(m => m.AddHabitComponent)
+    },
+    {
         path: 'statistics',
         loadComponent: () => import('./features/statistics/statistics.component').then(m => m.StatisticsComponent)
     },

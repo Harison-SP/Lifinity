@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { FrequencyType } from '../../models/habit.model';
 
 @Component({
     selector: 'app-add-habit',
@@ -19,8 +20,8 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
                         <span class="material-symbols-outlined">arrow_back</span>
                     </button>
                     <div>
-                        <h2 class="text-3xl font-black text-[#0d1b12] dark:text-white tracking-tight">Create Habit</h2>
-                        <p class="text-[#4c9a66] dark:text-gray-400 font-medium">Design your new routine.</p>
+                        <h2 class="text-3xl font-black text-[#0d1b12] dark:text-white tracking-tight">{{ isEditMode() ? 'Edit Habit' : 'Create Habit' }}</h2>
+                        <p class="text-[#4c9a66] dark:text-gray-400 font-medium">{{ isEditMode() ? 'Update your routine.' : 'Design your new routine.' }}</p>
                     </div>
                 </div>
             </header>
@@ -80,7 +81,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
                             <button type="submit" [disabled]="habitForm.invalid" class="group relative flex items-center justify-center gap-2 rounded-2xl bg-[#0d1b12] dark:bg-[#13ec5b] px-10 py-4 text-base font-black text-white dark:text-[#0d1b12] shadow-xl transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:scale-100 overflow-hidden">
                                 <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform"></div>
                                 <span class="material-symbols-outlined relative z-10">done_all</span>
-                                <span class="relative z-10">Start Habit</span>
+                                <span class="relative z-10">{{ isEditMode() ? 'Update Habit' : 'Start Habit' }}</span>
                             </button>
                         </div>
                     </form>
@@ -98,13 +99,17 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
   `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AddHabitComponent {
+export class AddHabitComponent implements OnInit {
     private fb = inject(FormBuilder);
     private habitService = inject(HabitService);
     private router = inject(Router);
     private location = inject(Location);
+    private route = inject(ActivatedRoute);
 
-    frequency = signal<'Daily' | 'Weekly'>('Weekly');
+    isEditMode = signal(false);
+    habitId = signal<string | null>(null);
+
+    frequency = signal<FrequencyType>('Daily');
     selectedDays = signal<number[]>([1, 2, 3, 4, 5]); // Weekdays default
 
     daysOfWeek = [
@@ -122,15 +127,41 @@ export class AddHabitComponent {
         description: [''],
     });
 
+    constructor() {
+        effect(() => {
+            const id = this.habitId();
+            const habits = this.habitService.habits();
+            if (id && habits.length > 0) {
+                const habit = habits.find(h => h.id === id);
+                if (habit) {
+                    this.habitForm.patchValue({
+                        name: habit.name,
+                        description: habit.description
+                    }, { emitEvent: false }); // Avoid infinite loops if we subscribed to valueChanges elsewhere
+                    this.frequency.set(habit.frequency as FrequencyType);
+                    this.selectedDays.set(habit.targetDays);
+                }
+            }
+        });
+    }
+
+    ngOnInit() {
+        const id = this.route.snapshot.paramMap.get('id');
+        if (id) {
+            this.isEditMode.set(true);
+            this.habitId.set(id);
+        }
+    }
+
     toggleDay(day: number) {
         this.selectedDays.update(days =>
             days.includes(day) ? days.filter(d => d !== day) : [...days, day]
         );
     }
 
-    onSubmit() {
+    async onSubmit() {
         if (this.habitForm.valid) {
-            this.habitService.addHabit({
+            const habitData = {
                 name: this.habitForm.value.name!,
                 description: this.habitForm.value.description || undefined,
                 frequency: this.frequency(),
@@ -138,8 +169,18 @@ export class AddHabitComponent {
                 icon: 'star',
                 color: '#13ec5b',
                 category: 'General'
-            });
-            this.router.navigate(['/']);
+            };
+
+            try {
+                if (this.isEditMode() && this.habitId()) {
+                    await this.habitService.updateHabit(this.habitId()!, habitData);
+                } else {
+                    await this.habitService.addHabit(habitData);
+                }
+                this.router.navigate(['/']);
+            } catch (error) {
+                console.error('Error saving habit:', error);
+            }
         }
     }
 

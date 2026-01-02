@@ -1,81 +1,101 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Habit, HabitLog } from '../models/habit.model';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
 })
 export class HabitService {
-    // Mock initial data matching the sample
-    private readonly _habits = signal<Habit[]>([
-        {
-            id: '1',
-            name: 'Morning Jog',
-            description: 'Daily goal: 30 minutes',
-            frequency: 'Daily',
-            targetDays: [0, 1, 2, 3, 4, 5, 6],
-            icon: 'directions_run',
-            color: '#13ec5b', // primary
-            category: 'Health',
-            streak: 12,
-            bestStreak: 45,
-            completionRate: 85,
-            completedToday: false,
-            createdAt: new Date('2023-01-01')
-        },
-        {
-            id: '2',
-            name: 'Learn Spanish',
-            description: 'Duolingo',
-            frequency: 'Daily',
-            targetDays: [0, 1, 2, 3, 4, 5, 6],
-            icon: 'language',
-            color: '#0ea5e9', // blue
-            category: 'Learning',
-            streak: 5,
-            bestStreak: 10,
-            completionRate: 70,
-            completedToday: true,
-            createdAt: new Date('2023-06-01')
-        }
-    ]);
+    private http = inject(HttpClient);
+    private apiUrl = 'http://127.0.0.1:8000/habits';
 
+    private readonly _habits = signal<Habit[]>([]);
     private readonly _logs = signal<HabitLog[]>([]);
 
     readonly habits = this._habits.asReadonly();
     readonly logs = this._logs.asReadonly();
 
     readonly habitsWithCompletion = computed(() => {
-        const habits = this._habits();
-        // In a real app we'd join with logs here
-        return habits;
+        return this._habits();
     });
 
-    addHabit(habit: Omit<Habit, 'id' | 'streak' | 'bestStreak' | 'completionRate' | 'completedToday' | 'createdAt'>) {
-        const newHabit: Habit = {
-            ...habit,
-            id: crypto.randomUUID(),
+    constructor() {
+        this.loadHabits();
+    }
+
+    async loadHabits() {
+        try {
+            const habits = await firstValueFrom(this.http.get<Habit[]>(this.apiUrl));
+            this._habits.set(habits);
+        } catch (error) {
+            console.error('Failed to load habits', error);
+        }
+    }
+
+    async addHabit(habitData: Omit<Habit, 'id' | 'streak' | 'bestStreak' | 'completionRate' | 'completedToday' | 'createdAt'>) {
+        // Backend expects matching fields. Our model is aligned now.
+        // We set default values for fields backend might not require but our UI does
+        const payload = {
+            ...habitData,
+            name: habitData.name,
+            description: habitData.description || '',
+            frequency: habitData.frequency,
+            targetDays: habitData.targetDays,
+            icon: habitData.icon || 'star', // Default icon
+            color: habitData.color || '#000000',
+            category: habitData.category || 'General',
             streak: 0,
             bestStreak: 0,
             completionRate: 0,
-            completedToday: false,
-            createdAt: new Date()
+            completedToday: false
         };
-        this._habits.update(current => [...current, newHabit]);
+
+        try {
+            const newHabit = await firstValueFrom(this.http.post<Habit>(this.apiUrl, payload));
+            this._habits.update(current => [...current, newHabit]);
+        } catch (error) {
+            console.error('Failed to add habit', error);
+        }
     }
 
-    toggleCompletion(habitId: string, date: string) {
-        this._habits.update(habits =>
-            habits.map(h => {
-                if (h.id === habitId) {
-                    // Simplified toggle logic for demo
-                    return { ...h, completedToday: !h.completedToday };
-                }
-                return h;
-            })
-        );
+    async updateHabit(id: string, habitData: Partial<Habit>) {
+        try {
+             const updatedHabit = await firstValueFrom(this.http.put<Habit>(`${this.apiUrl}/${id}`, habitData));
+             this._habits.update(habits =>
+                habits.map(h => h.id === id ? updatedHabit : h)
+            );
+        } catch (error) {
+            console.error('Failed to update habit', error);
+        }
     }
 
-    deleteHabit(id: string) {
-        this._habits.update(current => current.filter(h => h.id !== id));
+    async toggleCompletion(habitId: string, date: string) {
+        const habit = this._habits().find(h => h.id === habitId);
+        if (!habit) return;
+
+        const updatedStatus = !habit.completedToday;
+        // In a real app we might also log this to a separate 'logs' endpoint
+        
+        try {
+            const updatedHabit = await firstValueFrom(this.http.put<Habit>(`${this.apiUrl}/${habitId}`, { 
+                completedToday: updatedStatus 
+            }));
+            
+            this._habits.update(habits =>
+                habits.map(h => h.id === habitId ? updatedHabit : h)
+            );
+        } catch (error) {
+            console.error('Failed to toggle completion', error);
+        }
+    }
+
+    async deleteHabit(id: string) {
+        try {
+            await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
+            this._habits.update(current => current.filter(h => h.id !== id));
+        } catch (error) {
+            console.error('Failed to delete habit', error);
+        }
     }
 }
