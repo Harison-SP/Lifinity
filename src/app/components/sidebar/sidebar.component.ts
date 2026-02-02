@@ -40,6 +40,13 @@ import { SidebarService } from '../../services/sidebar.service';
           <div class="ml-auto w-1.5 h-1.5 rounded-full bg-[#13ec5b] opacity-0 group-[.active]:opacity-100"></div>
         </a>
         
+        <a routerLink="/planner" routerLinkActive="active bg-[#13ec5b]/15 text-[#0d1b12] dark:text-[#13ec5b] !font-bold shadow-sm" 
+           class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 text-[#4c9a66] hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-[#0d1b12] dark:hover:text-white whitespace-nowrap">
+          <span class="material-symbols-outlined transition-transform group-hover:scale-110 min-w-[24px]">calendar_month</span>
+          <span class="text-sm font-medium transition-all duration-300" [class.opacity-0]="sidebarService.isCollapsed()" [class.translate-x-[-10px]]="sidebarService.isCollapsed()">Planner</span>
+          <div class="ml-auto w-1.5 h-1.5 rounded-full bg-[#13ec5b] opacity-0 group-[.active]:opacity-100"></div>
+        </a>
+        
         <a routerLink="/statistics" routerLinkActive="active bg-[#13ec5b]/15 text-[#0d1b12] dark:text-[#13ec5b] !font-bold shadow-sm" 
            class="group flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 text-[#4c9a66] hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-[#0d1b12] dark:hover:text-white whitespace-nowrap">
           <span class="material-symbols-outlined transition-transform group-hover:scale-110 min-w-[24px]">bar_chart</span>

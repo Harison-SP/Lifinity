@@ -10,7 +10,7 @@ import { FrequencyType } from '../../models/habit.model';
     selector: 'app-add-habit',
     imports: [ReactiveFormsModule, SidebarComponent],
     template: `
-    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
+    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
         <app-sidebar />
         
         <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
@@ -34,11 +34,11 @@ import { FrequencyType } from '../../models/habit.model';
                         <div class="space-y-8">
                             <div class="space-y-3">
                                 <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Habit Name</label>
-                                <input formControlName="name" class="w-full rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-5 text-xl font-bold placeholder-[#4c9a66]/30 focus:border-[#13ec5b] focus:bg-white dark:focus:bg-[#1a2c20] transition-all outline-none" placeholder="e.g. Read 10 pages" type="text"/>
+                                <input formControlName="name" class="w-full rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-5 text-xl font-bold placeholder-[#4c9a66]/50 dark:placeholder-gray-500 focus:border-[#13ec5b] focus:bg-white dark:focus:bg-[#1a2c20] transition-all outline-none" placeholder="e.g. Read 10 pages" type="text"/>
                             </div>
                             <div class="space-y-3">
                                 <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Description</label>
-                                <textarea formControlName="description" class="w-full min-h-[120px] rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-5 text-lg font-medium placeholder-[#4c9a66]/30 focus:border-[#13ec5b] focus:bg-white dark:focus:bg-[#1a2c20] transition-all outline-none resize-none" placeholder="Add some motivation or details..."></textarea>
+                                <textarea formControlName="description" class="w-full min-h-[120px] rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-5 text-lg font-medium placeholder-[#4c9a66]/50 dark:placeholder-gray-500 focus:border-[#13ec5b] focus:bg-white dark:focus:bg-[#1a2c20] transition-all outline-none resize-none" placeholder="Add some motivation or details..."></textarea>
                             </div>
                         </div>
                         
@@ -159,7 +159,7 @@ export class AddHabitComponent implements OnInit {
         );
     }
 
-    async onSubmit() {
+    onSubmit() {
         if (this.habitForm.valid) {
             const habitData = {
                 name: this.habitForm.value.name!,
@@ -171,16 +171,14 @@ export class AddHabitComponent implements OnInit {
                 category: 'General'
             };
 
-            try {
-                if (this.isEditMode() && this.habitId()) {
-                    await this.habitService.updateHabit(this.habitId()!, habitData);
-                } else {
-                    await this.habitService.addHabit(habitData);
-                }
-                this.router.navigate(['/']);
-            } catch (error) {
-                console.error('Error saving habit:', error);
-            }
+            const obs$ = (this.isEditMode() && this.habitId()) 
+                ? this.habitService.updateHabit(this.habitId()!, habitData)
+                : this.habitService.addHabit(habitData);
+
+            obs$.subscribe({
+                next: () => this.router.navigate(['/']),
+                error: (error) => console.error('Error saving habit:', error)
+            });
         }
     }
 

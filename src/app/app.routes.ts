@@ -18,12 +18,20 @@ export const routes: Routes = [
         loadComponent: () => import('./features/statistics/statistics.component').then(m => m.StatisticsComponent)
     },
     {
+        path: 'habits',
+        loadComponent: () => import('./features/habits-list/habits-list.component').then(m => m.HabitsListComponent)
+    },
+    {
         path: 'details/:id',
         loadComponent: () => import('./features/habit-details/habit-details.component').then(m => m.HabitDetailsComponent)
     },
     {
         path: 'settings',
         loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
+    },
+    {
+        path: 'planner',
+        loadComponent: () => import('./features/planner/planner.component').then(m => m.PlannerComponent)
     },
     {
         path: '**',
