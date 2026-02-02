@@ -1,14 +1,15 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HabitService } from '../../services/habit.service';
 
 @Component({
     selector: 'app-habit-details',
-    imports: [RouterLink, SidebarComponent, CommonModule],
+    imports: [RouterLink, SidebarComponent, CommonModule, FormsModule],
     template: `
-    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
+    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
         <app-sidebar />
         
         <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
@@ -73,7 +74,7 @@ import { HabitService } from '../../services/habit.service';
                                     <p class="text-4xl font-black">{{ habit()?.bestStreak }}</p>
                                     <span class="text-sm font-bold text-slate-400">Days</span>
                                 </div>
-                                <p class="text-[10px] text-gray-400 font-semibold">Achieved in Oct 2023</p>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-300 font-semibold">Achieved in --</p>
                             </div>
 
                             <!-- Total Completions -->
@@ -81,7 +82,7 @@ import { HabitService } from '../../services/habit.service';
                                 <span class="material-symbols-outlined !text-7xl absolute -right-4 -bottom-4 opacity-5 text-blue-500">check_circle</span>
                                 <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-2">Total Completions</p>
                                 <div class="flex items-baseline gap-2 mb-4">
-                                    <p class="text-4xl font-black">128</p>
+                                    <p class="text-4xl font-black">{{ stats()?.total_completions || 0 }}</p>
                                     <span class="text-sm font-bold text-slate-400">Times</span>
                                 </div>
                                 <div class="inline-flex items-center gap-1 text-[10px] font-bold text-[#0d1b12] bg-[#13ec5b]/20 text-[#13ec5b] px-2 py-1 rounded-md">
@@ -95,10 +96,10 @@ import { HabitService } from '../../services/habit.service';
                                 <span class="material-symbols-outlined !text-7xl absolute -right-4 -bottom-4 opacity-5 text-purple-500">pie_chart</span>
                                 <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-2">Completion Rate</p>
                                 <div class="flex items-baseline gap-2 mb-4">
-                                    <p class="text-4xl font-black">{{ habit()?.completionRate }}%</p>
+                                    <p class="text-4xl font-black">{{ stats()?.completion_rate || 0 }}%</p>
                                 </div>
                                 <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-[#13ec5b] rounded-full" [style.width.%]="habit()?.completionRate"></div>
+                                    <div class="h-full bg-[#13ec5b] rounded-full" [style.width.%]="stats()?.completion_rate || 0"></div>
                                 </div>
                             </div>
                         </div>
@@ -107,7 +108,7 @@ import { HabitService } from '../../services/habit.service';
                         <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm overflow-x-auto">
                             <div class="flex items-center justify-between mb-6 min-w-[600px]">
                                 <h3 class="text-lg font-black text-[#0d1b12] dark:text-white">Activity Log (2024)</h3>
-                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 dark:text-gray-300 uppercase tracking-wider">
                                     <span>Less</span>
                                     <div class="flex gap-1">
                                         <div class="size-3 rounded-sm bg-gray-100 dark:bg-gray-800"></div>
@@ -118,7 +119,7 @@ import { HabitService } from '../../services/habit.service';
                                     <span>More</span>
                                 </div>
                             </div>
-                            <div class="flex gap-1 min-w-[800px]">
+                                <div class="flex gap-1 min-w-[800px]">
                                 <div class="flex flex-col gap-1 pr-2 text-[10px] font-bold text-gray-300 justify-between py-1">
                                     <span>Mon</span>
                                     <span>Wed</span>
@@ -126,14 +127,14 @@ import { HabitService } from '../../services/habit.service';
                                     <span>Sun</span>
                                 </div>
                                 <div class="flex-1 grid grid-flow-col grid-rows-7 gap-1">
-                                    @for (level of heatmapData; track $index) {
+                                    @for (item of fullHeatmap; track $index) {
                                         <div class="size-3 rounded-[2px] transition-colors hover:ring-2 ring-[#0d1b12]/10 dark:ring-white/20"
-                                            [class.bg-gray-100]="level === 0"
-                                            [class.dark:bg-gray-800]="level === 0"
-                                            [class.bg-[#13ec5b]/20]="level === 1"
-                                            [class.bg-[#13ec5b]/50]="level === 2"
-                                            [class.bg-[#13ec5b]]]="level >= 3"
-                                            [title]="'Activity Level: ' + level"></div>
+                                            [class.bg-gray-100]="item.level === 0"
+                                            [class.dark:bg-gray-800]="item.level === 0"
+                                            [class.bg-[#13ec5b]/20]="item.level === 1"
+                                            [class.bg-[#13ec5b]/50]="item.level === 2"
+                                            [class.bg-[#13ec5b]]]="item.level >= 3"
+                                            [title]="item.date + ': Level ' + item.level"></div>
                                     }
                                 </div>
                             </div>
@@ -145,14 +146,14 @@ import { HabitService } from '../../services/habit.service';
                             <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm flex flex-col">
                                 <h3 class="text-lg font-black mb-6">Weekly Frequency</h3>
                                 <div class="flex-1 flex items-end justify-between gap-2 h-48">
-                                    @for (day of weeklyData; track day.label) {
+                                    @for (day of stats()?.weekly_frequency; track day.day_name) {
                                         <div class="flex-1 flex flex-col justify-end items-center gap-2 group cursor-pointer w-full">
                                             <div class="w-full rounded-md transition-all relative" 
-                                                [class.bg-[#13ec5b]]="day.highlight"
-                                                [class.bg-gray-100]="!day.highlight"
-                                                [class.dark:bg-gray-800]="!day.highlight" 
-                                                [style.height.%]="day.value"></div>
-                                            <span class="text-[10px] font-bold text-gray-400">{{ day.label }}</span>
+                                                [class.bg-[#13ec5b]]="day.percentage > 70"
+                                                [class.bg-gray-100]="day.percentage <= 70"
+                                                [class.dark:bg-gray-800]="day.percentage <= 70" 
+                                                [style.height.%]="day.percentage"></div>
+                                            <span class="text-[10px] font-bold text-gray-400">{{ day.day_name.charAt(0) }}</span>
                                         </div>
                                     }
                                 </div>
@@ -162,10 +163,10 @@ import { HabitService } from '../../services/habit.service';
                             <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm flex flex-col relative overflow-hidden">
                                 <div class="flex items-center justify-between mb-6 relative z-10">
                                     <h3 class="text-lg font-black">Completion Trend</h3>
-                                    <span class="bg-[#13ec5b]/10 text-[#13ec5b] px-2 py-1 rounded-md text-[10px] font-bold uppercase">+15% vs last month</span>
+                                    <!-- Optional: Dynamic growth calculation -->
+                                    <!-- <span class="bg-[#13ec5b]/10 text-[#13ec5b] px-2 py-1 rounded-md text-[10px] font-bold uppercase">+15% vs last month</span> -->
                                 </div>
                                 <div class="flex-1 flex items-end relative h-48 w-full">
-                                    <!-- Simple SVG Wave Mock -->
                                     <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible" preserveAspectRatio="none">
                                         <defs>
                                             <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
@@ -173,23 +174,27 @@ import { HabitService } from '../../services/habit.service';
                                                 <stop offset="100%" stop-color="#13ec5b" stop-opacity="0"/>
                                             </linearGradient>
                                         </defs>
-                                        <path d="M0,45 C20,35 30,15 40,25 S60,40 70,10 S90,5 100,20 V50 H0 Z" fill="url(#gradient)" />
-                                        <path d="M0,45 C20,35 30,15 40,25 S60,40 70,10 S90,5 100,20" fill="none" stroke="#13ec5b" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+                                        <!-- Fill Area -->
+                                        <path [attr.d]="trendArea()" fill="url(#gradient)" />
+                                        <!-- Stroke Line -->
+                                        <path [attr.d]="trendLine()" fill="none" stroke="#13ec5b" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" />
                                     </svg>
                                 </div>
                                 <div class="flex justify-between text-[10px] font-bold text-gray-400 mt-2">
-                                    <span>Week 1</span>
-                                    <span>Week 4</span>
+                                    @if (stats()?.completion_trend?.length) {
+                                        <span>{{ stats()!.completion_trend[0].period }}</span>
+                                        <span>{{ stats()!.completion_trend[stats()!.completion_trend.length - 1].period }}</span>
+                                    }
                                 </div>
                             </div>
 
                             <!-- Calendar -->
                             <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm flex flex-col">
                                 <div class="flex items-center justify-between mb-6">
-                                    <h3 class="text-lg font-black">November 2025</h3>
+                                    <h3 class="text-lg font-black">{{ calendarMonthName() }} {{ calendarYear() }}</h3>
                                     <div class="flex gap-2 text-gray-400">
-                                        <span class="material-symbols-outlined text-sm cursor-pointer hover:text-black">chevron_left</span>
-                                        <span class="material-symbols-outlined text-sm cursor-pointer hover:text-black">chevron_right</span>
+                                        <span (click)="previousMonth()" class="material-symbols-outlined text-sm cursor-pointer hover:text-black dark:hover:text-white transition-colors">chevron_left</span>
+                                        <span (click)="nextMonth()" class="material-symbols-outlined text-sm cursor-pointer hover:text-black dark:hover:text-white transition-colors">chevron_right</span>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-7 gap-2 mb-2">
@@ -198,37 +203,55 @@ import { HabitService } from '../../services/habit.service';
                                     }
                                 </div>
                                 <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#0d1b12] dark:text-white">
-                                    <div class="p-2"></div><div class="p-2"></div><div class="p-2"></div> <!-- Empty start days for mock -->
-                                    <div class="p-2">1</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">2</div>
-                                    <div class="p-2">3</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">4</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">5</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">6</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">7</div>
-                                    <div class="p-2 rounded-full border border-[#13ec5b] text-[#13ec5b]">8</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">9</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">10</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">11</div>
-                                    <div class="p-2">12</div>
-                                    <div class="p-2">13</div>
-                                    <div class="p-2">14</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">15</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">16</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">17</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#13ec5b] text-[#0d1b12]">18</div>
-                                    <div class="p-2">19</div>
-                                    <div class="p-2">20</div>
-                                    <div class="flex items-center justify-center p-2 rounded-full bg-[#0d1b12] text-white">21</div>
-                                    <div class="p-2 text-gray-300">22</div>
-                                    <div class="p-2 text-gray-300">23</div>
-                                    <div class="p-2 text-gray-300">24</div>
-                                    <div class="p-2 text-gray-300">25</div>
+                                    @for (day of calendarDays(); track day.date) {
+                                        @if (day.isEmpty) {
+                                            <div class="p-2"></div>
+                                        } @else {
+                                            <div (click)="selectDate(day.date)" 
+                                                 class="p-2 rounded-full cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                 [class.bg-[#13ec5b]]="day.isCompleted"
+                                                 [class.text-[#0d1b12]]="day.isCompleted"
+                                                 [class.border]="day.isToday && !day.isCompleted"
+                                                 [class.border-[#13ec5b]]="day.isToday && !day.isCompleted"
+                                                 [class.text-[#13ec5b]]="day.isToday && !day.isCompleted"
+                                                 [class.text-gray-300]="day.isFuture"
+                                                 [class.cursor-not-allowed]="day.isFuture"
+                                                 [class.hover:bg-transparent]="day.isFuture">
+                                                {{ day.dayNumber }}
+                                            </div>
+                                        }
+                                    }
                                 </div>
-                                <button class="mt-auto w-full py-3 rounded-xl border border-dashed border-[#e5e7eb] dark:border-[#2d3a30] text-xs font-bold text-gray-400 hover:border-[#13ec5b] hover:text-[#13ec5b] transition-all flex items-center justify-center gap-2">
-                                    <span class="material-symbols-outlined text-sm">edit_note</span>
-                                    Add Note for Today
-                                </button>
+                                
+                                <!-- Log Entry Modal/Form -->
+                                @if (selectedDate()) {
+                                    <div class="mt-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-[#e5e7eb] dark:border-[#2d3a30]">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h4 class="text-sm font-bold">Log for {{ selectedDate() | date:'mediumDate' }}</h4>
+                                            <button (click)="closeLogForm()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                                <span class="material-symbols-outlined text-sm">close</span>
+                                            </button>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Value (optional)</label>
+                                                <input type="number" [(ngModel)]="logValue" 
+                                                       class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#13ec5b]"
+                                                       placeholder="Enter value">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Notes (optional)</label>
+                                                <textarea [(ngModel)]="logNotes" rows="2"
+                                                          class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#13ec5b] resize-none"
+                                                          placeholder="Add notes..."></textarea>
+                                            </div>
+                                            <button (click)="saveLog()" 
+                                                    class="w-full py-2.5 rounded-lg bg-[#13ec5b] text-[#0d1b12] font-bold text-sm hover:scale-105 active:scale-95 transition-all">
+                                                Save Log
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
 
@@ -236,7 +259,21 @@ import { HabitService } from '../../services/habit.service';
                         <div class="bg-white dark:bg-[#1a2c20] rounded-[2.5rem] border border-[#e5e7eb] dark:border-[#2d3a30] p-10 shadow-sm overflow-hidden">
                             <div class="flex items-center justify-between mb-8">
                                 <h3 class="text-xl font-black">History</h3>
-                                <button class="text-[#13ec5b] text-sm font-bold hover:underline">View All</button>
+                                <div class="flex items-center gap-2">
+                                    <button 
+                                        [disabled]="currentPage() === 1"
+                                        (click)="prevPage()"
+                                        class="size-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                                    </button>
+                                    <span class="text-xs font-bold text-gray-400">Page {{ currentPage() }} of {{ totalPages() }}</span>
+                                    <button 
+                                        [disabled]="currentPage() >= totalPages()"
+                                        (click)="nextPage()"
+                                        class="size-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-sm">
@@ -250,48 +287,23 @@ import { HabitService } from '../../services/habit.service';
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                        <tr class="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                            <td class="px-6 py-5 font-semibold">Today, Nov 21</td>
-                                            <td class="px-6 py-5">
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-500">Pending</span>
-                                            </td>
-                                            <td class="px-6 py-5 font-medium">-</td>
-                                            <td class="px-6 py-5 text-gray-400 italic">No notes</td>
-                                            <td class="px-6 py-5 text-right font-bold text-[#13ec5b] cursor-pointer hover:underline">Check-in</td>
-                                        </tr>
-                                        <tr class="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                            <td class="px-6 py-5 font-semibold">Yesterday, Nov 20</td>
-                                            <td class="px-6 py-5">
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#13ec5b]/10 text-[#13ec5b]">Completed</span>
-                                            </td>
-                                            <td class="px-6 py-5 font-medium">35 mins</td>
-                                            <td class="px-6 py-5 text-gray-500">Felt great, extra 5 mins!</td>
-                                            <td class="px-6 py-5 text-right">
-                                                <span class="material-symbols-outlined text-gray-300 hover:text-gray-500 cursor-pointer text-lg">more_vert</span>
-                                            </td>
-                                        </tr>
-                                        <tr class="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                            <td class="px-6 py-5 font-semibold">Nov 18, 2023</td>
-                                            <td class="px-6 py-5">
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#13ec5b]/10 text-[#13ec5b]">Completed</span>
-                                            </td>
-                                            <td class="px-6 py-5 font-medium">30 mins</td>
-                                            <td class="px-6 py-5 text-gray-400 italic">No notes</td>
-                                            <td class="px-6 py-5 text-right">
-                                                <span class="material-symbols-outlined text-gray-300 hover:text-gray-500 cursor-pointer text-lg">more_vert</span>
-                                            </td>
-                                        </tr>
-                                        <tr class="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                            <td class="px-6 py-5 font-semibold">Nov 17, 2023</td>
-                                            <td class="px-6 py-5">
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#13ec5b]/10 text-[#13ec5b]">Completed</span>
-                                            </td>
-                                            <td class="px-6 py-5 font-medium">30 mins</td>
-                                            <td class="px-6 py-5 text-gray-500">Morning run in the rain</td>
-                                            <td class="px-6 py-5 text-right">
-                                                <span class="material-symbols-outlined text-gray-300 hover:text-gray-500 cursor-pointer text-lg">more_vert</span>
-                                            </td>
-                                        </tr>
+                                        @for (log of history(); track log.id) {
+                                            <tr class="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                <td class="px-6 py-5 font-semibold">{{ log.completed_at | date:'mediumDate' }} <span class="text-xs text-gray-400 font-normal ml-1">{{ log.completed_at | date:'shortTime' }}</span></td>
+                                                <td class="px-6 py-5">
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#13ec5b]/10 text-[#13ec5b]">Completed</span>
+                                                </td>
+                                                <td class="px-6 py-5 font-medium">{{ log.value ? log.value : '-' }}</td>
+                                                <td class="px-6 py-5 text-gray-400 italic">{{ log.notes ? log.notes : 'No notes' }}</td>
+                                                <td class="px-6 py-5 text-right">
+                                                    <span class="material-symbols-outlined text-gray-300 hover:text-gray-500 cursor-pointer text-lg">more_vert</span>
+                                                </td>
+                                            </tr>
+                                        } @empty {
+                                            <tr>
+                                                <td colspan="5" class="px-6 py-10 text-center text-gray-400 italic">No history found for this period.</td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
                             </div>
@@ -327,47 +339,195 @@ export class HabitDetailsComponent implements OnInit {
     habitId = computed(() => this.route.snapshot.paramMap.get('id'));
     habit = computed(() => this.habitService.habits().find(h => h.id === this.habitId()));
 
-    // Analytics Data (Mock)
-    heatmapData: number[] = [];
-    weeklyData = [
-        { label: 'M', value: 40, highlight: false },
-        { label: 'T', value: 80, highlight: false },
-        { label: 'W', value: 100, highlight: true },
-        { label: 'T', value: 60, highlight: false },
-        { label: 'F', value: 20, highlight: false },
-        { label: 'S', value: 60, highlight: false }, // Updated for visual variety
-        { label: 'S', value: 50, highlight: false },
-    ];
+    // History Data
+    history = signal<import('../../models/habit.model').HabitLog[]>([]);
+    currentPage = signal(1);
+    pageSize = signal(5); // Show 5 items per page
+    totalHistory = signal(0);
+    totalPages = computed(() => Math.ceil(this.totalHistory() / this.pageSize()) || 1);
+
+    // Analytics Data
+    stats = signal<import('../../models/habit.model').HabitStats | null>(null);
+    fullHeatmap: {date: string, level: number}[] = [];
+
+    // Calendar Data
+    calendarMonth = signal(new Date().getMonth());
+    calendarYear = signal(new Date().getFullYear());
+    selectedDate = signal<string | null>(null);
+    logValue: number | undefined;
+    logNotes: string = '';
+
+    calendarMonthName = computed(() => {
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
+        return monthNames[this.calendarMonth()];
+    });
+
+    calendarDays = computed(() => {
+        const year = this.calendarYear();
+        const month = this.calendarMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const days: Array<{
+            date: string;
+            dayNumber: number;
+            isEmpty: boolean;
+            isCompleted: boolean;
+            isToday: boolean;
+            isFuture: boolean;
+        }> = [];
+
+        // Add empty cells for days before the first day of the month
+        for (let i = 0; i < startingDayOfWeek; i++) {
+            days.push({ date: '', dayNumber: 0, isEmpty: true, isCompleted: false, isToday: false, isFuture: false });
+        }
+
+        // Add actual days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            date.setHours(0, 0, 0, 0);
+            const dateString = date.toISOString().split('T')[0];
+            
+            // Check if this date has a log entry
+            const isCompleted = this.history().some(log => {
+                const logDate = new Date(log.completed_at);
+                logDate.setHours(0, 0, 0, 0);
+                return logDate.toISOString().split('T')[0] === dateString;
+            });
+
+            const isToday = date.getTime() === today.getTime();
+            const isFuture = date > today;
+
+            days.push({
+                date: dateString,
+                dayNumber: day,
+                isEmpty: false,
+                isCompleted,
+                isToday,
+                isFuture
+            });
+        }
+
+        return days;
+    });
+
+    trendLine = computed(() => {
+        const stats = this.stats();
+        if (!stats || !stats.completion_trend || stats.completion_trend.length === 0) return '';
+        
+        const data = stats.completion_trend;
+        const count = data.length;
+        if (count < 2) return '';
+        
+        // Map data to points
+        // X: 0 to 100
+        // Y: 0 to 50 (inverted, 0 is top, 50 is bottom)
+        
+        const points = data.map((item, index) => {
+            const x = (index / (count - 1)) * 100;
+            const y = 50 - ((item.rate / 100) * 50);
+            return `${x},${y}`;
+        });
+        
+        // Simple smoothing could be added, but for now polyline
+        // Use 'L' for lines. C for bezier would need control points calc.
+        // Let's try Catmull-Rom or simple L. Simple L is safer for now.
+        // Actually, let's just do straight lines for robustness.
+        
+        return `M ${points.join(' L ')}`;
+    });
+
+    trendArea = computed(() => {
+        const line = this.trendLine();
+        if (!line) return '';
+        
+        return `${line} V 50 H 0 Z`;
+    });
 
     ngOnInit() {
-        this.generateHeatmapData();
+        const id = this.habitId();
+        if (id) {
+            this.loadHistory(id);
+            this.loadStats(id);
+        }
     }
 
-    generateHeatmapData() {
-        // Generate ~365 data points for 52 weeks x 7 days
-        // Levels: 0 (empty), 1 (light), 2 (medium), 3 (dark), 4 (darkest)
-        this.heatmapData = Array.from({ length: 364 }, () => {
-            const rand = Math.random();
-            if (rand > 0.8) return 4;
-            if (rand > 0.6) return 3;
-            if (rand > 0.4) return 2;
-            if (rand > 0.2) return 1;
-            return 0;
+    loadStats(id: string) {
+        this.habitService.getHabitStats(id).subscribe({
+            next: (stats) => {
+                this.stats.set(stats);
+                this.generateHeatmap(stats.heatmap);
+            },
+            error: (err) => console.error('Failed to load stats', err)
         });
+    }
+
+    loadHistory(id: string) {
+        this.habitService.getHistory(id, this.currentPage(), this.pageSize()).subscribe({
+            next: (res) => {
+                this.history.set(res.items);
+                this.totalHistory.set(res.total);
+            },
+            error: (err) => console.error('Failed to load history', err)
+        });
+    }
+
+    nextPage() {
+        if (this.currentPage() < this.totalPages()) {
+            this.currentPage.update(p => p + 1);
+            const id = this.habitId();
+            if (id) this.loadHistory(id);
+        }
+    }
+
+    prevPage() {
+        if (this.currentPage() > 1) {
+            this.currentPage.update(p => p - 1);
+            const id = this.habitId();
+            if (id) this.loadHistory(id);
+        }
+    }
+
+    generateHeatmap(apiData: import('../../models/habit.model').HeatmapItem[]) {
+        // Generate last 364 days to fill the grid
+        const today = new Date();
+        const endDate = new Date(today);
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - 364); // Approx 1 year
+
+        const dataMap = new Map(apiData.map(item => [item.date, item.level]));
+        
+        this.fullHeatmap = [];
+        
+        // Loop from start to end
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            this.fullHeatmap.push({
+                date: dateStr,
+                level: dataMap.get(dateStr) || 0
+            });
+        }
     }
 
     toggleDone() {
         const id = this.habitId();
         if (id) {
-            this.habitService.toggleCompletion(id, new Date().toISOString().split('T')[0]);
+            this.habitService.toggleCompletion(id, new Date().toISOString().split('T')[0]).subscribe();
         }
     }
 
     deleteHabit() {
         const id = this.habitId();
         if (id && confirm('Are you sure you want to delete this habit?')) {
-            this.habitService.deleteHabit(id);
-            this.routerNavigate.navigate(['/']);
+            this.habitService.deleteHabit(id).subscribe(() => {
+                this.routerNavigate.navigate(['/']);
+            });
         }
     }
 
@@ -376,6 +536,79 @@ export class HabitDetailsComponent implements OnInit {
         if (id) {
             this.routerNavigate.navigate(['/edit', id]);
         }
+    }
+
+    // Calendar Methods
+    previousMonth() {
+        if (this.calendarMonth() === 0) {
+            this.calendarMonth.set(11);
+            this.calendarYear.update(y => y - 1);
+        } else {
+            this.calendarMonth.update(m => m - 1);
+        }
+    }
+
+    nextMonth() {
+        if (this.calendarMonth() === 11) {
+            this.calendarMonth.set(0);
+            this.calendarYear.update(y => y + 1);
+        } else {
+            this.calendarMonth.update(m => m + 1);
+        }
+    }
+
+    selectDate(date: string) {
+        if (!date) return;
+        
+        // Don't allow selecting future dates
+        const selectedDate = new Date(date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate > today) return;
+        
+        this.selectedDate.set(date);
+        
+        // Load existing log data if available
+        const existingLog = this.history().find(log => {
+            const logDate = new Date(log.completed_at);
+            logDate.setHours(0, 0, 0, 0);
+            return logDate.toISOString().split('T')[0] === date;
+        });
+        
+        if (existingLog) {
+            this.logValue = existingLog.value;
+            this.logNotes = existingLog.notes || '';
+        } else {
+            this.logValue = undefined;
+            this.logNotes = '';
+        }
+    }
+
+    closeLogForm() {
+        this.selectedDate.set(null);
+        this.logValue = undefined;
+        this.logNotes = '';
+    }
+
+    saveLog() {
+        const date = this.selectedDate();
+        const id = this.habitId();
+        
+        if (!date || !id) return;
+        
+        this.habitService.updateLog(id, date, {
+            value: this.logValue,
+            notes: this.logNotes
+        }).subscribe({
+            next: () => {
+                // Reload history to reflect changes
+                this.loadHistory(id);
+                this.loadStats(id); // Reload stats too
+                this.closeLogForm();
+            },
+            error: (err) => console.error('Failed to save log', err)
+        });
     }
 
     goBack() {

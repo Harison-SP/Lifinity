@@ -13,13 +13,45 @@ export interface Habit {
   bestStreak: number;
   completionRate: number;
   completedToday: boolean;
-  createdAt: Date;
+  created_at: string; // Changed from Date to string to match API response type usually
 }
 
 export interface HabitLog {
   id: string;
-  habitId: string;
-  date: string; // ISO Date string YYYY-MM-DD
-  completed: boolean;
+  habit_id: string;
+  completed_at: string; // ISO UTC
+  value?: number;
   notes?: string;
+}
+
+export interface HistoryResponse {
+  items: HabitLog[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
+
+export interface HeatmapItem {
+  date: string;
+  level: number;
+}
+
+export interface DayFrequency {
+  day_name: string;
+  count: number;
+  percentage: number;
+}
+
+export interface TrendItem {
+  period: string;
+  rate: number;
+}
+
+export interface HabitStats {
+  total_completions: number;
+  completion_rate: number;
+  heatmap: HeatmapItem[];
+  weekly_frequency: DayFrequency[];
+  completion_trend: TrendItem[];
 }

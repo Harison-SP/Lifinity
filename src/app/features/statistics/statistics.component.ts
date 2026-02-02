@@ -7,7 +7,7 @@ import { HabitService } from '../../services/habit.service';
     selector: 'app-statistics',
     imports: [RouterLink, SidebarComponent],
     template: `
-    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
+    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
       <app-sidebar />
       
       <main class="flex-1 flex flex-col h-screen overflow-hidden relative">

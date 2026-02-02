@@ -1,7 +1,8 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Habit, HabitLog } from '../models/habit.model';
-import { firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
@@ -11,91 +12,138 @@ export class HabitService {
     private apiUrl = 'http://127.0.0.1:8000/habits';
 
     private readonly _habits = signal<Habit[]>([]);
-    private readonly _logs = signal<HabitLog[]>([]);
+    
+    // We can keep logs if needed, but for now we focus on habits state
+    // private readonly _logs = signal<HabitLog[]>([]);
 
     readonly habits = this._habits.asReadonly();
-    readonly logs = this._logs.asReadonly();
-
-    readonly habitsWithCompletion = computed(() => {
-        return this._habits();
-    });
 
     constructor() {
         this.loadHabits();
     }
 
-    async loadHabits() {
-        try {
-            const habits = await firstValueFrom(this.http.get<Habit[]>(this.apiUrl));
-            this._habits.set(habits);
-        } catch (error) {
-            console.error('Failed to load habits', error);
-        }
+    private getTimezoneOffset(): number {
+        // Returns the time-zone difference from UTC, in minutes.
+        // For example, if your time zone is UTC+10, -600 will be returned.
+        // Backend expects this value to calculate Local Time = UTC - Offset.
+        // So passing this directly is correct based on my backend logic.
+        return new Date().getTimezoneOffset();
     }
 
-    async addHabit(habitData: Omit<Habit, 'id' | 'streak' | 'bestStreak' | 'completionRate' | 'completedToday' | 'createdAt'>) {
-        // Backend expects matching fields. Our model is aligned now.
-        // We set default values for fields backend might not require but our UI does
+    private getLocalDateString(): string {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    loadHabits() {
+        // Pass current date and timezone to get correct 'completedToday' status
+        const params = new HttpParams()
+            .set('date', this.getLocalDateString())
+            .set('timezone_offset', this.getTimezoneOffset().toString());
+
+        this.http.get<Habit[]>(this.apiUrl, { params }).subscribe({
+            next: (habits) => this._habits.set(habits),
+            error: (error) => console.error('Failed to load habits', error)
+        });
+    }
+
+    addHabit(habitData: Omit<Habit, 'id' | 'streak' | 'bestStreak' | 'completionRate' | 'completedToday' | 'created_at'>): Observable<Habit> {
         const payload = {
             ...habitData,
             name: habitData.name,
             description: habitData.description || '',
             frequency: habitData.frequency,
             targetDays: habitData.targetDays,
-            icon: habitData.icon || 'star', // Default icon
+            icon: habitData.icon || 'star',
             color: habitData.color || '#000000',
-            category: habitData.category || 'General',
-            streak: 0,
-            bestStreak: 0,
-            completionRate: 0,
-            completedToday: false
+            category: habitData.category || 'General'
         };
 
-        try {
-            const newHabit = await firstValueFrom(this.http.post<Habit>(this.apiUrl, payload));
-            this._habits.update(current => [...current, newHabit]);
-        } catch (error) {
-            console.error('Failed to add habit', error);
-        }
+        return this.http.post<Habit>(this.apiUrl, payload).pipe(
+            tap({
+                next: (newHabit) => this._habits.update(current => [...current, newHabit]),
+                error: (error) => console.error('Failed to add habit', error)
+            })
+        );
     }
 
-    async updateHabit(id: string, habitData: Partial<Habit>) {
-        try {
-             const updatedHabit = await firstValueFrom(this.http.put<Habit>(`${this.apiUrl}/${id}`, habitData));
-             this._habits.update(habits =>
-                habits.map(h => h.id === id ? updatedHabit : h)
-            );
-        } catch (error) {
-            console.error('Failed to update habit', error);
-        }
+    updateHabit(id: string, habitData: Partial<Habit>): Observable<Habit> {
+         return this.http.put<Habit>(`${this.apiUrl}/${id}`, habitData).pipe(
+             tap({
+                 next: (updatedHabit) => {
+                     this._habits.update(habits =>
+                        habits.map(h => h.id === id ? updatedHabit : h)
+                    );
+                 },
+                 error: (error) => console.error('Failed to update habit', error)
+             })
+         );
     }
 
-    async toggleCompletion(habitId: string, date: string) {
-        const habit = this._habits().find(h => h.id === habitId);
-        if (!habit) return;
-
-        const updatedStatus = !habit.completedToday;
-        // In a real app we might also log this to a separate 'logs' endpoint
+    toggleCompletion(habitId: string, _date: string): Observable<Habit | null> {
+        // We ignore the passed date string for the payload creation as we want exact timestamp
+        // But in a more complex app we might want to toggle PAST dates.
+        // For this task, we assume "toggle" usually means "Just did it now" or "Undo what I did".
+        // The backend logic supports toggling for the "Local Day" derived from the timestamp.
         
-        try {
-            const updatedHabit = await firstValueFrom(this.http.put<Habit>(`${this.apiUrl}/${habitId}`, { 
-                completedToday: updatedStatus 
-            }));
-            
-            this._habits.update(habits =>
-                habits.map(h => h.id === habitId ? updatedHabit : h)
-            );
-        } catch (error) {
-            console.error('Failed to toggle completion', error);
-        }
+        const now = new Date();
+        const payload = {
+            completed_at: now.toISOString(),
+            timezone_offset: this.getTimezoneOffset()
+        };
+        
+        return this.http.post<Habit>(`${this.apiUrl}/${habitId}/toggle`, payload).pipe(
+            tap({
+                next: (updatedHabit) => {
+                    this._habits.update(habits =>
+                        habits.map(h => h.id === habitId ? updatedHabit : h)
+                    );
+                },
+                error: (error) => console.error('Failed to toggle completion', error)
+            })
+        );
     }
 
-    async deleteHabit(id: string) {
-        try {
-            await firstValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
-            this._habits.update(current => current.filter(h => h.id !== id));
-        } catch (error) {
-            console.error('Failed to delete habit', error);
-        }
+    deleteHabit(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+            tap({
+                next: () => this._habits.update(current => current.filter(h => h.id !== id)),
+                error: (error) => console.error('Failed to delete habit', error)
+            })
+        );
+    }
+
+    updateLog(habitId: string, _date: string, data: { notes?: string; value?: number }): Observable<Habit | null> {
+         // Using the toggle endpoint for updates as it now supports idempotent updates with notes/value
+         const payload = {
+             completed_at: new Date(_date).toISOString(), // Use provided date (assuming it's the log's date)
+             timezone_offset: this.getTimezoneOffset(),
+             value: data.value,
+             notes: data.notes
+         };
+         
+         return this.http.post<Habit>(`${this.apiUrl}/${habitId}/toggle`, payload).pipe(
+             tap({
+                 error: (error) => console.error('Failed to update log', error)
+             })
+         );
+    }
+    
+    getHistory(habitId: string, page: number, size: number): Observable<import('../models/habit.model').HistoryResponse> {
+        const params = new HttpParams()
+            .set('page', page.toString())
+            .set('size', size.toString())
+            .set('timezone_offset', this.getTimezoneOffset().toString());
+
+        return this.http.get<import('../models/habit.model').HistoryResponse>(`${this.apiUrl}/${habitId}/history`, { params });
+    }
+
+    getHabitStats(habitId: string): Observable<import('../models/habit.model').HabitStats> {
+        const params = new HttpParams()
+            .set('timezone_offset', this.getTimezoneOffset().toString());
+        return this.http.get<import('../models/habit.model').HabitStats>(`${this.apiUrl}/${habitId}/stats`, { params });
     }
 }
