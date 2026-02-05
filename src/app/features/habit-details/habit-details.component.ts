@@ -133,7 +133,7 @@ import { HabitService } from '../../services/habit.service';
                                             [class.dark:bg-gray-800]="item.level === 0"
                                             [class.bg-[#13ec5b]/20]="item.level === 1"
                                             [class.bg-[#13ec5b]/50]="item.level === 2"
-                                            [class.bg-[#13ec5b]]]="item.level >= 3"
+                                            [class.bg-[#13ec5b]]="item.level >= 3"
                                             [title]="item.date + ': Level ' + item.level"></div>
                                     }
                                 </div>
@@ -149,10 +149,10 @@ import { HabitService } from '../../services/habit.service';
                                     @for (day of stats()?.weekly_frequency; track day.day_name) {
                                         <div class="flex-1 flex flex-col justify-end items-center gap-2 group cursor-pointer w-full">
                                             <div class="w-full rounded-md transition-all relative" 
-                                                [class.bg-[#13ec5b]]="day.percentage > 70"
-                                                [class.bg-gray-100]="day.percentage <= 70"
-                                                [class.dark:bg-gray-800]="day.percentage <= 70" 
-                                                [style.height.%]="day.percentage"></div>
+                                                [class.bg-[#13ec5b]]="day.percentage > 0"
+                                                [class.bg-gray-100]="day.percentage === 0"
+                                                [class.dark:bg-gray-800]="day.percentage === 0" 
+                                                [style.height.%]="day.percentage || 10"></div>
                                             <span class="text-[10px] font-bold text-gray-400">{{ day.day_name.charAt(0) }}</span>
                                         </div>
                                     }

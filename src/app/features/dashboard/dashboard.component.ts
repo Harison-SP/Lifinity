@@ -309,8 +309,13 @@ export class DashboardComponent {
 
     openLogModal(habit: import('../../models/habit.model').Habit) {
         this.selectedHabit.set(habit);
-        this.logValue = undefined;
-        this.logNotes = '';
+        if (habit.latestLog) {
+            this.logValue = habit.latestLog.value;
+            this.logNotes = habit.latestLog.notes || '';
+        } else {
+            this.logValue = undefined;
+            this.logNotes = '';
+        }
     }
 
     closeLogModal() {

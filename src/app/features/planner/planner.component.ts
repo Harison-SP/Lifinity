@@ -1,5 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { PlannerService, PlannerGoal, PlannerTask } from '../../services/planner.service';
 import { YearlyViewComponent } from './yearly-view/yearly-view.component';
 import { MonthlyViewComponent } from './monthly-view/monthly-view.component';
@@ -9,10 +10,13 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
 
 @Component({
   selector: 'app-planner',
-  imports: [CommonModule, YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent],
+  imports: [CommonModule, YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent, SidebarComponent],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-[#0d1b12] dark:to-[#1a2c20] p-8">
-      <div class="max-w-7xl mx-auto">
+    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
+      <app-sidebar />
+      
+      <main class="flex-1 flex flex-col h-screen overflow-hidden relative overflow-y-auto w-full">
+        <div class="p-8 max-w-7xl mx-auto w-full">
         <!-- Header -->
         <div class="mb-8 flex items-center gap-4">
           <button (click)="goBack()" class="size-11 rounded-xl bg-white dark:bg-[#1a2c20] shadow-sm flex items-center justify-center text-[#4c9a66] hover:text-[#0d1b12] dark:hover:text-white transition-colors">
@@ -51,6 +55,7 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
           }
         </div>
       </div>
+      </main>
     </div>
   `,
   styles: [`

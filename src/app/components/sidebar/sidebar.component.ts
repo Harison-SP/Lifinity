@@ -27,8 +27,8 @@ import { SidebarService } from '../../services/sidebar.service';
 
       <!-- Collapse Toggle Button -->
       <button (click)="sidebarService.toggle()" 
-              class="absolute -right-4 top-10 size-8 rounded-full bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] flex items-center justify-center text-[#4c9a66] hover:text-[#0d1b12] dark:hover:text-white shadow-sm transition-transform hover:scale-110 z-50">
-        <span class="material-symbols-outlined !text-lg transition-transform duration-300" [style.transform]="sidebarService.isCollapsed() ? 'rotate(180deg)' : 'rotate(0deg)'">chevron_left</span>
+              class="absolute -right-4 top-10 size-12 rounded-full bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] flex items-center justify-center text-[#4c9a66] hover:text-[#0d1b12] dark:hover:text-white shadow-sm transition-transform hover:scale-110 z-50">
+        <span class="material-symbols-outlined !text-xl transition-transform duration-300" [style.transform]="sidebarService.isCollapsed() ? 'rotate(180deg)' : 'rotate(0deg)'">chevron_left</span>
       </button>
 
       <!-- Navigation Section -->

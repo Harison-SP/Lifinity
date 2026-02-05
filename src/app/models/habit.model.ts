@@ -14,6 +14,12 @@ export interface Habit {
   completionRate: number;
   completedToday: boolean;
   created_at: string; // Changed from Date to string to match API response type usually
+  latestLog?: {
+      id: string;
+      value?: number;
+      notes?: string;
+      completed_at: any;
+  };
 }
 
 export interface HabitLog {
