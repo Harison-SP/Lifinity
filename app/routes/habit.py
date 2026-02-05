@@ -61,6 +61,13 @@ async def get_habits(date: Optional[str] = None, timezone_offset: Optional[int] 
                 "completed_at": {"$gte": utc_start, "$lte": utc_end}
             })
             habit["completedToday"] = True if log else False
+            if log:
+                habit["latestLog"] = {
+                    "id": str(log["_id"]),
+                    "value": log.get("value"),
+                    "notes": log.get("notes"),
+                    "completed_at": log.get("completed_at")
+                }
             
     return habits_serializer(habits)
 

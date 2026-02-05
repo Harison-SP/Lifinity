@@ -14,6 +14,7 @@ def habit_serializer(habit) -> dict:
         "bestStreak": habit.get("bestStreak", 0),
         "completionRate": habit.get("completionRate", 0.0),
         "completedToday": habit.get("completedToday", False),
+        "latestLog": habit.get("latestLog"),
         "created_at": habit.get("created_at")
     }
 
