@@ -83,6 +83,9 @@ class PlannerGoalBase(BaseModel):
     week: Optional[int] = None  # Week number of the year
     status: str = "active"  # "active", "completed", "archived"
     tasks: List[str] = Field(default_factory=list)  # List of task descriptions
+    startDate: Optional[str] = None # YYYY-MM-DD
+    endDate: Optional[str] = None   # YYYY-MM-DD
+    color: Optional[str] = None
 
 class PlannerGoalCreate(PlannerGoalBase):
     pass
@@ -92,6 +95,9 @@ class PlannerGoalUpdate(BaseModel):
     description: Optional[str] = None
     status: Optional[str] = None
     tasks: Optional[List[str]] = None
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    color: Optional[str] = None
 
 class PlannerGoal(PlannerGoalBase):
     id: str

@@ -22,6 +22,9 @@ def goal_helper(goal) -> dict:
         "week": goal.get("week"),
         "status": goal["status"],
         "tasks": goal.get("tasks", []),
+        "startDate": goal.get("startDate"),
+        "endDate": goal.get("endDate"),
+        "color": goal.get("color"),
         "created_at": goal["created_at"]
     }
 
