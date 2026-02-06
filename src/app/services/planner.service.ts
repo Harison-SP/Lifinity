@@ -12,6 +12,9 @@ export interface PlannerGoal {
   week?: number;
   status: 'active' | 'completed' | 'archived';
   tasks: string[];
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
+  color?: string;
   created_at?: string;
 }
 

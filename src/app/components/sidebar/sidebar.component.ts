@@ -7,6 +7,7 @@ import { SidebarService } from '../../services/sidebar.service';
   imports: [RouterLink, RouterLinkActive],
   template: `
     <aside [class.w-72]="!sidebarService.isCollapsed()" [class.w-24]="sidebarService.isCollapsed()" 
+           (mouseenter)="sidebarService.setCollapsed(false)" (mouseleave)="sidebarService.setCollapsed(true)"
            class="hidden md:flex flex-col border-r border-[#e5e7eb] dark:border-[#2d3a30] bg-white dark:bg-[#1a2c20] h-screen sticky top-0 transition-all duration-300 ease-in-out group/sidebar">
       
       <!-- Logo Section -->
