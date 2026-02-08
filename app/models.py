@@ -6,7 +6,28 @@ class HabitBase(BaseModel):
     name: str
     description: Optional[str] = None
     frequency: str = "Daily"
+    # New Fields for Habit Type & Targets
+    type: str = "yes_no"  # "yes_no", "measurable"
+    targetValue: float = 0
+    targetUnit: str = ""
+    targetComparator: str = ">="  # ">=", "<=", "=="
+
+    # New Fields for Advanced Frequency
+    frequencyType: str = "daily"  # "daily", "specific_days", "interval", "count_per_period"
+    frequencyDays: List[int] = Field(default_factory=list)  # Replaces targetDays for specific days
+    frequencyInterval: int = 1  # Every X days
+    frequencyCount: int = 1  # X times...
+    frequencyPeriod: int = 7  # ...per Y days (default week)
+    
+    # Date & Time
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    timeBlockStart: Optional[str] = None
+    timeBlockEnd: Optional[str] = None
+
+    # Deprecated but kept for backward compatibility (will map to new fields)
     targetDays: List[int] = Field(default_factory=lambda: [0, 1, 2, 3, 4, 5, 6])
+    
     icon: Optional[str] = None
     color: Optional[str] = None
     category: Optional[str] = None
@@ -22,6 +43,23 @@ class HabitUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     frequency: Optional[str] = None
+    
+    type: Optional[str] = None
+    targetValue: Optional[float] = None
+    targetUnit: Optional[str] = None
+    targetComparator: Optional[str] = None
+
+    frequencyType: Optional[str] = None
+    frequencyDays: Optional[List[int]] = None
+    frequencyInterval: Optional[int] = None
+    frequencyCount: Optional[int] = None
+    frequencyPeriod: Optional[int] = None
+
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    timeBlockStart: Optional[str] = None
+    timeBlockEnd: Optional[str] = None
+    
     targetDays: Optional[List[int]] = None
     icon: Optional[str] = None
     color: Optional[str] = None
@@ -41,7 +79,7 @@ class Habit(HabitBase):
 class HabitLogBase(BaseModel):
     habit_id: str
     completed_at: datetime # UTC timestamp
-    value: Optional[float] = None
+    value: Optional[float] = 1.0 # Default to 1.0 for yes/no, actual value for measurable
     notes: Optional[str] = None
 
 class HabitLogCreate(HabitLogBase):

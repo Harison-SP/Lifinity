@@ -277,6 +277,11 @@ async def create_habit(habit: HabitCreate):
     # Ensure creation time is UTC aware if possible, or naive UTC
     habit_dict["created_at"] = datetime.now(timezone.utc) 
     habit_dict["completedToday"] = False # Default to False upon creation
+    
+    # Fill legacy frequency if missing but new fields are present
+    if not habit_dict.get("frequency") and habit_dict.get("frequencyType"):
+         habit_dict["frequency"] = habit_dict["frequencyType"].capitalize()
+
     result = habit_collection.insert_one(habit_dict)
     new_habit = habit_collection.find_one({"_id": result.inserted_id})
     return habit_serializer(new_habit)
