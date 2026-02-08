@@ -5,10 +5,23 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { FrequencyType } from '../../models/habit.model';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatTimepickerModule } from '@angular/material/timepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
     selector: 'app-add-habit',
-    imports: [ReactiveFormsModule, SidebarComponent],
+    imports: [
+        ReactiveFormsModule, 
+        SidebarComponent, 
+        MatDatepickerModule, 
+        MatTimepickerModule, 
+        MatFormFieldModule, 
+        MatInputModule, 
+        MatNativeDateModule
+    ],
     template: `
     <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
         <app-sidebar />
@@ -36,25 +49,94 @@ import { FrequencyType } from '../../models/habit.model';
                                 <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Habit Name</label>
                                 <input formControlName="name" class="w-full rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-5 text-xl font-bold placeholder-[#4c9a66]/50 dark:placeholder-gray-500 focus:border-[#13ec5b] focus:bg-white dark:focus:bg-[#1a2c20] transition-all outline-none" placeholder="e.g. Read 10 pages" type="text"/>
                             </div>
+                            
+                            <!-- Habit Type Selection -->
+                            <div class="space-y-3">
+                                <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Habit Type</label>
+                                <div class="flex items-center gap-4">
+                                    <button type="button" (click)="setHabitType('yes_no')"
+                                        class="flex-1 p-4 rounded-xl border-2 text-center transition-all font-bold"
+                                        [class.border-[#13ec5b]]="habitType() === 'yes_no'"
+                                        [class.bg-[#13ec5b]/10]="habitType() === 'yes_no'"
+                                        [class.text-[#13ec5b]]="habitType() === 'yes_no'"
+                                        [class.border-gray-100]="habitType() !== 'yes_no'"
+                                        [class.dark:border-gray-800]="habitType() !== 'yes_no'">
+                                        Yes / No
+                                    </button>
+                                    <button type="button" (click)="setHabitType('measurable')"
+                                        class="flex-1 p-4 rounded-xl border-2 text-center transition-all font-bold"
+                                        [class.border-[#13ec5b]]="habitType() === 'measurable'"
+                                        [class.bg-[#13ec5b]/10]="habitType() === 'measurable'"
+                                        [class.text-[#13ec5b]]="habitType() === 'measurable'"
+                                        [class.border-gray-100]="habitType() !== 'measurable'"
+                                        [class.dark:border-gray-800]="habitType() !== 'measurable'">
+                                        Measurable
+                                    </button>
+                                </div>
+                            </div>
+
+                            @if (habitType() === 'measurable') {
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-3">
+                                        <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Target</label>
+                                        <input formControlName="targetValue" type="number" class="w-full rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-4 font-bold outline-none focus:border-[#13ec5b]"/>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Unit</label>
+                                        <input formControlName="targetUnit" type="text" placeholder="e.g. pages" class="w-full rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-4 font-bold outline-none focus:border-[#13ec5b]"/>
+                                    </div>
+                                    <div class="col-span-2 space-y-3">
+                                        <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Goal Type</label>
+                                        <select formControlName="targetComparator" class="w-full rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-4 font-bold outline-none focus:border-[#13ec5b]">
+                                            <option value=">=">At least</option>
+                                            <option value="<=">At most</option>
+                                            <option value="==">Exactly</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            }
+
                             <div class="space-y-3">
                                 <label class="text-xs font-black uppercase tracking-[0.2em] text-[#4c9a66] dark:text-[#13ec5b]">Description</label>
-                                <textarea formControlName="description" class="w-full min-h-[120px] rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-5 text-lg font-medium placeholder-[#4c9a66]/50 dark:placeholder-gray-500 focus:border-[#13ec5b] focus:bg-white dark:focus:bg-[#1a2c20] transition-all outline-none resize-none" placeholder="Add some motivation or details..."></textarea>
+                                <textarea formControlName="description" class="w-full min-h-[100px] rounded-2xl border-2 border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-[#102216] p-5 text-lg font-medium placeholder-[#4c9a66]/50 dark:placeholder-gray-500 focus:border-[#13ec5b] focus:bg-white dark:focus:bg-[#1a2c20] transition-all outline-none resize-none" placeholder="Add some motivation..."></textarea>
                             </div>
                         </div>
                         
                         <div class="my-10 h-px w-full bg-[#f0f2f1] dark:bg-[#2d3a30]"></div>
 
                         <!-- Section 2: Frequency -->
+                        <!-- Section 2: Frequency -->
                         <div class="space-y-8">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-xl font-black">Frequency</h3>
-                                <div class="flex items-center rounded-xl bg-gray-100 dark:bg-gray-800/50 p-1.5 p-1">
-                                    <button type="button" (click)="frequency.set('Daily')" class="rounded-lg px-6 py-2 text-sm font-bold transition-all" [class.bg-white]="frequency() === 'Daily'" [class.shadow-md]="frequency() === 'Daily'" [class.text-[#0d1b12]]="frequency() === 'Daily'" [class.text-[#4c9a66]]="frequency() !== 'Daily'">Daily</button>
-                                    <button type="button" (click)="frequency.set('Weekly')" class="rounded-lg px-6 py-2 text-sm font-bold transition-all" [class.bg-white]="frequency() === 'Weekly'" [class.shadow-md]="frequency() === 'Weekly'" [class.text-[#0d1b12]]="frequency() === 'Weekly'" [class.text-[#4c9a66]]="frequency() !== 'Weekly'">Weekly</button>
-                                </div>
+                            <h3 class="text-xl font-black">Frequency</h3>
+                            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                <button type="button" (click)="setFrequencyType('daily')" 
+                                    class="p-3 rounded-xl border-2 text-sm font-bold transition-all"
+                                    [class.border-[#13ec5b]]="frequencyType() === 'daily'"
+                                    [class.bg-[#13ec5b]/10]="frequencyType() === 'daily'"
+                                    [class.border-gray-100]="frequencyType() !== 'daily'"
+                                    [class.dark:border-gray-800]="frequencyType() !== 'daily'">
+                                    Every Day
+                                </button>
+                                <button type="button" (click)="setFrequencyType('specific_days')"
+                                    class="p-3 rounded-xl border-2 text-sm font-bold transition-all"
+                                    [class.border-[#13ec5b]]="frequencyType() === 'specific_days'"
+                                    [class.bg-[#13ec5b]/10]="frequencyType() === 'specific_days'"
+                                    [class.border-gray-100]="frequencyType() !== 'specific_days'"
+                                    [class.dark:border-gray-800]="frequencyType() !== 'specific_days'">
+                                    Specific Days
+                                </button>
+                                <button type="button" (click)="setFrequencyType('interval')"
+                                    class="p-3 rounded-xl border-2 text-sm font-bold transition-all"
+                                    [class.border-[#13ec5b]]="frequencyType() === 'interval'"
+                                    [class.bg-[#13ec5b]/10]="frequencyType() === 'interval'"
+                                    [class.border-gray-100]="frequencyType() !== 'interval'"
+                                    [class.dark:border-gray-800]="frequencyType() !== 'interval'">
+                                    Interval
+                                </button>
+                                <!-- Added Count per Period options could go here -->
                             </div>
                             
-                            @if (frequency() === 'Weekly') {
+                            @if (frequencyType() === 'specific_days') {
                                 <div class="flex flex-wrap gap-4">
                                     @for (day of daysOfWeek; track day.value) {
                                         <button type="button" (click)="toggleDay(day.value)"
@@ -71,6 +153,48 @@ import { FrequencyType } from '../../models/habit.model';
                                     }
                                 </div>
                             }
+
+                            @if (frequencyType() === 'interval') {
+                                <div class="flex items-center gap-4">
+                                    <span class="font-bold">Every</span>
+                                    <input formControlName="frequencyInterval" type="number" min="1" class="w-24 rounded-xl border-2 border-gray-100 dark:border-gray-800 bg-transparent p-3 text-center font-bold outline-none focus:border-[#13ec5b]"/>
+                                    <span class="font-bold">days</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Section 3: Duration & Time -->
+                        <div class="my-10 h-px w-full bg-[#f0f2f1] dark:bg-[#2d3a30]"></div>
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-black">Schedule</h3>
+                            <div class="grid grid-cols-2 gap-6">
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Start Date</mat-label>
+                                    <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="Choose a date">
+                                    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #startPicker></mat-datepicker>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>End Date</mat-label>
+                                    <input matInput [matDatepicker]="endPicker" formControlName="endDate" placeholder="Choose a date">
+                                    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #endPicker></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Time Block Start</mat-label>
+                                    <input matInput [matTimepicker]="timeStartPicker" formControlName="timeBlockStart">
+                                    <mat-timepicker-toggle matSuffix [for]="timeStartPicker"></mat-timepicker-toggle>
+                                    <mat-timepicker #timeStartPicker></mat-timepicker>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Time Block End</mat-label>
+                                    <input matInput [matTimepicker]="timeEndPicker" formControlName="timeBlockEnd">
+                                    <mat-timepicker-toggle matSuffix [for]="timeEndPicker"></mat-timepicker-toggle>
+                                    <mat-timepicker #timeEndPicker></mat-timepicker>
+                                </mat-form-field>
+                            </div>
                         </div>
                         
                         <!-- Action Footer -->
@@ -96,6 +220,38 @@ import { FrequencyType } from '../../models/habit.model';
     .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    ::ng-deep .mat-mdc-form-field {
+      width: 100%;
+    }
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      background-color: transparent !important;
+    }
+    ::ng-deep .mat-mdc-form-field-focus-overlay {
+      background-color: transparent !important;
+    }
+    ::ng-deep .mat-mdc-input-element {
+      color: inherit !important;
+      font-weight: 700 !important;
+    }
+    ::ng-deep .mdc-notched-outline__leading,
+    ::ng-deep .mdc-notched-outline__notch,
+    ::ng-deep .mdc-notched-outline__trailing {
+      border-color: rgba(76, 154, 102, 0.2) !important;
+      border-width: 2px !important;
+    }
+    ::ng-deep .mat-focused .mdc-notched-outline__leading,
+    ::ng-deep .mat-focused .mdc-notched-outline__notch,
+    ::ng-deep .mat-focused .mdc-notched-outline__trailing {
+      border-color: #13ec5b !important;
+    }
+    ::ng-deep .mat-mdc-form-field-label-wrapper {
+        top: -4px !important;
+    }
+    ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+    }
   `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -125,7 +281,22 @@ export class AddHabitComponent implements OnInit {
     habitForm = this.fb.group({
         name: ['', Validators.required],
         description: [''],
+        type: ['yes_no'], // yes_no, measurable
+        targetValue: [0],
+        targetUnit: [''],
+        targetComparator: ['>='], // >=, <=, ==
+        frequencyType: ['daily'], // daily, specific_days, interval, count_per_period
+        frequencyInterval: [1],
+        frequencyCount: [1],
+        frequencyPeriod: [7], // days
+        startDate: [''],
+        endDate: [''],
+        timeBlockStart: [''],
+        timeBlockEnd: ['']
     });
+
+    habitType = signal<string>('yes_no');
+    frequencyType = signal<string>('daily');
 
     constructor() {
         effect(() => {
@@ -136,10 +307,24 @@ export class AddHabitComponent implements OnInit {
                 if (habit) {
                     this.habitForm.patchValue({
                         name: habit.name,
-                        description: habit.description
-                    }, { emitEvent: false }); // Avoid infinite loops if we subscribed to valueChanges elsewhere
-                    this.frequency.set(habit.frequency as FrequencyType);
-                    this.selectedDays.set(habit.targetDays);
+                        description: habit.description,
+                        type: habit.type || 'yes_no',
+                        targetValue: habit.targetValue,
+                        targetUnit: habit.targetUnit,
+                        targetComparator: habit.targetComparator,
+                        frequencyType: habit.frequencyType || 'daily',
+                        frequencyInterval: habit.frequencyInterval,
+                        frequencyCount: habit.frequencyCount,
+                        frequencyPeriod: habit.frequencyPeriod,
+                        startDate: habit.startDate ? new Date(habit.startDate) : null,
+                        endDate: habit.endDate ? new Date(habit.endDate) : null,
+                        timeBlockStart: habit.timeBlockStart ? this.timeStringToDate(habit.timeBlockStart) : null,
+                        timeBlockEnd: habit.timeBlockEnd ? this.timeStringToDate(habit.timeBlockEnd) : null
+                    } as any, { emitEvent: false }); 
+                    
+                    this.habitType.set(habit.type || 'yes_no');
+                    this.frequencyType.set(habit.frequencyType || 'daily');
+                    this.selectedDays.set(habit.frequencyDays || habit.targetDays || []);
                 }
             }
         });
@@ -159,13 +344,42 @@ export class AddHabitComponent implements OnInit {
         );
     }
 
+    setHabitType(type: string) {
+        this.habitType.set(type);
+        this.habitForm.patchValue({ type });
+    }
+
+    setFrequencyType(type: string) {
+        this.frequencyType.set(type);
+        this.habitForm.patchValue({ frequencyType: type });
+    }
+
     onSubmit() {
         if (this.habitForm.valid) {
+            const formVal = this.habitForm.value;
             const habitData = {
-                name: this.habitForm.value.name!,
-                description: this.habitForm.value.description || undefined,
-                frequency: this.frequency(),
-                targetDays: this.frequency() === 'Daily' ? [0, 1, 2, 3, 4, 5, 6] : this.selectedDays(),
+                name: formVal.name!,
+                description: formVal.description || undefined,
+                type: this.habitType() as any,
+                targetValue: formVal.targetValue || 0,
+                targetUnit: formVal.targetUnit || '',
+                targetComparator: formVal.targetComparator as any || '>=',
+                
+                frequency: 'Custom', // Legacy/display backup
+                frequencyType: this.frequencyType(),
+                frequencyDays: this.frequencyType() === 'specific_days' ? this.selectedDays() : [],
+                frequencyInterval: formVal.frequencyInterval || 1,
+                frequencyCount: formVal.frequencyCount || 1,
+                frequencyPeriod: formVal.frequencyPeriod || 7,
+
+                targetDays: this.frequencyType() === 'daily' ? [0, 1, 2, 3, 4, 5, 6] : 
+                            this.frequencyType() === 'specific_days' ? this.selectedDays() : [],
+                
+                startDate: this.dateToString(formVal.startDate as any),
+                endDate: this.dateToString(formVal.endDate as any),
+                timeBlockStart: this.timeToString(formVal.timeBlockStart as any),
+                timeBlockEnd: this.timeToString(formVal.timeBlockEnd as any),
+
                 icon: 'star',
                 color: '#13ec5b',
                 category: 'General'
@@ -184,5 +398,29 @@ export class AddHabitComponent implements OnInit {
 
     goBack() {
         this.location.back();
+    }
+
+    private dateToString(date: Date | null | undefined): string | undefined {
+        if (!date) return undefined;
+        if (typeof date === 'string') return date;
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    private timeToString(date: Date | null | undefined): string | undefined {
+        if (!date) return undefined;
+        if (typeof date === 'string') return date;
+        const d = new Date(date);
+        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    private timeStringToDate(timeStr: string): Date {
+        const [h, m] = timeStr.split(':').map(Number);
+        const d = new Date();
+        d.setHours(h, m, 0, 0);
+        return d;
     }
 }
