@@ -15,30 +15,30 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
   standalone: true,
   imports: [CommonModule, FormsModule, LinearCalendarComponent, MatDatepickerModule, MatNativeDateModule, MatInputModule, MatChipsModule, MatIconModule],
   template: `
-    <div class="h-full flex flex-col gap-4 relative">
+    <div class="h-full flex flex-col gap-4 relative font-manrope">
       <div class="flex flex-col gap-4 px-4 pt-2">
          <div class="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-            <h2 class="text-2xl font-bold text-white flex items-center gap-2 uppercase tracking-tight">
-              <span class="text-[#ec5b13] material-symbols-outlined">calendar_view_week</span>
-              <button (click)="changeYear(-1)" class="p-1 hover:text-[#ec5b13] rounded transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
-              <span class="font-mono text-[#ec5b13]">{{ currentYear() }}</span>
-              <button (click)="changeYear(1)" class="p-1 hover:text-[#ec5b13] rounded transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
-              <span class="text-sm text-slate-500 ml-2 tracking-widest font-mono">_CYCLE_OVERVIEW</span>
+            <h2 class="text-2xl font-black text-black flex items-center gap-2 uppercase font-arvo">
+              <span class="text-black material-symbols-outlined text-3xl">calendar_view_week</span>
+              <button (click)="changeYear(-1)" class="p-1 hover:bg-black hover:text-white rounded-none border border-transparent hover:border-black transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
+              <span class="font-mono text-black underline decoration-4 decoration-electric-red">{{ currentYear() }}</span>
+              <button (click)="changeYear(1)" class="p-1 hover:bg-black hover:text-white rounded-none border border-transparent hover:border-black transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+              <span class="text-sm text-concrete-500 ml-2 tracking-widest font-mono font-bold">_CYCLE_OVERVIEW</span>
             </h2>
 
              <!-- Filter Chips -->
              <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar-x w-full md:w-auto">
-                 <span class="text-[10px] uppercase font-bold text-slate-500 tracking-widest mr-2 whitespace-nowrap">Filter_Spectra:</span>
+                 <span class="text-[10px] uppercase font-black text-concrete-900 tracking-widest mr-2 whitespace-nowrap">Filter_Spectra:</span>
                  <div class="flex gap-2">
                     @for (color of presetColors; track color) {
                       <button (click)="toggleFilter(color)" 
-                              class="size-6 rounded-sm border border-slate-700 transition-all hover:scale-110 flex items-center justify-center relative group"
+                              class="size-6 rigid-border-sm border-[2px] transition-all hover:scale-110 flex items-center justify-center relative group"
                               [style.background-color]="color"
                               [class.ring-2]="selectedColors().has(color)"
-                              [class.ring-white]="selectedColors().has(color)"
+                              [class.ring-black]="selectedColors().has(color)"
                               [class.opacity-40]="selectedColors().size > 0 && !selectedColors().has(color)">
                           @if(selectedColors().has(color)) {
-                              <span class="absolute text-[8px] text-white font-bold inset-0 flex items-center justify-center bg-black/20">✓</span>
+                              <span class="absolute text-[10px] text-white font-black inset-0 flex items-center justify-center bg-black/20">✓</span>
                           }
                       </button>
                     }
@@ -46,7 +46,7 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
              </div>
 
             <button (click)="openAddForm()" 
-                    class="px-4 py-2 bg-[#ec5b13] text-white rounded font-bold hover:bg-white hover:text-[#ec5b13] transition-all shadow-[0_0_15px_rgba(236,91,19,0.4)] flex items-center gap-2 uppercase tracking-wider text-xs ml-auto md:ml-0 whitespace-nowrap">
+                    class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs ml-auto md:ml-0 whitespace-nowrap active:translate-y-1 active:shadow-none">
               <span class="material-symbols-outlined text-lg">add</span>
               INIT_EVENT
             </button>
@@ -55,8 +55,8 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
 
       <div class="flex-1 flex overflow-hidden gap-4 px-4 pb-4">
         <!-- Linear Calendar -->
-        <div class="flex-1 bg-[#050608]/80 rounded border border-[#2a3441] p-1 overflow-hidden h-full flex flex-col relative group/calendar shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-          <div class="absolute inset-x-0 top-0 h-1 bg-[#ec5b13] opacity-50 z-20"></div>
+        <div class="flex-1 bg-white rigid-border border-[4px] p-0 overflow-hidden h-full flex flex-col relative group/calendar brutalist-shadow-active">
+          <div class="absolute inset-x-0 top-0 h-1 bg-electric-red z-20"></div>
           <app-linear-calendar 
             [events]="calendarEvents()"
             (eventClick)="onEventClick($event)"
@@ -68,51 +68,53 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
 
         <!-- Add/Edit Goal Form (Side Panel) -->
         @if (showAddForm()) {
-          <div class="w-80 bg-[#0c0e12] p-6 rounded border border-[#ec5b13] overflow-y-auto h-full flex flex-col transition-all relative animate-in slide-in-from-right duration-300 shadow-[0_0_50px_rgba(0,0,0,0.8)] z-30">
-            <div class="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ec5b13]"></div>
-            <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ec5b13]"></div>
-            
-            <h3 class="text-lg font-black text-white uppercase tracking-wider mb-6 border-b border-[#2a3441] pb-2">
-                <span class="text-[#ec5b13] mr-2">>></span>{{ editingId() ? 'Edit_Event' : 'New_Event' }}
-            </h3>
+          <div class="w-80 bg-white rigid-border border-[4px] p-6 overflow-y-auto h-full flex flex-col transition-all relative animate-in slide-in-from-right duration-300 shadow-[0_0_50px_rgba(0,0,0,0.2)] z-30 brutalist-shadow-active">
+            <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-2">
+                <h3 class="text-lg font-black text-black uppercase tracking-wider font-arvo">
+                    {{ editingId() ? 'Edit_Event' : 'New_Event' }}
+                </h3>
+                 <button (click)="closeForm()" class="border-2 border-transparent hover:border-black w-8 h-8 flex items-center justify-center">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
             
             <div class="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
                <div class="space-y-1">
-                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Event_Alias</label>
+                 <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Event_Alias</label>
                  <input [ngModel]="currentGoal().title" (ngModelChange)="updateCurrentGoal({title: $event})" placeholder="ENTER_ALIAS"
-                        class="w-full px-4 py-3 bg-[#050608] border border-[#2a3441] focus:border-[#ec5b13] text-white font-mono text-sm outline-none transition-all rounded">
+                        class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all rounded-none uppercase placeholder:text-concrete-300">
                </div>
 
                <div class="space-y-1">
-                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Event_Details</label>
+                 <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Event_Details</label>
                  <textarea [ngModel]="currentGoal().description" (ngModelChange)="updateCurrentGoal({description: $event})" rows="3" placeholder="// ADD_DETAILS..."
-                        class="w-full px-4 py-3 bg-[#050608] border border-[#2a3441] focus:border-[#ec5b13] text-white font-mono text-sm outline-none transition-all resize-none rounded"></textarea>
+                        class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all resize-none rounded-none uppercase placeholder:text-concrete-300"></textarea>
                </div>
 
                <div class="space-y-1">
-                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Time_Window</label>
-                 <mat-form-field appearance="outline" class="w-full cyberpunk-input">
-                   <mat-date-range-input [rangePicker]="picker" class="text-white">
-                     <input matStartDate placeholder="START" [(ngModel)]="currentStartDateStr" (dateChange)="onDateChange('start', $event)" class="text-white">
-                     <input matEndDate placeholder="END" [(ngModel)]="currentEndDateStr" (dateChange)="onDateChange('end', $event)" class="text-white">
+                 <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Time_Window</label>
+                 <mat-form-field appearance="outline" class="w-full brutalist-input-wrapper">
+                   <mat-date-range-input [rangePicker]="picker" class="text-black font-mono font-bold">
+                     <input matStartDate placeholder="START" [(ngModel)]="currentStartDateStr" (dateChange)="onDateChange('start', $event)" class="text-black">
+                     <input matEndDate placeholder="END" [(ngModel)]="currentEndDateStr" (dateChange)="onDateChange('end', $event)" class="text-black">
                    </mat-date-range-input>
-                   <mat-datepicker-toggle matIconSuffix [for]="picker" class="text-[#ec5b13]"></mat-datepicker-toggle>
-                   <mat-date-range-picker #picker panelClass="cyberpunk-datepicker"></mat-date-range-picker>
+                   <mat-datepicker-toggle matIconSuffix [for]="picker" class="text-black"></mat-datepicker-toggle>
+                   <mat-date-range-picker #picker panelClass="brutalist-datepicker"></mat-date-range-picker>
                  </mat-form-field>
                </div>
 
                <div>
-                 <label class="block text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">Spectra_Code</label>
+                 <label class="block text-[10px] font-black tracking-widest text-concrete-900 uppercase mb-3">Spectra_Code</label>
                  <div class="flex gap-2 flex-wrap">
                    @for (color of presetColors; track color) {
                      <button (click)="updateCurrentGoal({color: color})"
-                             class="size-8 rounded border-2 transition-all hover:scale-110 flex items-center justify-center"
+                             class="size-8 rounded-none border-[3px] transition-all hover:scale-110 flex items-center justify-center"
                              [style.background-color]="color"
-                             [class.border-white]="currentGoal().color === color"
+                             [class.border-black]="currentGoal().color === color"
                              [class.border-transparent]="currentGoal().color !== color"
-                             [class.shadow-[0_0_10px_white]]="currentGoal().color === color">
+                             [class.shadow-[2px_2px_0_0_black]]="currentGoal().color === color">
                              @if(currentGoal().color === color) {
-                                 <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                 <div class="w-2 h-2 bg-black"></div>
                              }
                      </button>
                    }
@@ -120,29 +122,26 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
                </div>
             </div>
             
-            <div class="flex gap-3 mt-6 justify-end pt-4 border-t border-[#2a3441]">
+            <div class="flex gap-3 mt-6 justify-end pt-4 border-t-4 border-black">
                 @if (editingId()) {
                   @if (!isConfirmingDelete()) {
-                    <button (click)="deleteGoal()" class="mr-auto text-red-500 hover:text-red-400 font-bold text-xs uppercase tracking-widest flex items-center gap-1 transition-colors">
+                    <button (click)="deleteGoal()" class="mr-auto text-electric-red hover:text-black font-black text-xs uppercase tracking-widest flex items-center gap-1 transition-colors border-2 border-transparent hover:border-black px-2">
                       <span class="material-symbols-outlined text-sm">delete</span>
                       Abort
                     </button>
                   } @else {
-                    <div class="mr-auto flex items-center gap-2 bg-[#050608] p-1 px-2 rounded border border-red-900/50">
-                       <span class="text-[9px] uppercase font-bold text-red-500 mr-1 tracking-wider">Confirm?</span>
-                       <button (click)="confirmDelete()" class="text-[#ec5b13] hover:text-white flex items-center transition-colors" title="Confirm Delete">
+                    <div class="mr-auto flex items-center gap-2 bg-white p-1 px-2 rigid-border-sm border-[2px] shadow-[2px_2px_0_0_black]">
+                       <span class="text-[9px] uppercase font-black text-electric-red mr-1 tracking-wider">Confirm?</span>
+                       <button (click)="confirmDelete()" class="text-black hover:text-electric-red flex items-center transition-colors" title="Confirm Delete">
                          <span class="material-symbols-outlined text-sm">check</span>
                        </button>
-                       <button (click)="cancelDelete()" class="text-slate-500 hover:text-white flex items-center transition-colors" title="Cancel Delete">
+                       <button (click)="cancelDelete()" class="text-concrete-400 hover:text-black flex items-center transition-colors" title="Cancel Delete">
                          <span class="material-symbols-outlined text-sm">close</span>
                        </button>
                     </div>
                   }
                 }
-              <button (click)="closeForm()" class="px-4 py-2 border border-[#2a3441] text-slate-400 hover:text-white hover:bg-white/5 rounded font-bold uppercase tracking-widest transition-all text-xs">
-                  Cancel
-              </button>
-              <button (click)="saveGoal()" class="px-4 py-2 bg-[#ec5b13] text-white rounded font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(236,91,19,0.3)] hover:shadow-[0_0_25px_rgba(236,91,19,0.5)] hover:scale-[1.02] transition-all text-xs">
+              <button (click)="saveGoal()" class="flex-1 py-3 bg-black text-white rigid-border-sm border-[2px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all text-xs shadow-[4px_4px_0_0_concrete-400]">
                   Commit
               </button>
             </div>
@@ -156,64 +155,36 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; 
     }
     
-    ::ng-deep .cyberpunk-input .mat-mdc-form-field-focus-overlay {
-      background-color: transparent !important;
+    ::ng-deep .brutalist-input-wrapper .mat-mdc-text-field-wrapper {
+        background-color: white !important;
+        border: 2px solid black !important;
+        border-radius: 0 !important;
+        padding: 0 0.5rem !important;
     }
     
-    ::ng-deep .cyberpunk-input .mat-mdc-input-element {
-      color: white !important;
-      font-family: 'JetBrains Mono', monospace !important;
-      font-size: 0.875rem !important;
-    }
-    
-    ::ng-deep .cyberpunk-input .mat-mdc-text-field-wrapper {
-        background-color: #050608 !important;
-        border: 1px solid #2a3441 !important;
-        border-radius: 0.25rem !important;
-        padding: 0 1rem !important;
-    }
-    
-    ::ng-deep .cyberpunk-input .mat-mdc-form-field-infix {
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
+    ::ng-deep .brutalist-input-wrapper .mat-mdc-form-field-infix {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
         min-height: unset !important;
         border: none !important;
     }
     
     /* Remove underline */
-    ::ng-deep .cyberpunk-input .mdc-line-ripple { 
+    ::ng-deep .brutalist-input-wrapper .mdc-line-ripple { 
         display: none !important; 
     }
 
-    .custom-scrollbar-x::-webkit-scrollbar {
-        height: 2px;
-    }
-    .custom-scrollbar-x::-webkit-scrollbar-track {
-        background: #050608;
-    }
-    .custom-scrollbar-x::-webkit-scrollbar-thumb {
-        background: #2a3441;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #ec5b13;
-    }
+    .custom-scrollbar-x::-webkit-scrollbar { height: 4px; }
+    .custom-scrollbar-x::-webkit-scrollbar-track { background: #e5e5e5; }
+    .custom-scrollbar-x::-webkit-scrollbar-thumb { background: black; }
     
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #2a3441;
-      border-radius: 2px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #ec5b13;
-    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #e5e5e5; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
   `]
 })
 export class YearlyViewComponent implements OnInit {
+  // Logic remains EXACTLY the same as previous file.
   private plannerService = inject(PlannerService);
   
   goals = signal<PlannerGoal[]>([]);

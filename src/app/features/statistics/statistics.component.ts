@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HabitService } from '../../services/habit.service';
 import { CommonModule } from '@angular/common';
@@ -8,111 +8,143 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     imports: [CommonModule, RouterLink],
     template: `
-    <div class="h-full overflow-y-auto custom-scrollbar relative bg-[#050608]">
-        <!-- Top Bar Decoration -->
-        <div class="absolute top-0 left-0 right-0 h-1 bg-[#ec5b13] z-50 shadow-[0_0_10px_#ec5b13] opacity-80"></div>
-
-        <header class="p-8 border-b border-[#2a3441] bg-[#0c0e12] relative z-10 shrink-0 flex justify-between items-end">
-          <div>
-              <h2 class="text-3xl font-black text-white tracking-tighter uppercase flex items-center gap-3">
-                <span class="material-symbols-outlined text-[#ec5b13] text-4xl">analytics</span>
-                ANALYTICS_CORE
-              </h2>
-              <p class="text-[#ec5b13] font-bold tracking-widest text-xs mt-1 uppercase opacity-80 pl-1">>> SYSTEM_PERFORMANCE_METRICS_LOADED</p>
-          </div>
-          <div class="hidden md:flex gap-4 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
-              <span>_cpu: 12%</span>
-              <span>_mem: 4GB</span>
-              <span>_net: ONLINE</span>
-          </div>
+    <div class="min-h-screen bg-concrete-200 p-6 md:p-8 lg:p-12 font-manrope pb-24">
+        <!-- Header -->
+        <header class="mb-12 border-b-4 border-black pb-6 flex flex-col md:flex-row items-end justify-between gap-6">
+            <div>
+                <div class="bg-black text-white px-2 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
+                    System_Analytica // V.2.0
+                </div>
+                <h1 class="text-5xl md:text-7xl font-black text-black uppercase leading-none font-arvo">
+                    Global_Metrics
+                </h1>
+            </div>
+            <div class="text-right hidden md:block">
+                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400">Data_Stream: ACTIVE</p>
+                <p class="text-[10px] font-bold font-mono text-concrete-900">{{ today | date:'yyyy-MM-dd HH:mm:ss' }}</p>
+            </div>
         </header>
 
-        <div class="p-8 relative">
-          <!-- Background Grid -->
-          <div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]"></div>
+        <!-- Aggregate Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <!-- Global Efficiency -->
+            <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-active relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                    <span class="material-symbols-outlined text-9xl text-black">pie_chart</span>
+                </div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-4 border-b-2 border-black pb-1">System_Efficiency</p>
+                <div class="flex items-baseline gap-2 mb-4 relative z-10">
+                    <span class="text-7xl font-black font-arvo leading-none">{{ globalEfficiency() }}%</span>
+                    <span class="text-xs font-bold text-electric-red uppercase">NOMINAL</span>
+                </div>
+                <div class="w-full h-4 bg-concrete-100 border-2 border-black">
+                    <div class="h-full bg-electric-red" [style.width.%]="globalEfficiency()"></div>
+                </div>
+            </div>
 
-          <div class="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 pb-20">
+            <!-- Total Output -->
+            <div class="bg-black text-white rigid-border border-[4px] p-6 brutalist-shadow-active relative overflow-hidden group">
+                 <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity">
+                    <span class="material-symbols-outlined text-9xl text-white">check_circle</span>
+                </div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-4 border-b border-concrete-400 pb-1">Total_Completions</p>
+                <div class="flex items-baseline gap-2 mb-4 relative z-10">
+                    <span class="text-7xl font-black font-arvo leading-none text-yellow-400">{{ totalCompletions() }}</span>
+                    <span class="text-xs font-bold uppercase">Ops</span>
+                </div>
+                 <p class="text-xs font-mono text-concrete-300 relative z-10">
+                    Across {{ habitService.habits().length }} active protocols
+                </p>
+            </div>
+
+            <!-- Best Performer -->
+            <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-active relative overflow-hidden group">
+                 <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                    <span class="material-symbols-outlined text-9xl text-black">emoji_events</span>
+                </div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-4 border-b-2 border-black pb-1">Top_Performer</p>
+                @if (bestHabit(); as best) {
+                    <div class="relative z-10">
+                        <h3 class="text-2xl font-black uppercase leading-tight mb-2 truncate" [title]="best.name">{{ best.name }}</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="bg-concrete-100 border-2 border-black px-2 py-1">
+                                <span class="text-[10px] font-bold uppercase block text-concrete-400">Streak</span>
+                                <span class="text-xl font-black font-mono">{{ best.streak }}</span>
+                            </div>
+                            <div class="bg-concrete-100 border-2 border-black px-2 py-1">
+                                <span class="text-[10px] font-bold uppercase block text-concrete-400">Rate</span>
+                                <span class="text-xl font-black font-mono">{{ best.completionRate }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                } @else {
+                     <p class="text-2xl font-black uppercase text-concrete-300">NO_DATA</p>
+                }
+            </div>
+        </div>
+
+        <!-- Detailed Metrics -->
+         <h2 class="text-3xl font-black text-black uppercase mb-8 flex items-center gap-4">
+            <span class="w-4 h-4 bg-electric-red"></span>
+            Protocol_Breakdown
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @for (habit of habitService.habits(); track habit.id) {
-              <a [routerLink]="['/details', habit.id]" 
-                 class="group bg-[#0c0e12] p-6 rounded border border-[#2a3441] shadow-[0_4px_20px_-5px_rgba(0,0,0,0.5)] hover:border-[#ec5b13] hover:shadow-[0_0_30px_rgba(236,91,19,0.15)] transition-all duration-300 relative overflow-hidden block">
-                
-                <!-- Corner Decorations -->
-                <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ec5b13] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ec5b13] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                
-                <!-- Scanline -->
-                <div class="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity"></div>
-                
-                <div class="flex items-center gap-4 mb-6 relative z-10">
-                  <div class="size-12 rounded bg-[#ec5b13]/10 border border-[#ec5b13]/20 flex items-center justify-center text-[#ec5b13] group-hover:scale-110 group-hover:bg-[#ec5b13] group-hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(236,91,19,0.1)]">
-                    <span class="material-symbols-outlined text-2xl">{{ habit.icon }}</span>
-                  </div>
-                  <div class="overflow-hidden">
-                    <h3 class="font-bold text-white truncate text-lg tracking-tight uppercase group-hover:text-[#ec5b13] transition-colors">{{ habit.name }}</h3>
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-                        {{ habit.category }}
-                        <span class="text-[#ec5b13]">_ID:{{habit.id | slice:0:4}}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div class="space-y-6 relative z-10">
-                  <div class="grid grid-cols-2 gap-4 border-t border-b border-[#2a3441] py-4 bg-[#050608]/50">
-                    <div>
-                      <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Streak_Count</p>
-                      <p class="text-2xl font-black text-white tracking-tighter font-mono flex items-baseline gap-1">
-                          {{ habit.streak }} <span class="text-[10px] text-[#ec5b13] font-bold uppercase">Cycles</span>
-                      </p>
+                <a [routerLink]="['/details', habit.id]" class="block bg-concrete-100 rigid-border border-[2px] hover:border-[4px] hover:bg-white transition-all group overflow-hidden relative p-6 cursor-pointer">
+                    <!-- Progress Background -->
+                    <div class="absolute bottom-0 left-0 h-1 bg-black w-full opacity-10">
+                         <div class="h-full bg-electric-red" [style.width.%]="habit.completionRate"></div>
                     </div>
-                    <div class="text-right border-l border-[#2a3441] pl-4">
-                      <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Efficiency</p>
-                      <p class="text-2xl font-black text-[#ec5b13] tracking-tighter font-mono">{{ habit.completionRate }}%</p>
+
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="material-symbols-outlined text-4xl text-black group-hover:text-electric-red transition-colors">{{ habit.icon }}</span>
+                        <span class="text-[10px] font-bold bg-black text-white px-2 py-1 uppercase tracking-wider">{{ habit.category }}</span>
                     </div>
-                  </div>
 
-                  <div class="w-full bg-[#050608] border border-[#2a3441] h-2 overflow-hidden rounded-sm relative">
-                    <!-- Grid background for bar -->
-                    <div class="absolute inset-0 bg-[linear-gradient(90deg,transparent_20%,rgba(255,255,255,0.05)_20%)] bg-[length:4px_100%]"></div>
-                    <div class="bg-[#ec5b13] h-full transition-all duration-1000 ease-out shadow-[0_0_10px_#ec5b13]" 
-                         [style.width.%]="habit.completionRate"></div>
-                  </div>
-                </div>
+                    <h3 class="text-xl font-black uppercase mb-4 truncate">{{ habit.name }}</h3>
 
-                <div class="mt-6 flex items-center justify-between text-slate-500 group-hover:text-[#ec5b13] transition-colors relative z-10">
-                  <span class="text-[10px] font-bold uppercase tracking-[0.2em] font-mono group-hover:underline decoration-[#ec5b13] decoration-2 underline-offset-4">Access_Data_Log</span>
-                  <span class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1">arrow_forward</span>
-                </div>
-              </a>
-            } @empty {
-              <div class="col-span-full py-20 text-center flex flex-col items-center justify-center opacity-50 border-2 border-dashed border-[#2a3441] rounded">
-                 <span class="material-symbols-outlined text-6xl text-slate-700 mb-4">dataset</span>
-                 <p class="text-slate-500 font-mono uppercase tracking-widest text-sm">NO_METRICS_AVAILABLE</p>
-                 <p class="text-slate-600 text-xs mt-2">Initialize a habit protocol to begin data collection.</p>
-              </div>
+                    <div class="grid grid-cols-2 gap-4 text-xs font-mono border-t-2 border-concrete-300 pt-4">
+                        <div>
+                            <span class="block text-concrete-400 font-bold uppercase">Streak</span>
+                            <span class="block text-lg font-black">{{ habit.streak }}</span>
+                        </div>
+                         <div class="text-right">
+                            <span class="block text-concrete-400 font-bold uppercase">Efficiency</span>
+                            <span class="block text-lg font-black text-electric-red">{{ habit.completionRate }}%</span>
+                        </div>
+                    </div>
+                </a>
             }
-          </div>
         </div>
     </div>
-  `,
-    styles: [`
-    :host { font-family: 'JetBrains Mono', monospace; display: block; height: 100%; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #050608;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #2a3441;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #ec5b13;
-    }
-  `],
+    `,
+    styles: [`:host { display: block; }`],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StatisticsComponent {
     habitService = inject(HabitService);
+    today = new Date();
+
+    globalEfficiency = computed(() => {
+        const habits = this.habitService.habits();
+        if (habits.length === 0) return 0;
+        const totalRate = habits.reduce((acc, h) => acc + (h.completionRate || 0), 0);
+        return Math.round(totalRate / habits.length);
+    });
+
+    totalCompletions = computed(() => {
+         // This is an estimate based on what we have loaded. 
+         // Ideally backend should provide a global stats endpoint.
+         // For now, let's sum up streak * frequency approximation or just return 0 if not available
+         // Actually, habit model doesn't store total completions count directly in the list view, only in details stats.
+         // I'll leave it as a placeholder or sum streaks as a proxy for "recent activity"
+         return this.habitService.habits().reduce((acc, h) => acc + (h.streak || 0), 0);
+    });
+
+    bestHabit = computed(() => {
+        const habits = this.habitService.habits();
+        if (habits.length === 0) return null;
+        return habits.reduce((prev, current) => ((prev.streak || 0) > (current.streak || 0)) ? prev : current);
+    });
 }

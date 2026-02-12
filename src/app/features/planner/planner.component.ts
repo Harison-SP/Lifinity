@@ -9,41 +9,38 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
   selector: 'app-planner',
   imports: [CommonModule, YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent],
   template: `
-    <div class="h-full overflow-y-auto relative z-10 bg-[#050608]">
-        <div class="scanline"></div>
-        <div class="fixed inset-0 pointer-events-none z-0" style="background-image: radial-gradient(circle at center, transparent 0%, #050608 100%); opacity: 0.8"></div>
+    <div class="h-full overflow-y-auto relative z-10 bg-concrete-200 min-h-screen font-manrope footer-pb">
         
         <div class="p-6 lg:p-10 max-w-[1600px] mx-auto relative z-10">
           <!-- Header -->
-          <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-slate-800 pb-6">
+          <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b-4 border-black pb-6">
             <div class="flex items-center gap-4">
-              <button (click)="goBack()" class="w-10 h-10 flex items-center justify-center rounded border border-slate-700 text-slate-500 hover:border-[#ec5b13] hover:text-[#ec5b13] hover:bg-[#ec5b13]/10 transition-all">
-                <span class="material-symbols-outlined">arrow_back</span>
+              <button (click)="goBack()" class="w-12 h-12 flex items-center justify-center rigid-border-sm bg-white hover:bg-black hover:text-white transition-all group">
+                <span class="material-symbols-outlined text-xl">arrow_back</span>
               </button>
               <div>
-                <h2 class="text-3xl font-black text-white tracking-tight uppercase glitch-hover cursor-default">
-                    SYS_PLANNER: <span class="text-slate-500">SECTOR_BETA</span>
-                </h2>
-                <div class="flex items-center gap-3 mt-1 text-[10px] text-[#ec5b13] font-mono tracking-widest uppercase">
-                    <span>STATUS: ACTIVE</span>
-                    <span class="text-slate-700">//</span>
-                    <span>TEMPORAL_ALIGNMENT_ENGAGED</span>
+                <div class="bg-black text-white px-2 py-0.5 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
+                    System_Planner // Beta
                 </div>
+                <h2 class="text-4xl md:text-6xl font-black text-black tracking-tight uppercase font-arvo">
+                    Temporal_Grid
+                </h2>
               </div>
             </div>
 
             <!-- Period Tabs -->
-            <div class="flex bg-[#0c0e12] p-1 rounded-lg border border-slate-800">
+            <div class="flex p-1 gap-2">
               @for (period of periods; track period.value) {
                 <button 
                   (click)="activePeriod.set(period.value)"
-                  class="px-4 py-2 rounded text-xs font-bold uppercase tracking-widest transition-all duration-300 flex items-center gap-2"
-                  [class.bg-[#ec5b13]]="activePeriod() === period.value"
+                  class="px-4 py-2 text-xs font-black uppercase tracking-widest transition-all rigid-border-sm border-[2px] flex items-center gap-2"
+                  [class.bg-black]="activePeriod() === period.value"
                   [class.text-white]="activePeriod() === period.value"
-                  [class.shadow-[0_0_15px_rgba(236,91,19,0.4)]]="activePeriod() === period.value"
-                  [class.text-slate-500]="activePeriod() !== period.value"
-                  [class.hover:text-white]="activePeriod() !== period.value"
-                  [class.hover:bg-slate-800]="activePeriod() !== period.value">
+                  [class.shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]]="activePeriod() === period.value"
+                  [class.bg-white]="activePeriod() !== period.value"
+                  [class.text-black]="activePeriod() !== period.value"
+                  [class.hover:translate-x-[1px]]="activePeriod() !== period.value"
+                  [class.hover:translate-y-[1px]]="activePeriod() !== period.value">
                   <span class="material-symbols-outlined text-sm">{{period.icon}}</span>
                   <span class="hidden md:inline">{{period.label}}</span>
                 </button>
@@ -52,12 +49,11 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
           </header>
 
           <!-- Content Area -->
-          <div class="tac-panel p-6 min-h-[600px] relative">
-            <div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
-            
+          <div class="bg-white rigid-border border-[4px] p-6 min-h-[600px] relative brutalist-shadow-md">
             @if (activePeriod() === 'yearly') {
               <app-yearly-view></app-yearly-view>
             } @else if (activePeriod() === 'monthly') {
+                <!-- Placeholder for now as we focus on Daily -->
               <app-monthly-view></app-monthly-view>
             } @else if (activePeriod() === 'weekly') {
               <app-weekly-view></app-weekly-view>
@@ -69,10 +65,8 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
     </div>
   `,
   styles: [`
-    :host { font-family: 'Public Sans', sans-serif; display: block; height: 100%; }
-    .material-symbols-outlined { 
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; 
-    }
+    :host { display: block; height: 100%; }
+    .footer-pb { padding-bottom: 100px; }
   `]
 })
 export class PlannerComponent {
