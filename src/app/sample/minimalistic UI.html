@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BRUTALIST HABIT SYSTEM</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2b8cee',
+                        concrete: {
+                            100: '#e5e5e5',
+                            200: '#ccc',
+                            300: '#b3b3b3',
+                            400: '#808080',
+                            800: '#333',
+                            900: '#1a1a1a',
+                        },
+                        'electric-red': '#ff0000',
+                        'accent-red': '#ff3e3e',
+                    },
+                    borderRadius: {
+                        'md': '0.375rem',
+                    },
+                    fontFamily: {
+                        manrope: ['Manrope', 'sans-serif'],
+                        arvo: ['Arvo', 'serif'],
+                        mono: ['Space Mono', 'monospace'],
+                        jetbrains: ['JetBrains Mono', 'monospace'],
+                        inter: ['Inter', 'sans-serif'],
+                        public: ['Public Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&family=Inter:wght@700;800;900&family=Space+Mono:wght@400;700&family=Public+Sans:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&family=Manrope:wght@400;500;700;800&family=Roboto+Slab:wght@800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .brutalist-shadow { box-shadow: 16px 16px 0px 0px #000000; }
+            .brutalist-shadow-sm { box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 1); }
+            .brutalist-shadow-md { box-shadow: 8px 8px 0 0 rgba(0, 0, 0, 1); }
+            .rigid-border { border: 4px solid #000000; }
+            .rigid-border-sm { border: 2px solid #000000; }
+            .industrial-bg {
+                background: repeating-linear-gradient(
+                    45deg,
+                    #e5e5e5,
+                    #e5e5e5 10px,
+                    #dbdbdb 10px,
+                    #dbdbdb 20px
+                );
+            }
+            .active-scan::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 2px;
+                background: #ff3e3e;
+                animation: scan 3s linear infinite;
+            }
+            @keyframes scan {
+                0% { top: 0; } 100% { top: 100%; }
+            }
+        }
+        
+        body {
+            @apply font-manrope bg-[#b1b1b1] dark:bg-zinc-900;
+        }
+
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: #aaa; border-left: 3px solid black; }
+        ::-webkit-scrollbar-thumb { background: black; }
+    </style>
+
+    <!-- React and Router Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body class="min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Shared Components ---
+
+        const NavigationOverlay = () => {
+            const [isOpen, setIsOpen] = useState(false);
+            const navigate = useNavigate();
+
+            const links = [
+                { path: '/', label: 'DASHBOARD', icon: 'architecture' },
+                { path: '/initialize', label: 'INITIALIZE', icon: 'add_box' },
+                { path: '/planner', label: 'PLANNER', icon: 'calendar_today' },
+                { path: '/timeline', label: 'TIMELINE', icon: 'timeline' },
+                { path: '/statistics', label: 'STATISTICS', icon: 'monitoring' },
+            ];
+
+            return (
+                <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2">
+                    {isOpen && (
+                        <div className="bg-black text-white p-4 rigid-border mb-4 flex flex-col gap-2 brutalist-shadow-sm min-w-[200px]">
+                            {links.map(link => (
+                                <Link 
+                                    key={link.path} 
+                                    to={link.path} 
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex items-center gap-3 p-2 hover:bg-zinc-800 transition-colors uppercase font-black tracking-tighter"
+                                >
+                                    <span className="material-symbols-outlined">{link.icon}</span>
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                    <button 
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="w-16 h-16 bg-black text-white rigid-border flex items-center justify-center hover:bg-electric-red transition-all brutalist-shadow-sm group"
+                    >
+                        <span className={`material-symbols-outlined text-4xl transition-transform ${isOpen ? 'rotate-45' : ''}`}>
+                            {isOpen ? 'close' : 'menu'}
+                        </span>
+                    </button>
+                </div>
+            );
+        };
+
+        // --- Screens ---
+
+        // Screen 1: Initialization Module
+        const InitializationPage = () => {
+            return (
+                <div className="min-h-screen flex items-center justify-center p-6 bg-concrete-200 relative overflow-hidden">
+                    <div className="fixed inset-0 pointer-events-none industrial-bg opacity-30 z-0"></div>
+                    <div className="relative z-10 w-full max-w-2xl bg-white rigid-border brutalist-shadow">
+                        <div className="bg-black text-white p-4 flex justify-between items-center rigid-border -m-[4px] mb-8">
+                            <h1 className="text-2xl font-black tracking-tighter uppercase font-inter">Habit_Initialization_Module_v1.0</h1>
+                            <Link to="/" className="material-symbols-outlined font-black">close</Link>
+                        </div>
+                        <div className="p-8">
+                            <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-black tracking-[0.3em] text-black uppercase">IDENTIFIER</label>
+                                    <input className="w-full h-16 rigid-border bg-transparent px-4 text-2xl font-black uppercase placeholder:text-black/20 focus:translate-x-[-2px] focus:translate-y-[-2px] transition-transform" placeholder="ENTER_HABIT_NAME" type="text"/>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-black tracking-[0.3em] text-black uppercase">FREQUENCY_MATRIX</label>
+                                        <div className="relative">
+                                            <select className="w-full h-16 rigid-border bg-transparent px-4 text-xl font-bold uppercase appearance-none cursor-pointer">
+                                                <option>DAILY_CYCLE</option>
+                                                <option>WEEKLY_INTERVAL</option>
+                                                <option>PERIODIC_STRETCH</option>
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                <span className="material-symbols-outlined font-black">stat_0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-black tracking-[0.3em] text-black uppercase">PRIORITY_CODE</label>
+                                        <div className="flex gap-2 h-16">
+                                            <button className="flex-1 rigid-border bg-white hover:bg-black hover:text-white transition-colors flex items-center justify-center" type="button">
+                                                <span className="material-symbols-outlined scale-150">priority_high</span>
+                                            </button>
+                                            <button className="flex-1 rigid-border bg-black text-white flex items-center justify-center" type="button">
+                                                <span className="material-symbols-outlined scale-150">warning</span>
+                                            </button>
+                                            <button className="flex-1 rigid-border bg-white hover:bg-black hover:text-white transition-colors flex items-center justify-center" type="button">
+                                                <span className="material-symbols-outlined scale-150">report</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-black tracking-[0.3em] text-black uppercase">SYSTEM_TYPE</label>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {['Physical', 'Cognitive', 'Technical'].map((type, idx) => (
+                                            <label key={type} className="relative cursor-pointer group">
+                                                <input defaultChecked={idx===0} className="sr-only peer" name="type" type="radio"/>
+                                                <div className="rigid-border p-4 flex flex-col items-center gap-2 peer-checked:bg-black peer-checked:text-white transition-all group-hover:translate-x-[-2px] group-hover:translate-y-[-2px]">
+                                                    <span className="material-symbols-outlined text-3xl">
+                                                        {type === 'Physical' ? 'fitness_center' : type === 'Cognitive' ? 'psychology' : 'code'}
+                                                    </span>
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">{type}</span>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button className="w-full py-6 bg-electric-red rigid-border text-white text-3xl font-bold font-arvo uppercase tracking-widest hover:brightness-110 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all brutalist-shadow" type="submit">
+                                    INITIALIZE
+                                </button>
+                            </form>
+                        </div>
+                        <div className="bg-black p-2 flex justify-between px-8">
+                            <span className="text-[9px] font-mono text-white/50 tracking-[0.2em]">LATENCY: 0.002MS</span>
+                            <span className="text-[9px] font-mono text-white/50 tracking-[0.2em]">UID: 0x822-BRUT</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Screen 2: Planner
+        const PlannerPage = () => {
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            
+            return (
+                <div className="min-h-screen flex flex-col overflow-hidden bg-concrete-100">
+                    <header className="h-24 rigid-border-sm bg-concrete-200 flex items-center justify-between px-8 z-30">
+                        <div className="flex flex-col">
+                            <h1 className="font-arvo text-4xl font-black uppercase tracking-tighter leading-none">
+                                PLANNER_MANIFEST: <span className="text-electric-red">2026</span>
+                            </h1>
+                            <p className="font-mono text-[10px] mt-1 font-bold">STATUS: OPERATIONAL // OBJECTIVE: STRATEGIC_COHERENCE</p>
+                        </div>
+                        <div className="hidden md:flex gap-4">
+                            <div className="rigid-border-sm bg-white p-2 flex flex-col items-center justify-center min-w-[120px]">
+                                <span className="text-[9px] font-black uppercase font-mono">Global_Efficiency</span>
+                                <span className="text-2xl font-black">84.2%</span>
+                            </div>
+                            <div className="rigid-border-sm bg-electric-red text-white p-2 flex flex-col items-center justify-center min-w-[120px]">
+                                <span className="text-[9px] font-black uppercase font-mono text-white/80">Active_Streaks</span>
+                                <span className="text-2xl font-black">12</span>
+                            </div>
+                        </div>
+                    </header>
+                    <div className="flex flex-1 overflow-hidden">
+                        <aside className="hidden lg:flex w-80 rigid-border-sm border-t-0 border-l-0 bg-[#b3b3b3] flex-col p-6 overflow-y-auto">
+                            <div className="mb-8">
+                                <h3 className="font-mono text-xs font-black mb-4 bg-black text-white px-2 py-1 inline-block uppercase">SECTOR_FILTER</h3>
+                                <div className="space-y-2">
+                                    {['Physical_Output', 'Cognitive_Load', 'Social_Capital', 'Asset_Liquid'].map((label) => (
+                                        <button key={label} className="w-full text-left rigid-border-sm bg-white px-4 py-2 font-black uppercase text-xs hover:bg-black hover:text-white transition-colors flex justify-between items-center">
+                                            {label} <span className="material-symbols-outlined text-sm">bolt</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="mb-8">
+                                <h3 className="font-mono text-xs font-black mb-4 bg-black text-white px-2 py-1 inline-block uppercase">INITIALIZE_EVENT</h3>
+                                <div className="rigid-border-sm bg-white p-4 brutalist-shadow-sm">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-[9px] font-black uppercase mb-1">Descriptor</label>
+                                            <input className="w-full rigid-border-sm bg-[#e0e0e0] p-2 text-xs font-bold uppercase focus:ring-0 focus:outline-none focus:bg-white" placeholder="EVENT_NAME" type="text"/>
+                                        </div>
+                                        <button className="w-full bg-electric-red text-white font-black rigid-border-sm py-3 uppercase tracking-tighter hover:brightness-110">
+                                            Execute_Entry
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-auto p-4 rigid-border-sm bg-[#999] flex items-center gap-3">
+                                <img alt="Operator" className="w-12 h-12 rigid-border-sm grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7jL-R8oI-C0d6PiNI7MY2xQ5zgbcQp2PCW2Wpyg75tbLCAbXj2jwvAJ2TjFS5RpDuVznLvkUktIUHKfpCFyHE4wmgrfbLu1vPgA7mOQuR_mxj6JaBo1DrechCrYso_zhCKW9pQvx9SLIxYllSxylwI-colf4s687lSC1WbS8z5Jxy_IWhgHCd9gthqlPnY6psBCDxK-YwIjEg92qhwEEwRLaIf0Ysqlp-R57SoiQG2cFtnArZvDLsL2mRbkALHcjBxPMSIliRSRU"/>
+                                <div className="flex flex-col">
+                                    <span className="font-black uppercase text-sm leading-none">OP_MORGAN</span>
+                                    <span className="font-mono text-[9px] font-bold mt-1">LVL: 88 // CLEARANCE: A1</span>
+                                </div>
+                            </div>
+                        </aside>
+                        <main className="flex-1 overflow-auto bg-[#c8c8c8]">
+                            <div className="sticky top-0 z-20 flex bg-[#a0a0a0] rigid-border-sm border-t-0">
+                                <div className="w-40 min-w-[160px] border-r-[3px] border-black flex items-center justify-center font-black uppercase text-xs bg-black text-white">
+                                    Timeline_Axis
+                                </div>
+                                <div className="flex">
+                                    {Array.from({length: 31}).map((_, i) => (
+                                        <div key={i} className="h-10 w-10 flex-shrink-0 flex items-center justify-center border-r border-black/30 font-mono text-[9px] bg-black text-white">
+                                            {(i+1).toString().padStart(2, '0')}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                {months.map((month, mIdx) => (
+                                    <div key={month} className="flex border-b-[3px] border-black">
+                                        <div className="w-40 flex-shrink-0 rigid-border-sm border-t-0 border-l-0 border-b-0 bg-[#bdbdbd] p-4 flex items-center font-black uppercase tracking-widest text-lg font-arvo">
+                                            {month}
+                                        </div>
+                                        <div className="flex">
+                                            {Array.from({length: 31}).map((_, i) => {
+                                                const isActive = (mIdx === 1 && (i === 7 || i === 8 || i === 12 || i === 20)) || (mIdx === 0 && i > 25);
+                                                return (
+                                                    <div 
+                                                        key={i} 
+                                                        className={`h-10 w-10 flex-shrink-0 flex items-center justify-center border-r border-black/30 text-xs font-bold ${isActive ? 'bg-electric-red text-white' : 'hover:bg-gray-300 cursor-pointer'}`}
+                                                    >
+                                                        {isActive ? '■' : ''}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="p-12">
+                                <div className="max-w-4xl bg-white rigid-border-sm brutalist-shadow-sm p-8">
+                                    <h2 className="font-arvo text-3xl font-black uppercase mb-6 underline decoration-8 decoration-electric-red">Operational_Logic</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                        <div>
+                                            <h4 className="font-black uppercase text-sm mb-2">Priority_Alpha</h4>
+                                            <p className="text-xs font-bold text-gray-700">All markers in red represent completed strategic objectives. Failures are not logged.</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black uppercase text-sm mb-2">Cycle_Duration</h4>
+                                            <p className="text-xs font-bold text-gray-700">Strategic planning cycles are fixed at 365 days. No deviations permitted.</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black uppercase text-sm mb-2">System_Ref</h4>
+                                            <p className="text-xs font-bold text-gray-700">V.2026.4.01 - Concrete & Steel Theme. Optimized for desktop high-resolution manifests.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            );
+        };
+
+        // Screen 3: Timeline
+        const TimelinePage = () => {
+            return (
+                <div className="min-h-screen flex overflow-hidden bg-concrete-100">
+                    <aside className="hidden md:flex w-80 rigid-border-sm border-t-0 border-l-0 border-b-0 bg-white flex-col z-20">
+                        <div className="p-6 border-b-[4px] border-black bg-[#f3f4f6]">
+                            <h1 className="text-4xl font-arvo uppercase tracking-tighter leading-none mb-2">BRUTALIST<br/>MANIFEST</h1>
+                            <div className="text-xs font-bold tracking-widest border-t-2 border-black pt-2 mt-4">SYSTEM_VERSION: 1.0.0</div>
+                        </div>
+                        <nav className="flex-1 p-0 flex flex-col">
+                            <div className="px-6 py-4 bg-black text-white font-arvo text-lg uppercase">Core_Ops</div>
+                            {['Timeline', 'Log_Files', 'Raw_Data'].map(item => (
+                                <a key={item} className="p-6 border-b-[4px] border-black bg-white hover:bg-black hover:text-white transition-colors flex items-center justify-between group" href="#">
+                                    <span className="font-black text-xl uppercase tracking-tighter">{item}</span>
+                                    <span className="material-symbols-outlined font-black">arrow_right_alt</span>
+                                </a>
+                            ))}
+                            <div className="mt-auto p-6 border-t-[4px] border-black bg-[#e5e7eb]">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 rigid-border-sm bg-white flex items-center justify-center">
+                                        <img alt="User" className="w-full h-full grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7jL-R8oI-C0d6PiNI7MY2xQ5zgbcQp2PCW2Wpyg75tbLCAbXj2jwvAJ2TjFS5RpDuVznLvkUktIUHKfpCFyHE4wmgrfbLu1vPgA7mOQuR_mxj6JaBo1DrechCrYso_zhCKW9pQvx9SLIxYllSxylwI-colf4s687lSC1WbS8z5Jxy_IWhgHCd9gthqlPnY6psBCDxK-YwIjEg92qhwEEwRLaIf0Ysqlp-R57SoiQG2cFtnArZvDLsL2mRbkALHcjBxPMSIliRSRU"/>
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-sm uppercase">Operator_884</p>
+                                        <p className="text-[10px] font-mono">STATUS: ACTIVE</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                    </aside>
+                    <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+                        <header className="h-24 border-b-[4px] border-black bg-white flex items-center justify-between px-10 z-10 shrink-0">
+                            <div className="flex items-center h-full">
+                                <div className="rigid-border-sm flex overflow-hidden">
+                                    <button className="px-4 py-2 bg-white hover:bg-black hover:text-white border-r-2 border-black">
+                                        <span className="material-symbols-outlined font-bold">arrow_back</span>
+                                    </button>
+                                    <div className="px-8 py-2 flex flex-col justify-center items-center bg-white">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Temporal_Sector</span>
+                                        <span className="text-2xl font-arvo uppercase tracking-tighter">2024.OCT.24</span>
+                                    </div>
+                                    <button className="px-4 py-2 bg-white hover:bg-black hover:text-white border-l-2 border-black">
+                                        <span className="material-symbols-outlined font-bold">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="hidden sm:flex gap-4">
+                                <div className="rigid-border-sm bg-black text-white px-6 py-2 flex items-center gap-4">
+                                    <span className="text-[10px] font-black uppercase">System_Load</span>
+                                    <span className="text-xl font-arvo">88%</span>
+                                </div>
+                                <button className="rigid-border-sm bg-electric-red text-white px-8 py-2 font-black uppercase text-sm hover:scale-[1.02] active:scale-95 transition-transform">
+                                    New_Execution
+                                </button>
+                            </div>
+                        </header>
+                        <div className="flex-1 flex overflow-hidden">
+                            <div className="flex-1 overflow-y-auto relative">
+                                <div className="flex min-h-full">
+                                    <div className="w-24 shrink-0 border-r-[4px] border-black bg-[#e5e7eb] flex flex-col text-[12px] font-bold font-mono text-center pt-4">
+                                        {Array.from({length: 24}).map((_, i) => (
+                                            <div key={i} className="h-[100px] flex items-start justify-center pt-2">
+                                                <span className="bg-black text-white px-1">{i.toString().padStart(2, '0')}:00</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex-1 relative h-[2400px]">
+                                        <div className="absolute w-full border-t-[6px] border-electric-red z-30 pointer-events-none" style={{ top: '850px' }}>
+                                            <div className="absolute -top-4 left-0 bg-electric-red text-white font-black text-[10px] px-2 py-0.5 uppercase tracking-widest">
+                                                CURRENT_TIME_MARKER
+                                            </div>
+                                        </div>
+                                        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(0deg, #1a1a1a 2px, transparent 2px)', backgroundSize: '100% 100px' }}></div>
+                                        
+                                        <div className="absolute left-8 right-8 top-[600px] h-[200px] z-10">
+                                            <div className="w-full h-full rigid-border-sm bg-white p-4 flex flex-col justify-between hover:bg-gray-50 transition-colors">
+                                                <div>
+                                                    <div className="flex justify-between items-start">
+                                                        <h2 className="text-3xl font-arvo uppercase leading-none">PROTOCOL_EXECUTION</h2>
+                                                        <span className="bg-black text-white text-[10px] px-2 py-1 font-mono uppercase">ID: X-902</span>
+                                                    </div>
+                                                    <p className="mt-2 text-xs font-mono uppercase tracking-widest">CORE_MODULE_ASSEMBLY // SECTOR_7</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <span className="rigid-border-sm border-black border-[2px] px-3 py-1 text-[10px] font-black bg-black text-white uppercase">Primary</span>
+                                                    <span className="rigid-border-sm border-black border-[2px] px-3 py-1 text-[10px] font-black uppercase">Active</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="absolute left-8 w-1/2 top-[900px] h-[400px] z-10">
+                                            <div className="w-full h-full rigid-border-sm bg-[#1a1a1a] text-white p-6 flex flex-col">
+                                                <h2 className="text-4xl font-arvo uppercase leading-none mb-4">SYSTEM_REFAC_02</h2>
+                                                <div className="space-y-2 font-mono text-[11px] uppercase opacity-70">
+                                                    <p>&gt; Analyzing structural integrity</p>
+                                                    <p>&gt; Recalibrating logic gates</p>
+                                                    <p>&gt; Finalizing deployment</p>
+                                                </div>
+                                                <div className="mt-auto border-[4px] border-white p-4 bg-white text-black font-black uppercase text-center text-xl">
+                                                    CRITICAL_PHASE
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <aside className="hidden xl:flex w-96 border-l-[4px] border-black bg-white flex-col p-0">
+                                <div className="p-6 border-b-[4px] border-black bg-black text-white">
+                                    <h3 className="text-2xl font-arvo uppercase tracking-tighter">STARK_MANIFEST</h3>
+                                    <p className="text-[10px] font-mono uppercase opacity-60">Upcoming Units // Queue</p>
+                                </div>
+                                <div className="flex-1 overflow-y-auto bg-[#f3f4f6] p-6 space-y-px">
+                                    {[
+                                        {title: 'Integrity_Check', time: '09:00_PST', checked: true},
+                                        {title: 'Data_Silo_A_Purge', time: '10:30_PST', checked: true},
+                                        {title: 'System_Reboot_Sequence', time: '12:00_PST', checked: false},
+                                        {title: 'Personnel_Audit', time: '14:00_PST', checked: false}
+                                    ].map((item, i) => (
+                                        <div key={i} className="p-2 border-[2px] border-black mb-[-2px] bg-white flex items-center gap-4">
+                                            <div className={`w-6 h-6 border-[3px] border-black ${item.checked ? 'bg-black' : 'bg-transparent'}`}></div>
+                                            <div className="flex-1">
+                                                <p className="font-black text-xs uppercase">{item.title}</p>
+                                                <p className="text-[9px] font-mono opacity-60">{item.time}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </aside>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // Screen 4: Dashboard
+        const DashboardPage = () => {
+            return (
+                <div className="min-h-screen bg-concrete-200 flex flex-col lg:flex-row relative">
+                    <nav className="lg:w-20 w-full flex lg:flex-col items-center bg-concrete-900 text-white p-0 z-50">
+                        <div className="w-full aspect-square flex items-center justify-center bg-accent-red text-black mb-0">
+                            <span className="material-symbols-outlined text-4xl font-bold">architecture</span>
+                        </div>
+                        <div className="flex lg:flex-col w-full">
+                            {['grid_view', 'layers', 'precision_manufacturing', 'settings_input_component'].map((icon, i) => (
+                                <button key={i} className={`w-full aspect-square flex items-center justify-center border-b border-concrete-400 hover:bg-accent-red hover:text-black transition-colors ${i===0 ? 'bg-concrete-800' : ''}`}>
+                                    <span className="material-symbols-outlined">{icon}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="lg:mt-auto w-full p-2">
+                            <img alt="User Avatar" className="w-full aspect-square grayscale border-2 border-white object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD55ige4U-EhzN9s84Qz8WBJYl_kx75hVV7hngSlnNPRhouVvhzkShPuA3JzBoDb70-kJRxPWKvuEfMVWLjzLo8DAIv-dQLIUUHq2DoSrFqs_zTRMv9Olp7wjNAALhDK_sZfdS-UneZmelGAuQ4c__swkI9M2BkQkYOpowAneLIrP6XViYT7haEdncaTg2-EtJm1DuWBdQhdZSpVvOfMKOypXIauDEIwFucqvBpgQunL1QNRAKA7rvrn-m9f-9DvWIraKGBX0ZWxok"/>
+                        </div>
+                    </nav>
+                    <main className="flex-1 p-6 md:p-8 lg:p-12">
+                        <header className="flex flex-col md:flex-row items-start justify-between gap-6 mb-12">
+                            <div className="space-y-1">
+                                <div className="bg-concrete-900 text-white px-4 py-1 inline-block text-xs font-bold uppercase tracking-[0.2em]">User Profile // Identity verified</div>
+                                <h1 className="text-6xl md:text-8xl font-black text-concrete-900 uppercase leading-none font-arvo">STATUS: ALEX</h1>
+                                <div className="flex items-center gap-4 pt-2">
+                                    <div className="h-6 w-1 bg-accent-red"></div>
+                                    <p className="text-sm font-bold uppercase tracking-widest text-concrete-400">
+                                        Pending Tasks: <span className="text-concrete-900 underline">02 UNITS</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <Link to="/initialize" className="rigid-border border-[4px] brutalist-shadow-md bg-accent-red text-white font-black py-4 px-8 flex items-center gap-3 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter">
+                                <span className="material-symbols-outlined">add_box</span>
+                                <span>Initialize New Process</span>
+                            </Link>
+                        </header>
+                        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                            <div className="bg-concrete-100 rigid-border border-[4px] brutalist-shadow-md p-6 flex flex-col active-scan">
+                                <span className="text-[10px] font-black text-concrete-400 uppercase mb-8 border-b-2 border-concrete-900 pb-1">Efficiency_Rating // 01</span>
+                                <div className="flex items-end gap-2 mb-4">
+                                    <span className="text-7xl font-black leading-none">33%</span>
+                                    <span className="text-xs font-bold text-accent-red pb-1 underline">NOMINAL</span>
+                                </div>
+                                <div className="w-full h-4 bg-concrete-300 mt-auto">
+                                    <div className="bg-concrete-900 h-full w-[33%]"></div>
+                                </div>
+                            </div>
+                            <div className="bg-concrete-900 rigid-border border-[4px] brutalist-shadow-md p-6 text-white flex flex-col justify-between">
+                                <span className="text-[10px] font-bold text-concrete-400 uppercase mb-4 border-b border-concrete-400 pb-1">Uptime_Sequence</span>
+                                <div className="flex items-center gap-4">
+                                    <span className="text-8xl font-black italic leading-none text-yellow-400">03</span>
+                                    <div className="text-xs font-bold leading-tight uppercase">Consecutive<br/>Cycles<br/>Recorded</div>
+                                </div>
+                            </div>
+                            <div className="bg-concrete-100 rigid-border border-[4px] brutalist-shadow-md p-6 flex flex-col">
+                                <span className="text-[10px] font-black text-concrete-400 uppercase mb-8 border-b-2 border-concrete-900 pb-1">Aggregate_Output</span>
+                                <div className="flex items-baseline gap-1 mb-2">
+                                    <span className="text-7xl font-black text-concrete-900 leading-none">82</span>
+                                    <span className="text-2xl font-black text-concrete-400">%</span>
+                                </div>
+                            </div>
+                        </section>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            <section className="lg:col-span-8">
+                                <div className="flex items-baseline gap-4 mb-6">
+                                    <h2 className="text-4xl font-black text-concrete-900 uppercase font-arvo">Active_Protocols</h2>
+                                    <span className="text-xl font-bold text-concrete-400">[03]</span>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="rigid-border border-[2px] brutalist-shadow-sm bg-white p-4 flex items-center gap-6 opacity-40 grayscale">
+                                        <div className="w-10 h-10 border-2 border-concrete-900 bg-concrete-900 flex items-center justify-center text-white">
+                                            <span className="material-symbols-outlined text-2xl">done_all</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-2xl font-black text-concrete-900 uppercase line-through">Protocol_Project</h3>
+                                            <span className="text-[10px] font-bold bg-concrete-200 px-2 py-0.5 border border-concrete-900 uppercase">Sect_01 // Gen</span>
+                                        </div>
+                                    </div>
+                                    <div className="rigid-border border-[2px] brutalist-shadow-sm bg-concrete-100 p-4 flex items-center gap-6 border-l-[12px] border-l-accent-red">
+                                        <div className="w-10 h-10 border-2 border-concrete-900 bg-transparent"></div>
+                                        <div className="flex-1">
+                                            <h3 className="text-2xl font-black text-concrete-900 uppercase">Protocol_DSA</h3>
+                                            <span className="text-[10px] font-bold bg-concrete-900 text-white px-2 py-0.5 uppercase">Sect_04 // Edu</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section className="lg:col-span-4 space-y-8">
+                                <div className="bg-yellow-400 rigid-border border-[4px] brutalist-shadow-md p-8 relative overflow-hidden">
+                                    <span className="material-symbols-outlined text-[10rem] absolute -right-8 -bottom-8 opacity-20 text-black">format_quote</span>
+                                    <div className="w-10 h-10 bg-black flex items-center justify-center text-white mb-6">
+                                        <span className="material-symbols-outlined">bolt</span>
+                                    </div>
+                                    <blockquote className="text-xl font-black text-black mb-6 leading-tight uppercase relative z-10">
+                                        "CONSISTENCY IS THE KEY TO ACHIEVING ANY GOAL. REPEAT_PROCESS_UNTIL_SUCCESS."
+                                    </blockquote>
+                                </div>
+                            </section>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // Screen 5: Statistics
+        const StatisticsPage = () => {
+            return (
+                <div className="min-h-screen p-6 bg-concrete-200">
+                    <header className="mb-8 flex flex-col md:flex-row justify-between items-end gap-4">
+                        <div className="bg-white rigid-border border-[4px] p-4 w-full md:w-auto">
+                            <h1 className="font-arvo text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
+                                HABIT_STATUS: <span className="text-electric-red">PROJECT</span>
+                            </h1>
+                            <div className="flex justify-between mt-2 font-bold text-xs uppercase tracking-widest border-t-2 border-black pt-1">
+                                <span>SYSTEM_LOG_ID: 0098-X</span>
+                                <span>METRIC_DENSITY: HIGH</span>
+                            </div>
+                        </div>
+                        <div className="bg-black text-white p-4 rigid-border border-[4px] flex items-center gap-6">
+                            <div>
+                                <span className="block text-[10px] opacity-60">LAST_SYNC</span>
+                                <span className="text-xl font-bold tracking-tighter">2023.OCT.24</span>
+                            </div>
+                            <button className="bg-electric-red text-white w-12 h-12 flex items-center justify-center rigid-border border-[2px] hover:translate-x-1 hover:-translate-y-1 transition-transform">
+                                <span className="material-symbols-outlined">refresh</span>
+                            </button>
+                        </div>
+                    </header>
+                    <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[
+                            { label: 'CURRENT_STREAK', val: '42', detail: '+12% VS PREVIOUS', icon: 'trending_up', red: false },
+                            { label: 'MAX_STREAK', val: '128', detail: 'RECORDED: 2023.04.12', icon: null, red: false },
+                            { label: 'TOTAL_UNITS', val: '3,402', detail: 'ACTIVE CUMULATIVE', icon: null, red: false },
+                            { label: 'EFFICIENCY_RATING', val: '94.8%', detail: 'OPTIMIZATION_LEVEL: ALPHA', icon: null, red: true },
+                        ].map((stat, i) => (
+                            <div key={i} className={`${stat.red ? 'bg-electric-red text-white' : 'bg-white text-black'} rigid-border border-[4px] p-4 flex flex-col justify-between h-40`}>
+                                <span className={`text-xs font-bold uppercase border-b-2 mb-4 ${stat.red ? 'border-white' : 'border-black'}`}>{stat.label}</span>
+                                <div className="text-6xl font-black font-arvo">{stat.val}</div>
+                                <div className="mt-4 text-[10px] font-bold flex items-center gap-1">
+                                    {stat.icon && <span className="material-symbols-outlined text-electric-red text-sm">{stat.icon}</span>}
+                                    {stat.detail}
+                                </div>
+                            </div>
+                        ))}
+                        
+                        <section className="lg:col-span-4 bg-white rigid-border border-[4px] p-6">
+                            <div className="flex justify-between items-center mb-6 border-b-4 border-black pb-2">
+                                <h2 className="font-arvo text-3xl font-black uppercase">ANNUAL_MANIFEST</h2>
+                                <div className="hidden sm:flex gap-2 items-center text-[10px] font-bold uppercase">
+                                    <span>LOW</span>
+                                    <div className="flex">
+                                        {['bg-gray-200', 'bg-gray-400', 'bg-gray-600', 'bg-gray-800', 'bg-electric-red'].map((c, i) => (
+                                            <div key={i} className={`w-[14px] h-[14px] border border-black ${c}`}></div>
+                                        ))}
+                                    </div>
+                                    <span>HIGH_VOLUME</span>
+                                </div>
+                            </div>
+                            <div className="flex gap-1 overflow-x-auto pb-4">
+                                <div className="grid grid-rows-7 gap-1 flex-shrink-0">
+                                    {['MON', 'WED', 'FRI'].map(d => <span key={d} className="text-[8px] h-[14px] flex items-center">{d}</span>)}
+                                </div>
+                                <div className="flex gap-1">
+                                    {Array.from({length: 52}).map((_, col) => (
+                                        <div key={col} className="grid grid-rows-7 gap-1 flex-shrink-0">
+                                            {Array.from({length: 7}).map((_, row) => {
+                                                const colors = ['bg-gray-100', 'bg-gray-200', 'bg-gray-400', 'bg-gray-600', 'bg-gray-800', 'bg-electric-red'];
+                                                const intensity = Math.random() > 0.8 ? 5 : Math.floor(Math.random() * 5);
+                                                return <div key={row} className={`w-[14px] h-[14px] border border-black ${colors[intensity]}`}></div>
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- Main App ---
+
+        const App = () => {
+            const location = useLocation();
+
+            // Set body class for scanlines and industrial look on certain pages
+            useEffect(() => {
+                if (location.pathname === '/initialize') {
+                    document.body.className = "bg-[#b1b1b1] dark:bg-zinc-900 min-h-screen";
+                } else {
+                    document.body.className = "bg-concrete-200 dark:bg-zinc-900 min-h-screen";
+                }
+            }, [location]);
+
+            return (
+                <div className="relative font-manrope">
+                    <Routes>
+                        <Route path="/" element={<DashboardPage />} />
+                        <Route path="/initialize" element={<InitializationPage />} />
+                        <Route path="/planner" element={<PlannerPage />} />
+                        <Route path="/timeline" element={<TimelinePage />} />
+                        <Route path="/statistics" element={<StatisticsPage />} />
+                    </Routes>
+                    <NavigationOverlay />
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(
+            <MemoryRouter>
+                <App />
+            </MemoryRouter>
+        );
+    </script>
+</body>
+</html>

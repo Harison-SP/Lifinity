@@ -7,66 +7,122 @@ import { PlannerService, PlannerGoal } from '../../../services/planner.service';
   selector: 'app-weekly-view',
   imports: [CommonModule, FormsModule],
   template: `
-    <div>
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-[#0d1b12] dark:text-white">Weekly Goals</h2>
+    <div class="h-full flex flex-col font-manrope">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-4">
+        <h2 class="text-2xl font-black text-black flex items-center gap-2 uppercase font-arvo">
+          <span class="material-symbols-outlined text-3xl">view_week</span>
+          Weekly_Objectives
+        </h2>
+        
         <button (click)="showAddForm.set(!showAddForm())" 
-                class="px-4 py-2 bg-[#13ec5b] text-[#0d1b12] rounded-xl font-semibold hover:bg-[#0ba841] transition-colors">
-          <span class="material-symbols-outlined align-middle">add</span>
-          Add Goal
+                class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black uppercase tracking-wider text-xs shadow-[4px_4px_0_0_black] hover:shadow-[2px_2px_0_0_black] hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">add</span>
+          INIT_GOAL
         </button>
       </div>
 
       <!-- Add Goal Form -->
       @if (showAddForm()) {
-        <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl mb-6">
-          <input [(ngModel)]="newGoal.title" placeholder="Goal title" 
-                 class="w-full px-4 py-3 rounded-lg mb-3 bg-white dark:bg-[#1a2c20] border border-slate-200 dark:border-slate-700 text-[#0d1b12] dark:text-white">
-          <textarea [(ngModel)]="newGoal.description" placeholder="Description (optional)" 
-                    class="w-full px-4 py-3 rounded-lg mb-3 bg-white dark:bg-[#1a2c20] border border-slate-200 dark:border-slate-700 text-[#0d1b12] dark:text-white" rows="3"></textarea>
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <input type="number" [(ngModel)]="newGoal.year" [placeholder]="currentYear.toString()" 
-                   class="px-4 py-3 rounded-lg bg-white dark:bg-[#1a2c20] border border-slate-200 dark:border-slate-700 text-[#0d1b12] dark:text-white">
-            <input type="number" [(ngModel)]="newGoal.week" placeholder="Week number (1-52)" min="1" max="52"
-                   class="px-4 py-3 rounded-lg bg-white dark:bg-[#1a2c20] border border-slate-200 dark:border-slate-700 text-[#0d1b12] dark:text-white">
+        <div class="mb-8 mx-4 bg-white rigid-border border-[4px] p-6 relative brutalist-shadow-active">
+            <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-2">
+                <h3 class="text-lg font-black text-black uppercase tracking-wider font-arvo">New_Objective_Parameters</h3>
+                <button (click)="showAddForm.set(false)" class="border-2 border-transparent hover:border-black w-8 h-8 flex items-center justify-center">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+          <div class="space-y-4">
+              <div class="space-y-1">
+                 <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Objective_Title</label>
+                 <input [(ngModel)]="newGoal.title" placeholder="ENTER_TITLE" 
+                        class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all rounded-none uppercase placeholder:text-concrete-300">
+              </div>
+              
+              <div class="space-y-1">
+                 <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Calculated_Params</label>
+                 <textarea [(ngModel)]="newGoal.description" placeholder="// ADD_DETAILS..." 
+                        class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all resize-none rounded-none uppercase placeholder:text-concrete-300" rows="3"></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                   <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Cycle_Year</label>
+                   <input type="number" [(ngModel)]="newGoal.year" [placeholder]="currentYear.toString()" 
+                          class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all rounded-none">
+                </div>
+                <div class="space-y-1">
+                   <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Sequence_Week</label>
+                   <input type="number" [(ngModel)]="newGoal.week" placeholder="1-52" min="1" max="52"
+                          class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all rounded-none">
+                </div>
+              </div>
           </div>
-          <div class="flex gap-3">
-            <button (click)="addGoal()" class="px-6 py-2 bg-[#13ec5b] text-[#0d1b12] rounded-lg font-semibold">Save</button>
-            <button (click)="showAddForm.set(false)" class="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-[#0d1b12] dark:text-white rounded-lg">Cancel</button>
+          
+          <div class="flex gap-3 mt-6 border-t-4 border-black pt-4">
+            <button (click)="addGoal()" class="flex-1 px-6 py-3 bg-black text-white rigid-border-sm border-[2px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all text-xs shadow-[4px_4px_0_0_concrete-400]">
+                Initialize_Objective
+            </button>
           </div>
         </div>
       }
 
       <!-- Goals List -->
-      <div class="space-y-4">
+      <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar space-y-4">
         @for (goal of goals(); track goal.id) {
-          <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl">
-            <div class="flex justify-between items-start mb-3">
-              <div>
-                <h3 class="text-xl font-bold text-[#0d1b12] dark:text-white">{{goal.title}}</h3>
-                <p class="text-sm text-[#4c9a66] dark:text-[#13ec5b]">Week {{goal.week}} of {{goal.year}}</p>
+          <div class="bg-white p-6 rigid-border-sm border-[2px] transition-all group relative overflow-hidden hover:shadow-[4px_4px_0_0_black] cursor-pointer">
+            <div class="flex justify-between items-start mb-4 relative z-10">
+              <div class="flex items-start gap-4">
+                  <div class="p-3 bg-black text-white border-2 border-black rigid-border-sm flex items-center justify-center">
+                      <span class="material-symbols-outlined">flag</span>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-black text-black uppercase tracking-wide font-arvo">{{goal.title}}</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] bg-concrete-200 text-black px-1.5 py-0.5 font-mono border border-black font-bold">W{{goal.week}} // {{goal.year}}</span>
+                        <span class="text-[10px] text-electric-red font-mono tracking-widest uppercase font-bold">
+                            ACTIVE
+                        </span>
+                    </div>
+                  </div>
               </div>
-              <button (click)="deleteGoal(goal.id!)" class="text-red-500 hover:text-red-700">
-                <span class="material-symbols-outlined">delete</span>
+              <button (click)="deleteGoal(goal.id!)" class="text-concrete-400 hover:text-electric-red transition-colors p-2 border-2 border-transparent hover:border-black">
+                <span class="material-symbols-outlined text-lg">delete</span>
               </button>
             </div>
+            
             @if (goal.description) {
-              <p class="text-[#4c9a66] dark:text-slate-300">{{goal.description}}</p>
+              <div class="pl-[60px] relative z-10">
+                  <p class="text-black text-sm font-mono border-l-4 border-black pl-3 py-1 uppercase">{{goal.description}}</p>
+              </div>
             }
           </div>
         } @empty {
-          <p class="text-center text-[#4c9a66] dark:text-slate-400 py-8">No weekly goals yet. Add one to get started!</p>
+          <div class="flex flex-col items-center justify-center py-20 border-4 border-dashed border-concrete-300">
+             <span class="material-symbols-outlined text-6xl text-concrete-400 mb-4">track_changes</span>
+             <p class="text-concrete-500 font-mono uppercase tracking-widest font-bold">NO_OBJECTIVES_DETECTED</p>
+             <button (click)="showAddForm.set(true)" class="mt-4 text-black hover:bg-black hover:text-white px-4 py-2 border-2 border-black text-xs font-black uppercase tracking-wider transition-colors">
+                 Initialize_First_Objective
+             </button>
+          </div>
         }
       </div>
     </div>
   `,
   styles: [`
-    .material-symbols-outlined { 
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; 
+    :host { display: block; height: 100%; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #e5e5e5; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
+    
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
   `]
 })
 export class WeeklyViewComponent implements OnInit {
+  // Logic remains identical
   private plannerService = inject(PlannerService);
   
   goals = signal<PlannerGoal[]>([]);
@@ -74,13 +130,13 @@ export class WeeklyViewComponent implements OnInit {
   currentYear = new Date().getFullYear();
   currentWeek = this.getWeekNumber(new Date());
   
-  newGoal = {
+  newGoal: Partial<PlannerGoal> = {
     title: '',
     description: '',
     year: this.currentYear,
     week: this.currentWeek,
-    period: 'weekly' as const,
-    status: 'active' as const,
+    period: 'weekly',
+    status: 'active',
     tasks: []
   };
 
@@ -95,9 +151,18 @@ export class WeeklyViewComponent implements OnInit {
   }
 
   addGoal() {
-    if (!this.newGoal.title.trim()) return;
+    if (!this.newGoal.title?.trim()) return;
     
-    this.plannerService.createGoal(this.newGoal).subscribe(() => {
+    const goalToCreate = {
+        ...this.newGoal,
+        year: this.newGoal.year || this.currentYear,
+        week: this.newGoal.week || this.currentWeek,
+        period: 'weekly' as const,
+        status: 'active' as const,
+        tasks: []
+    } as PlannerGoal;
+
+    this.plannerService.createGoal(goalToCreate).subscribe(() => {
       this.loadGoals();
       this.newGoal = {
         title: '',

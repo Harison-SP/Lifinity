@@ -118,8 +118,11 @@ export class HabitService {
 
     updateLog(habitId: string, _date: string, data: { notes?: string; value?: number }): Observable<Habit | null> {
          // Using the toggle endpoint for updates as it now supports idempotent updates with notes/value
+         // Local day neutral timestamp: YYYY-MM-DDT12:00:00
+         // This ensures that when subtracting/adding timezone_offset, we stay in the same local day.
+         const timestamp = _date.includes('T') ? _date : `${_date}T12:00:00`;
          const payload = {
-             completed_at: new Date(_date).toISOString(), // Use provided date (assuming it's the log's date)
+             completed_at: new Date(timestamp).toISOString(), 
              timezone_offset: this.getTimezoneOffset(),
              value: data.value,
              notes: data.notes
@@ -145,5 +148,11 @@ export class HabitService {
         const params = new HttpParams()
             .set('timezone_offset', this.getTimezoneOffset().toString());
         return this.http.get<import('../models/habit.model').HabitStats>(`${this.apiUrl}/${habitId}/stats`, { params });
+    }
+
+    getHabitAnalytics(habitId: string): Observable<import('../models/habit.model').AnalyticsResponse> {
+        const params = new HttpParams()
+            .set('timezone_offset', this.getTimezoneOffset().toString());
+        return this.http.get<import('../models/habit.model').AnalyticsResponse>(`${this.apiUrl}/${habitId}/analytics`, { params });
     }
 }

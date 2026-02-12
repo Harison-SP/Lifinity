@@ -1,280 +1,178 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HabitService } from '../../services/habit.service';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [RouterLink, SidebarComponent, FormsModule],
+    imports: [RouterLink, CommonModule, FormsModule],
     template: `
-    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
-        <app-sidebar />
-        
-        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-            <!-- Mobile Header -->
-            <header class="md:hidden flex items-center justify-between p-5 bg-white dark:bg-[#1a2c20] border-b border-[#e5e7eb] dark:border-[#2d3a30]">
-                <div class="flex items-center gap-3">
-                    <div class="size-9 rounded-xl bg-gradient-to-br from-[#13ec5b] to-[#0ba841] flex items-center justify-center text-[#0d1b12] shadow-sm">
-                        <span class="material-symbols-outlined filled text-xl">loop</span>
-                    </div>
-                    <span class="font-black tracking-tighter text-xl">HabitLoop</span>
-                </div>
-                <button class="size-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[#4c9a66]">menu</span>
-                </button>
-            </header>
-
-            <div class="flex-1 overflow-y-auto p-6 md:p-10 lg:p-12 scrollbar-hide">
-                <div class="max-w-[1200px] mx-auto flex flex-col gap-10">
-                    <!-- Page Heading Section -->
-                    <section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                        <div class="flex flex-col gap-3">
-                            <h2 class="text-4xl md:text-5xl font-black text-[#0d1b12] dark:text-white tracking-tight leading-none">Good Morning, Alex!</h2>
-                            <p class="text-[#4c9a66] dark:text-gray-400 text-xl font-medium">
-                                You have <span class="text-[#0d1b12] dark:text-[#13ec5b] font-bold underline decoration-[#13ec5b]/30 decoration-4 underline-offset-4">{{ remainingHabits() }} habits</span> left to complete today.
-                            </p>
-                        </div>
-                        <a routerLink="/add" class="group relative inline-flex items-center gap-3 bg-[#0d1b12] dark:bg-[#13ec5b] dark:text-[#0d1b12] text-white px-8 py-4 rounded-2xl font-bold transition-all hover:shadow-[0_20px_50px_rgba(19,236,91,0.2)] active:scale-95 overflow-hidden">
-                            <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                            <span class="material-symbols-outlined relative z-10">add</span>
-                            <span class="relative z-10">New Habit</span>
-                        </a>
-                    </section>
-
-                    <!-- Stats Overview -->
-                    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <!-- Progress Card -->
-                        <div class="group bg-white dark:bg-[#1a2c20] p-7 rounded-[2rem] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 col-span-1 lg:col-span-2 overflow-hidden relative">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#13ec5b]/10 to-transparent rounded-bl-[100px]"></div>
-                            <div class="flex justify-between items-start mb-6 relative z-10">
-                                <div>
-                                    <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-1">Daily Progress</p>
-                                    <h3 class="text-3xl font-black text-[#0d1b12] dark:text-white leading-tight">{{ completionPercent() }}% <span class="text-lg font-bold text-[#4c9a66]">Done</span></h3>
-                                </div>
-                                <div class="size-14 rounded-2xl bg-[#13ec5b]/10 flex items-center justify-center text-[#13ec5b] group-hover:scale-110 transition-transform">
-                                    <span class="material-symbols-outlined filled text-3xl">monitoring</span>
-                                </div>
-                            </div>
-                            <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-4 mb-3 relative overflow-hidden">
-                                <div class="bg-gradient-to-r from-[#13ec5b] to-[#0ea5e9] h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(19,236,91,0.5)]" [style.width.%]="completionPercent()"></div>
-                            </div>
-                            <div class="flex justify-between items-center text-sm relative z-10">
-                                <span class="font-bold text-[#4c9a66]">{{ completedCount() }} Task Completed</span>
-                                <span class="font-bold text-gray-400">{{ habitService.habits().length - completedCount() }} Remaining</span>
-                            </div>
-                        </div>
-
-                        <!-- Streak Card -->
-                        <div class="group bg-white dark:bg-[#1a2c20] p-7 rounded-[2rem] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden relative">
-                            <div class="flex justify-between items-start mb-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66]">Best Streak</p>
-                                <span class="material-symbols-outlined text-orange-500 filled text-3xl animate-pulse">local_fire_department</span>
-                            </div>
-                            <div>
-                                <p class="text-4xl font-black text-[#0d1b12] dark:text-white tracking-tighter">{{ bestStreak() }} <span class="text-lg">Days</span></p>
-                                <div class="mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/20 w-fit">
-                                    <span class="material-symbols-outlined text-sm font-bold text-green-600">trending_up</span>
-                                    <span class="text-xs font-bold text-green-600">Keep it up!</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Weekly Completion Card -->
-                        <div class="group bg-white dark:bg-[#1a2c20] p-7 rounded-[2rem] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden relative">
-                            <div class="flex justify-between items-start mb-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66]">Weekly Avg</p>
-                                <span class="material-symbols-outlined text-blue-500 filled text-3xl">calendar_month</span>
-                            </div>
-                            <div>
-                                <p class="text-4xl font-black text-[#0d1b12] dark:text-white tracking-tighter">{{ weeklyAvg() }}<span class="text-lg">%</span></p>
-                                <div class="mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 w-fit">
-                                    <span class="material-symbols-outlined text-sm font-bold text-blue-600">bolt</span>
-                                    <span class="text-xs font-bold text-blue-600">Avg Completion</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Habits List -->
-                    <section class="flex flex-col gap-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <h3 class="text-2xl font-black text-[#0d1b12] dark:text-white tracking-tight">Today's Habits</h3>
-                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 text-xs font-bold">{{ habitService.habits().length }}</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="size-11 rounded-xl hover:bg-white hover:shadow-md dark:hover:bg-gray-800 transition-all text-[#4c9a66] flex items-center justify-center border border-transparent hover:border-gray-100">
-                                    <span class="material-symbols-outlined">filter_list</span>
-                                </button>
-                                <button class="size-11 rounded-xl hover:bg-white hover:shadow-md dark:hover:bg-gray-800 transition-all text-[#4c9a66] flex items-center justify-center border border-transparent hover:border-gray-100">
-                                    <span class="material-symbols-outlined">sort</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 gap-4">
-                            @for (habit of habitService.habits(); track habit.id) {
-                                <div class="group flex items-center p-6 bg-white dark:bg-[#1a2c20] rounded-[1.5rem] border border-[#e5e7eb] dark:border-[#2d3a30] hover:shadow-lg hover:border-[#13ec5b]/30 transition-all duration-300 cursor-pointer"
-                                     (click)="openLogModal(habit)">
-                                    <div class="flex items-center gap-6 flex-1">
-                                        <label class="relative flex items-center cursor-pointer" (click)="$event.stopPropagation()">
-                                            <input type="checkbox" 
-                                                   [checked]="habit.completedToday"
-                                                   (change)="toggleCompletion(habit.id)" 
-                                                   class="peer sr-only">
-                                            <div class="size-8 rounded-xl border-2 border-gray-200 dark:border-gray-700 peer-checked:bg-[#13ec5b] peer-checked:border-[#13ec5b] transition-all flex items-center justify-center">
-                                                <span class="material-symbols-outlined text-white text-xl scale-0 peer-checked:scale-100 transition-transform">check</span>
-                                            </div>
-                                        </label>
-                                        <div class="flex flex-col">
-                                            <span class="text-lg font-bold transition-all"
-                                                  [class.line-through]="habit.completedToday"
-                                                  [class.text-gray-400]="habit.completedToday"
-                                                  [class.dark:text-white/30]="habit.completedToday"
-                                                  [class.text-[#0d1b12]]="!habit.completedToday"
-                                                  [class.dark:text-white]="!habit.completedToday">{{ habit.name }}</span>
-                                            <span class="text-xs font-bold text-[#4c9a66]/60 uppercase tracking-widest mt-0.5">{{ habit.category }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4">
-                                        <div class="px-4 py-2 rounded-2xl bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 text-sm font-black flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-lg filled">local_fire_department</span>
-                                            {{ habit.streak }}
-                                        </div>
-                                        <span class="material-symbols-outlined text-gray-300 group-hover:text-[#4c9a66] transition-colors">chevron_right</span>
-                                    </div>
-                                </div>
-                            } @empty {
-                                <div class="p-20 text-center bg-white dark:bg-[#1a2c20] rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
-                                    <div class="size-20 rounded-3xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center mx-auto mb-6 text-gray-300">
-                                        <span class="material-symbols-outlined text-5xl">task_alt</span>
-                                    </div>
-                                    <h4 class="text-xl font-bold text-[#0d1b12] dark:text-white">No habits yet</h4>
-                                    <p class="text-[#4c9a66] mt-2 mb-8 max-w-xs mx-auto text-sm">Every journey begins with a single step. Start your first habit today!</p>
-                                    <a routerLink="/add" class="inline-flex items-center gap-2 bg-[#13ec5b] text-[#0d1b12] px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform">
-                                        <span class="material-symbols-outlined">add</span>
-                                        <span>Create Habit</span>
-                                    </a>
-                                </div>
-                            }
-                        </div>
-                    </section>
+    <div class="min-h-screen bg-concrete-200 p-6 md:p-8 lg:p-12 font-manrope">
+        <!-- Dashboard Header -->
+        <header class="flex flex-col md:flex-row items-start justify-between gap-6 mb-12">
+            <div class="space-y-1">
+                <div class="bg-concrete-900 text-white px-4 py-1 inline-block text-xs font-bold uppercase tracking-[0.2em]">User Profile // Identity Verified</div>
+                <h1 class="text-6xl md:text-8xl font-black text-concrete-900 uppercase leading-none font-arvo">STATUS: COMMANDER</h1>
+                <div class="flex items-center gap-4 pt-2">
+                    <div class="h-6 w-1 bg-electric-red"></div>
+                    <p class="text-sm font-bold uppercase tracking-widest text-concrete-400">
+                        Pending Tasks: <span class="text-concrete-900 underline">{{ remainingHabits() }} UNITS</span>
+                    </p>
                 </div>
             </div>
-        </main>
+            <a routerLink="/add" class="rigid-border border-[4px] brutalist-shadow-md bg-electric-red text-white font-black py-4 px-8 flex items-center gap-3 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter cursor-pointer">
+                <span class="material-symbols-outlined">add_box</span>
+                <span>Initialize New Process</span>
+            </a>
+        </header>
 
-        <!-- Right Sidebar (Insights) -->
-        <aside class="hidden xl:flex w-96 border-l border-[#e5e7eb] dark:border-[#2d3a30] bg-white dark:bg-[#1a2c20] flex-col h-screen overflow-y-auto p-10 sticky top-0">
-            <div class="flex items-center justify-between mb-10">
-                <h3 class="text-xl font-black text-[#0d1b12] dark:text-white tracking-tight">Insights</h3>
-                <button class="size-10 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-center transition-colors">
-                    <span class="material-symbols-outlined text-[#4c9a66]">more_horiz</span>
-                </button>
-            </div>
-            
-            <div class="space-y-10">
-                 <!-- Categories -->
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-5">Tracked Categories</p>
-                    <div class="flex flex-wrap gap-2.5">
-                        <span class="px-4 py-2 rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-300 text-xs font-bold border border-purple-100 dark:border-purple-800/50">Health</span>
-                        <span class="px-4 py-2 rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-300 text-xs font-bold border border-blue-100 dark:border-blue-800/50">Learning</span>
-                        <span class="px-4 py-2 rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-300 text-xs font-bold border border-amber-100 dark:border-amber-800/50">Focus</span>
-                    </div>
+        <!-- Stats Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <!-- Efficiency Rating -->
+            <div class="bg-concrete-100 rigid-border border-[4px] brutalist-shadow-md p-6 flex flex-col active-scan relative overflow-hidden">
+                <span class="text-[10px] font-black text-concrete-400 uppercase mb-8 border-b-2 border-concrete-900 pb-1 z-10 relative">Efficiency_Rating // 01</span>
+                <div class="flex items-end gap-2 mb-4 z-10 relative">
+                    <span class="text-7xl font-black leading-none">{{ completionPercent() }}%</span>
+                    <span class="text-xs font-bold text-electric-red pb-1 underline">NOMINAL</span>
                 </div>
+                <div class="w-full h-4 bg-concrete-300 mt-auto z-10 relative">
+                    <div class="bg-concrete-900 h-full transition-all duration-1000" [style.width.%]="completionPercent()"></div>
+                </div>
+            </div>
 
-                <!-- Motivation Quote -->
-                <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0d1b12] via-[#1a2c20] to-[#0d1b12] p-8 text-white shadow-2xl">
-                    <div class="absolute -right-6 -top-6 text-white/5 pointer-events-none">
-                        <span class="material-symbols-outlined" style="font-size: 160px">format_quote</span>
-                    </div>
-                    <div class="relative z-10">
-                        <div class="size-10 rounded-xl bg-[#13ec5b] flex items-center justify-center text-[#0d1b12] mb-6">
-                            <span class="material-symbols-outlined filled">bolt</span>
+            <!-- Uptime Sequence (Best Streak) -->
+            <div class="bg-concrete-900 rigid-border border-[4px] brutalist-shadow-md p-6 text-white flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-concrete-400 uppercase mb-4 border-b border-concrete-400 pb-1">Uptime_Sequence</span>
+                <div class="flex items-center gap-4">
+                    <span class="text-8xl font-black italic leading-none text-yellow-400">{{ bestStreak() }}</span>
+                    <div class="text-xs font-bold leading-tight uppercase">Consecutive<br/>Cycles<br/>Recorded</div>
+                </div>
+            </div>
+
+            <!-- Aggregate Output (Total Habits) -->
+            <div class="bg-concrete-100 rigid-border border-[4px] brutalist-shadow-md p-6 flex flex-col">
+                <span class="text-[10px] font-black text-concrete-400 uppercase mb-8 border-b-2 border-concrete-900 pb-1">Total_Protocols</span>
+                <div class="flex items-baseline gap-1 mb-2">
+                    <span class="text-7xl font-black text-concrete-900 leading-none">{{ habitService.habits().length }}</span>
+                    <span class="text-2xl font-black text-concrete-400">ACTIVE</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Active Protocols List -->
+            <section class="lg:col-span-8">
+                <div class="flex items-baseline gap-4 mb-6">
+                    <h2 class="text-4xl font-black text-concrete-900 uppercase font-arvo">Active_Protocols</h2>
+                    <span class="text-xl font-bold text-concrete-400">[{{ remainingHabits() }}]</span>
+                </div>
+                <div class="space-y-4">
+                    @for (habit of habitService.habits(); track habit.id) {
+                        <div class="rigid-border border-[2px] brutalist-shadow-sm p-4 flex items-center gap-6 cursor-pointer transition-all hover:translate-x-1"
+                             [class.bg-white]="!habit.completedToday"
+                             [class.bg-concrete-100]="habit.completedToday"
+                             [class.opacity-60]="habit.completedToday"
+                             [class.grayscale]="habit.completedToday"
+                             [class.border-l-electric-red]="!habit.completedToday"
+                             [class.border-l-[12px]]="!habit.completedToday"
+                             (click)="handleHabitClick(habit)">
+                            
+                            <div class="w-10 h-10 border-2 border-concrete-900 flex items-center justify-center transition-colors"
+                                 [class.bg-concrete-900]="habit.completedToday"
+                                 [class.text-white]="habit.completedToday"
+                                 [class.bg-transparent]="!habit.completedToday">
+                                @if (habit.completedToday) {
+                                    <span class="material-symbols-outlined text-2xl">done_all</span>
+                                }
+                            </div>
+                            
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-black text-concrete-900 uppercase transition-all"
+                                    [class.line-through]="habit.completedToday">{{ habit.name }}</h3>
+                                <span class="text-[10px] font-bold px-2 py-0.5 uppercase border border-concrete-900"
+                                      [class.bg-concrete-200]="habit.completedToday"
+                                      [class.bg-concrete-900]="!habit.completedToday"
+                                      [class.text-white]="!habit.completedToday">
+                                    {{ habit.category || 'GEN' }} // {{ habit.frequencyType || 'DAILY' }}
+                                </span>
+                            </div>
+                            
+                            <button (click)="$event.stopPropagation(); navigateToDetails(habit.id)" class="w-8 h-8 flex items-center justify-center border-2 border-transparent hover:border-concrete-900 rounded-full transition-colors">
+                                <span class="material-symbols-outlined text-concrete-900">arrow_forward</span>
+                            </button>
                         </div>
-                        <p class="text-2xl font-black leading-tight tracking-tight mb-4 italic">"Consistency is the key to achieving any goal."</p>
-                        <p class="text-sm text-[#13ec5b] font-bold uppercase tracking-widest">— Keep going, Alex!</p>
-                    </div>
+                    } @empty {
+                        <div class="p-8 text-center border-4 border-dashed border-concrete-300">
+                            <p class="text-concrete-400 font-bold uppercase tracking-widest">No Active Protocols Initiated</p>
+                        </div>
+                    }
                 </div>
+            </section>
 
-                <!-- Goal Tracker Mini -->
-                <div class="bg-gray-50 dark:bg-[#2d3a30]/30 p-8 rounded-[2rem] border border-[#e5e7eb] dark:border-[#2d3a30]">
-                    <h4 class="font-black text-[#0d1b12] dark:text-white mb-2">Monthly Goal</h4>
-                    <p class="text-sm text-[#4c9a66] mb-6">Complete 200 sessions</p>
-                    <div class="flex items-end gap-1 h-32 mb-4">
-                        <div class="flex-1 bg-gray-200 dark:bg-gray-800 rounded-t-lg h-1/2"></div>
-                        <div class="flex-1 bg-gray-200 dark:bg-gray-800 rounded-t-lg h-3/4"></div>
-                        <div class="flex-1 bg-[#13ec5b] rounded-t-lg h-full shadow-[0_0_15px_rgba(19,236,91,0.3)]"></div>
-                        <div class="flex-1 bg-gray-200 dark:bg-gray-800 rounded-t-lg h-2/3"></div>
-                        <div class="flex-1 bg-gray-200 dark:bg-gray-800 rounded-t-lg h-1/2"></div>
+            <!-- Quote / Side Panel -->
+            <section class="lg:col-span-4 space-y-8">
+                <div class="bg-yellow-400 rigid-border border-[4px] brutalist-shadow-md p-8 relative overflow-hidden">
+                    <span class="material-symbols-outlined text-[10rem] absolute -right-8 -bottom-8 opacity-20 text-black select-none">format_quote</span>
+                    <div class="w-10 h-10 bg-black flex items-center justify-center text-white mb-6 relative z-10">
+                        <span class="material-symbols-outlined">bolt</span>
                     </div>
-                    <p class="text-xs font-bold text-center text-[#4c9a66]">WEEKLY ACTIVITY</p>
+                    <blockquote class="text-xl font-black text-black mb-6 leading-tight uppercase relative z-10">
+                        "CONSISTENCY IS THE KEY TO ACHIEVING ANY GOAL. REPEAT_PROCESS_UNTIL_SUCCESS."
+                    </blockquote>
                 </div>
-            </div>
-        </aside>
+            </section>
+        </div>
 
-        <!-- Log Entry Modal Overlay -->
+        <!-- Log Modal (Brutalist Style) -->
         @if (selectedHabit()) {
-            <div class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#0d1b12]/60 backdrop-blur-sm transition-all"
-                 (click)="closeLogModal()">
-                
-                <!-- Modal Content -->
-                <div class="bg-white dark:bg-[#1a2c20] rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative border border-[#e5e7eb] dark:border-[#2d3a30] animate-in zoom-in-95 duration-200"
-                     (click)="$event.stopPropagation()">
+            <div class="fixed inset-0 z-[200] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm" (click)="closeLogModal()">
+                <div class="bg-white rigid-border border-[4px] p-8 w-full max-w-md brutalist-shadow-md relative" (click)="$event.stopPropagation()">
+                    <div class="bg-black text-white p-2 absolute -top-4 -left-4 font-black uppercase tracking-widest text-xs">
+                        Input_Required
+                    </div>
                     
-                    <!-- Header -->
-                    <div class="flex items-start justify-between mb-6">
+                    <div class="flex items-start justify-between mb-8">
                         <div>
-                            <span class="text-xs font-bold text-[#4c9a66] uppercase tracking-widest mb-1 block">{{ selectedHabit()?.category }}</span>
-                            <h3 class="text-2xl font-black text-[#0d1b12] dark:text-white">{{ selectedHabit()?.name }}</h3>
+                            <span class="text-xs font-bold text-electric-red uppercase tracking-widest block mb-1">MEASURABLE_PROTOCOL</span>
+                            <h3 class="text-3xl font-black text-concrete-900 uppercase leading-none font-arvo">{{ selectedHabit()?.name }}</h3>
                         </div>
-                        <button (click)="closeLogModal()" class="size-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors">
-                            <span class="material-symbols-outlined text-gray-400">close</span>
+                        <button (click)="closeLogModal()" class="w-10 h-10 bg-concrete-100 border-2 border-black flex items-center justify-center hover:bg-electric-red hover:text-white transition-colors">
+                            <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
 
-                    <!-- Form -->
-                    <div class="space-y-5">
+                    <div class="space-y-6">
                         <div class="space-y-2">
-                            <label class="text-sm font-bold text-[#0d1b12] dark:text-white">Value</label>
+                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900">Value_Input</label>
                             <input type="number" 
                                    [(ngModel)]="logValue" 
-                                   placeholder="e.g. 30"
-                                   class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#0d1610] border border-transparent focus:bg-white dark:focus:bg-[#1a2c20] focus:border-[#13ec5b] outline-none transition-all font-medium text-[#0d1b12] dark:text-white">
+                                   placeholder="ENTER_DATA"
+                                   class="w-full h-16 rigid-border-sm bg-concrete-100 px-4 text-2xl font-black font-mono outline-none focus:bg-white focus:border-electric-red transition-colors">
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-sm font-bold text-[#0d1b12] dark:text-white">Notes</label>
+                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900">Mission_Notes</label>
                             <textarea rows="3" 
                                       [(ngModel)]="logNotes" 
-                                      placeholder="How did it go?"
-                                      class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#0d1610] border border-transparent focus:bg-white dark:focus:bg-[#1a2c20] focus:border-[#13ec5b] outline-none transition-all font-medium text-[#0d1b12] dark:text-white resize-none"></textarea>
+                                      placeholder="// OPTIONAL_LOG_ENTRY..."
+                                      class="w-full p-4 rigid-border-sm bg-concrete-100 text-sm font-bold font-mono outline-none focus:bg-white focus:border-electric-red transition-colors resize-none"></textarea>
                         </div>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="flex gap-3 mt-8">
-                        <button (click)="navigateToDetails(selectedHabit()!.id)" class="flex-1 px-4 py-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-[#0d1b12] dark:text-white font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                            View History
-                        </button>
-                        <button (click)="saveLog()" class="flex-[2] px-4 py-3.5 rounded-xl bg-[#13ec5b] text-[#0d1b12] font-bold hover:shadow-[0_10px_30px_rgba(19,236,91,0.3)] hover:-translate-y-0.5 active:translate-y-0 transition-all">
-                            Save Progress
+                    <div class="flex gap-4 mt-8">
+                        <button (click)="saveLog()" class="flex-1 py-4 bg-electric-red text-white font-black uppercase tracking-widest hover:brightness-110 active:translate-x-1 active:translate-y-1 transition-all rigid-border-sm">
+                            COMMIT_DATA
                         </button>
                     </div>
-
                 </div>
             </div>
         }
     </div>
-  `,
+    `,
     styles: [`
-    :host { font-family: 'Inter', sans-serif; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  `],
+        :host { display: block; }
+    `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent {
@@ -295,19 +193,20 @@ export class DashboardComponent {
         return Math.max(...habits.map(h => h.bestStreak || 0));
     });
 
-    weeklyAvg = computed(() => {
-        const habits = this.habitService.habits();
-        if (habits.length === 0) return 0;
-        const totalRate = habits.reduce((sum, h) => sum + (h.completionRate || 0), 0);
-        return Math.round(totalRate / habits.length);
-    });
-
     // Modal State
-    selectedHabit = signal<import('../../models/habit.model').Habit | null>(null);
+    selectedHabit = signal<any | null>(null);
     logValue: number | undefined;
     logNotes: string = '';
 
-    openLogModal(habit: import('../../models/habit.model').Habit) {
+    handleHabitClick(habit: any) {
+        if (habit.type === 'measurable') {
+            this.openLogModal(habit);
+        } else {
+            this.toggleCompletion(habit.id);
+        }
+    }
+
+    openLogModal(habit: any) {
         this.selectedHabit.set(habit);
         if (habit.latestLog) {
             this.logValue = habit.latestLog.value;
@@ -335,7 +234,12 @@ export class DashboardComponent {
     }
 
     toggleCompletion(id: string) {
-        this.habitService.toggleCompletion(id, 'today').subscribe();
+        const habit = this.habitService.habits().find(h => h.id === id);
+        if (habit?.type === 'measurable') {
+            this.openLogModal(habit!);
+        } else {
+            this.habitService.toggleCompletion(id, 'today').subscribe();
+        }
     }
 
     navigateToDetails(id: string) {

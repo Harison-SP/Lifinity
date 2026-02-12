@@ -1,333 +1,247 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HabitService } from '../../services/habit.service';
 
 @Component({
     selector: 'app-habit-details',
-    imports: [RouterLink, SidebarComponent, CommonModule, FormsModule],
+    standalone: true,
+    imports: [CommonModule, FormsModule],
     template: `
-    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
-        <app-sidebar />
-        
-        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-            <header class="p-8 border-b border-[#e5e7eb] dark:border-[#2d3a30] bg-white dark:bg-[#1a2c20] flex items-center justify-between sticky top-0 z-30">
-                <div class="flex items-center gap-4">
-                    <button (click)="goBack()" class="size-11 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-[#4c9a66] hover:text-[#0d1b12] dark:hover:text-white transition-colors">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                    <div>
-                        <h2 class="text-3xl font-black text-[#0d1b12] dark:text-white tracking-tight">{{ habit()?.name || 'Loading...' }}</h2>
-                        <p class="text-[#4c9a66] dark:text-gray-400 font-medium">{{ habit()?.description }}</p>
+    <div class="min-h-screen bg-concrete-200 p-6 md:p-8 lg:p-12 font-manrope pb-24 relative">
+        <!-- Header -->
+        <header class="mb-12 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-black pb-6 bg-white p-6 rigid-border-sm brutalist-shadow-sm">
+            <div class="flex items-center gap-6 w-full md:w-auto">
+                <button (click)="goBack()" class="w-12 h-12 rigid-border-sm bg-white flex items-center justify-center hover:bg-black hover:text-white transition-colors group shrink-0">
+                    <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                </button>
+                <div>
+                    <div class="bg-black text-white px-2 py-0.5 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
+                        Protocol_Analysis
+                    </div>
+                    <h1 class="text-3xl md:text-5xl font-black text-black uppercase leading-none font-arvo flex items-center gap-3">
+                        {{ habit()?.name || 'LOADING...' }}
+                    </h1>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                <button (click)="editHabit()" class="px-4 py-2 bg-concrete-100 rigid-border-sm border-[2px] text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                    Edit
+                </button>
+                <button (click)="deleteHabit()" class="px-4 py-2 bg-concrete-100 rigid-border-sm border-[2px] text-xs font-black uppercase tracking-widest hover:bg-electric-red hover:text-white hover:border-black transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                    Purge
+                </button>
+                <button (click)="toggleDone()" 
+                        class="px-6 py-2 rigid-border-sm border-[2px] font-black uppercase tracking-widest text-xs transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none shadow-[4px_4px_0_0_black]"
+                        [class.bg-electric-red]="!habit()?.completedToday"
+                        [class.text-white]="!habit()?.completedToday"
+                        [class.bg-concrete-900]="habit()?.completedToday"
+                        [class.text-white]="habit()?.completedToday">
+                    {{ habit()?.completedToday ? 'COMPLETED' : 'MARK_COMPLETE' }}
+                </button>
+            </div>
+        </header>
+
+        @if (habit()) {
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <!-- Streak -->
+                <div class="bg-white rigid-border border-[4px] p-6 relative group overflow-hidden brutalist-shadow-sm">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-2 border-b-2 border-black pb-1">Current_Sequence</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-6xl font-black font-arvo leading-none">{{ habit()?.streak }}</span>
+                        <span class="text-xs font-bold text-electric-red uppercase">Days</span>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <button class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-[#0d1b12] dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" (click)="editHabit()">
-                        <span class="material-symbols-outlined text-[20px]">edit</span>
-                        Edit
-                    </button>
-                    <button class="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-[#0d1b12] dark:text-white font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" (click)="deleteHabit()">
-                        <span class="material-symbols-outlined text-[20px]">delete</span>
-                        Delete
-                    </button>
-                    <button (click)="toggleDone()" 
-                            [class.bg-[#13ec5b]]="!habit()?.completedToday"
-                            [class.text-[#0d1b12]]="!habit()?.completedToday"
-                            [class.bg-gray-100]="habit()?.completedToday"
-                            [class.dark:bg-gray-800]="habit()?.completedToday"
-                            [class.text-gray-400]="habit()?.completedToday"
-                            class="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold shadow-sm transition-all hover:scale-105 active:scale-95 ml-2">
-                        <span class="material-symbols-outlined text-[22px]">{{ habit()?.completedToday ? 'check_circle' : 'check' }}</span>
-                        {{ habit()?.completedToday ? 'Completed' : 'Mark Complete' }}
-                    </button>
+                <!-- Best Streak -->
+                <div class="bg-black text-white rigid-border border-[4px] p-6 relative group overflow-hidden brutalist-shadow-sm">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-2 border-b border-concrete-400 pb-1">Max_Continuity</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-6xl font-black font-arvo leading-none text-yellow-400">{{ habit()?.bestStreak }}</span>
+                        <span class="text-xs font-bold uppercase">Record</span>
+                    </div>
                 </div>
-            </header>
 
-            <div class="flex-1 overflow-y-auto p-8 scrollbar-hide">
-                <div class="max-w-[1400px] mx-auto flex flex-col gap-8">
-                    
-                    @if (habit()) {
-                        <!-- 1. Stats Cards -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <!-- Current Streak -->
-                            <div class="p-8 rounded-[2rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm relative overflow-hidden">
-                                <span class="material-symbols-outlined !text-7xl absolute -right-4 -bottom-4 opacity-5 text-[#13ec5b]">local_fire_department</span>
-                                <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-2">Current Streak</p>
-                                <div class="flex items-baseline gap-2 mb-4">
-                                    <p class="text-4xl font-black">{{ habit()?.streak }}</p>
-                                    <span class="text-sm font-bold text-slate-400">Days</span>
-                                </div>
-                                <div class="inline-flex items-center gap-1 text-[10px] font-bold text-[#0d1b12] bg-[#13ec5b] px-2 py-1 rounded-md">
-                                    <span class="material-symbols-outlined text-[14px]">trending_up</span>
-                                    +2 this week
-                                </div>
-                            </div>
+                <!-- Total Completions -->
+                <div class="bg-white rigid-border border-[4px] p-6 relative group overflow-hidden brutalist-shadow-sm">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-2 border-b-2 border-black pb-1">Total_Executions</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-6xl font-black font-arvo leading-none">{{ stats()?.total_completions || 0 }}</span>
+                        <span class="text-xs font-bold uppercase">Ops</span>
+                    </div>
+                </div>
 
-                            <!-- Best Streak -->
-                            <div class="p-8 rounded-[2rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm relative overflow-hidden">
-                                <span class="material-symbols-outlined !text-7xl absolute -right-4 -bottom-4 opacity-5 text-amber-500">emoji_events</span>
-                                <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-2">Best Streak</p>
-                                <div class="flex items-baseline gap-2 mb-4">
-                                    <p class="text-4xl font-black">{{ habit()?.bestStreak }}</p>
-                                    <span class="text-sm font-bold text-slate-400">Days</span>
-                                </div>
-                                <p class="text-[10px] text-gray-400 dark:text-gray-300 font-semibold">Achieved in --</p>
-                            </div>
+                <!-- Efficiency -->
+                <div class="bg-white rigid-border border-[4px] p-6 relative group overflow-hidden brutalist-shadow-sm">
+                     <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-2 border-b-2 border-black pb-1">Global_Efficiency</p>
+                     <div class="flex items-baseline gap-2 relative z-10">
+                        <span class="text-6xl font-black font-arvo leading-none">{{ stats()?.completion_rate || 0 }}</span>
+                        <span class="text-2xl font-black">%</span>
+                     </div>
+                     <div class="absolute bottom-0 left-0 h-2 bg-concrete-200 w-full">
+                        <div class="h-full bg-electric-red transition-all" [style.width.%]="stats()?.completion_rate || 0"></div>
+                     </div>
+                </div>
+            </div>
 
-                            <!-- Total Completions -->
-                            <div class="p-8 rounded-[2rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm relative overflow-hidden">
-                                <span class="material-symbols-outlined !text-7xl absolute -right-4 -bottom-4 opacity-5 text-blue-500">check_circle</span>
-                                <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-2">Total Completions</p>
-                                <div class="flex items-baseline gap-2 mb-4">
-                                    <p class="text-4xl font-black">{{ stats()?.total_completions || 0 }}</p>
-                                    <span class="text-sm font-bold text-slate-400">Times</span>
-                                </div>
-                                <div class="inline-flex items-center gap-1 text-[10px] font-bold text-[#0d1b12] bg-[#13ec5b]/20 text-[#13ec5b] px-2 py-1 rounded-md">
-                                    <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
-                                    Top 10%
-                                </div>
-                            </div>
-
-                            <!-- Completion Rate -->
-                            <div class="p-8 rounded-[2rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm relative overflow-hidden">
-                                <span class="material-symbols-outlined !text-7xl absolute -right-4 -bottom-4 opacity-5 text-purple-500">pie_chart</span>
-                                <p class="text-xs font-bold uppercase tracking-widest text-[#4c9a66] mb-2">Completion Rate</p>
-                                <div class="flex items-baseline gap-2 mb-4">
-                                    <p class="text-4xl font-black">{{ stats()?.completion_rate || 0 }}%</p>
-                                </div>
-                                <div class="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-[#13ec5b] rounded-full" [style.width.%]="stats()?.completion_rate || 0"></div>
-                                </div>
-                            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <!-- Activity Heatmap -->
+                <div class="lg:col-span-2 bg-white rigid-border border-[4px] p-8 brutalist-shadow-md">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-black text-black uppercase font-arvo">Activity_Matrix</h3>
+                        <div class="flex items-center gap-1 text-[9px] font-bold uppercase">
+                            <span>NULL</span>
+                            <div class="w-3 h-3 bg-concrete-100 border border-black"></div>
+                            <div class="w-3 h-3 bg-concrete-300 border border-black"></div>
+                            <div class="w-3 h-3 bg-concrete-400 border border-black"></div>
+                             <div class="w-3 h-3 bg-black border border-black"></div>
+                            <span>MAX</span>
                         </div>
-
-                        <!-- 2. Activity Log (Heatmap) -->
-                        <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm overflow-x-auto">
-                            <div class="flex items-center justify-between mb-6 min-w-[600px]">
-                                <h3 class="text-lg font-black text-[#0d1b12] dark:text-white">Activity Log (2024)</h3>
-                                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 dark:text-gray-300 uppercase tracking-wider">
-                                    <span>Less</span>
-                                    <div class="flex gap-1">
-                                        <div class="size-3 rounded-sm bg-gray-100 dark:bg-gray-800"></div>
-                                        <div class="size-3 rounded-sm bg-[#13ec5b]/30"></div>
-                                        <div class="size-3 rounded-sm bg-[#13ec5b]/60"></div>
-                                        <div class="size-3 rounded-sm bg-[#13ec5b]"></div>
-                                    </div>
-                                    <span>More</span>
-                                </div>
+                    </div>
+                    <div class="overflow-x-auto pb-2 custom-scrollbar">
+                        <div class="flex gap-1 min-w-max">
+                            <div class="flex flex-col gap-1 pr-2 text-[9px] font-bold font-mono uppercase justify-between">
+                                <span>Mon</span><span>Wed</span><span>Fri</span><span>Sun</span>
                             </div>
-                                <div class="flex gap-1 min-w-[800px]">
-                                <div class="flex flex-col gap-1 pr-2 text-[10px] font-bold text-gray-300 justify-between py-1">
-                                    <span>Mon</span>
-                                    <span>Wed</span>
-                                    <span>Fri</span>
-                                    <span>Sun</span>
-                                </div>
-                                <div class="flex-1 grid grid-flow-col grid-rows-7 gap-1">
-                                    @for (item of fullHeatmap; track $index) {
-                                        <div class="size-3 rounded-[2px] transition-colors hover:ring-2 ring-[#0d1b12]/10 dark:ring-white/20"
-                                            [class.bg-gray-100]="item.level === 0"
-                                            [class.dark:bg-gray-800]="item.level === 0"
-                                            [class.bg-[#13ec5b]/20]="item.level === 1"
-                                            [class.bg-[#13ec5b]/50]="item.level === 2"
-                                            [class.bg-[#13ec5b]]="item.level >= 3"
-                                            [title]="item.date + ': Level ' + item.level"></div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Charts Grid (Frequency, Trend, Calendar) -->
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <!-- Weekly Frequency -->
-                            <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm flex flex-col">
-                                <h3 class="text-lg font-black mb-6">Weekly Frequency</h3>
-                                <div class="flex-1 flex items-end justify-between gap-2 h-48">
-                                    @for (day of stats()?.weekly_frequency; track day.day_name) {
-                                        <div class="flex-1 flex flex-col justify-end items-center gap-2 group cursor-pointer w-full">
-                                            <div class="w-full rounded-md transition-all relative" 
-                                                [class.bg-[#13ec5b]]="day.percentage > 0"
-                                                [class.bg-gray-100]="day.percentage === 0"
-                                                [class.dark:bg-gray-800]="day.percentage === 0" 
-                                                [style.height.%]="day.percentage || 10"></div>
-                                            <span class="text-[10px] font-bold text-gray-400">{{ day.day_name.charAt(0) }}</span>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-
-                            <!-- Completion Trend -->
-                            <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm flex flex-col relative overflow-hidden">
-                                <div class="flex items-center justify-between mb-6 relative z-10">
-                                    <h3 class="text-lg font-black">Completion Trend</h3>
-                                    <!-- Optional: Dynamic growth calculation -->
-                                    <!-- <span class="bg-[#13ec5b]/10 text-[#13ec5b] px-2 py-1 rounded-md text-[10px] font-bold uppercase">+15% vs last month</span> -->
-                                </div>
-                                <div class="flex-1 flex items-end relative h-48 w-full">
-                                    <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible" preserveAspectRatio="none">
-                                        <defs>
-                                            <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
-                                                <stop offset="0%" stop-color="#13ec5b" stop-opacity="0.5"/>
-                                                <stop offset="100%" stop-color="#13ec5b" stop-opacity="0"/>
-                                            </linearGradient>
-                                        </defs>
-                                        <!-- Fill Area -->
-                                        <path [attr.d]="trendArea()" fill="url(#gradient)" />
-                                        <!-- Stroke Line -->
-                                        <path [attr.d]="trendLine()" fill="none" stroke="#13ec5b" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" />
-                                    </svg>
-                                </div>
-                                <div class="flex justify-between text-[10px] font-bold text-gray-400 mt-2">
-                                    @if (stats()?.completion_trend?.length) {
-                                        <span>{{ stats()!.completion_trend[0].period }}</span>
-                                        <span>{{ stats()!.completion_trend[stats()!.completion_trend.length - 1].period }}</span>
-                                    }
-                                </div>
-                            </div>
-
-                            <!-- Calendar -->
-                            <div class="p-8 rounded-[2.5rem] bg-white dark:bg-[#1a2c20] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm flex flex-col">
-                                <div class="flex items-center justify-between mb-6">
-                                    <h3 class="text-lg font-black">{{ calendarMonthName() }} {{ calendarYear() }}</h3>
-                                    <div class="flex gap-2 text-gray-400">
-                                        <span (click)="previousMonth()" class="material-symbols-outlined text-sm cursor-pointer hover:text-black dark:hover:text-white transition-colors">chevron_left</span>
-                                        <span (click)="nextMonth()" class="material-symbols-outlined text-sm cursor-pointer hover:text-black dark:hover:text-white transition-colors">chevron_right</span>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-7 gap-2 mb-2">
-                                    @for (d of ['S','M','T','W','T','F','S']; track d) {
-                                        <div class="text-center text-[10px] font-bold text-gray-400">{{d}}</div>
-                                    }
-                                </div>
-                                <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#0d1b12] dark:text-white">
-                                    @for (day of calendarDays(); track day.date) {
-                                        @if (day.isEmpty) {
-                                            <div class="p-2"></div>
-                                        } @else {
-                                            <div (click)="selectDate(day.date)" 
-                                                 class="p-2 rounded-full cursor-pointer transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                 [class.bg-[#13ec5b]]="day.isCompleted"
-                                                 [class.text-[#0d1b12]]="day.isCompleted"
-                                                 [class.border]="day.isToday && !day.isCompleted"
-                                                 [class.border-[#13ec5b]]="day.isToday && !day.isCompleted"
-                                                 [class.text-[#13ec5b]]="day.isToday && !day.isCompleted"
-                                                 [class.text-gray-300]="day.isFuture"
-                                                 [class.cursor-not-allowed]="day.isFuture"
-                                                 [class.hover:bg-transparent]="day.isFuture">
-                                                {{ day.dayNumber }}
-                                            </div>
-                                        }
-                                    }
-                                </div>
-                                
-                                <!-- Log Entry Modal/Form -->
-                                @if (selectedDate()) {
-                                    <div class="mt-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-[#e5e7eb] dark:border-[#2d3a30]">
-                                        <div class="flex items-center justify-between mb-3">
-                                            <h4 class="text-sm font-bold">Log for {{ selectedDate() | date:'mediumDate' }}</h4>
-                                            <button (click)="closeLogForm()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                                <span class="material-symbols-outlined text-sm">close</span>
-                                            </button>
-                                        </div>
-                                        <div class="space-y-3">
-                                            <div>
-                                                <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Value (optional)</label>
-                                                <input type="number" [(ngModel)]="logValue" 
-                                                       class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#13ec5b]"
-                                                       placeholder="Enter value">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1">Notes (optional)</label>
-                                                <textarea [(ngModel)]="logNotes" rows="2"
-                                                          class="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#13ec5b] resize-none"
-                                                          placeholder="Add notes..."></textarea>
-                                            </div>
-                                            <button (click)="saveLog()" 
-                                                    class="w-full py-2.5 rounded-lg bg-[#13ec5b] text-[#0d1b12] font-bold text-sm hover:scale-105 active:scale-95 transition-all">
-                                                Save Log
-                                            </button>
-                                        </div>
-                                    </div>
+                            <div class="grid grid-flow-col grid-rows-7 gap-1">
+                                @for (item of fullHeatmap; track $index) {
+                                    <div class="w-3 h-3 border border-black transition-all hover:scale-125 relative cursor-help"
+                                         [class.bg-concrete-100]="item.level === 0"
+                                         [class.bg-concrete-300]="item.level === 1"
+                                         [class.bg-concrete-500]="item.level === 2"
+                                         [class.bg-black]="item.level >= 3"
+                                         [title]="item.date + ': ' + item.level"></div>
                                 }
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- 4. History Table -->
-                        <div class="bg-white dark:bg-[#1a2c20] rounded-[2.5rem] border border-[#e5e7eb] dark:border-[#2d3a30] p-10 shadow-sm overflow-hidden">
-                            <div class="flex items-center justify-between mb-8">
-                                <h3 class="text-xl font-black">History</h3>
-                                <div class="flex items-center gap-2">
-                                    <button 
-                                        [disabled]="currentPage() === 1"
-                                        (click)="prevPage()"
-                                        class="size-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                                        <span class="material-symbols-outlined text-sm">chevron_left</span>
-                                    </button>
-                                    <span class="text-xs font-bold text-gray-400">Page {{ currentPage() }} of {{ totalPages() }}</span>
-                                    <button 
-                                        [disabled]="currentPage() >= totalPages()"
-                                        (click)="nextPage()"
-                                        class="size-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                                        <span class="material-symbols-outlined text-sm">chevron_right</span>
-                                    </button>
+                <!-- Calendar -->
+                <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-md">
+                    <div class="flex items-center justify-between mb-6 border-b-4 border-black pb-2">
+                        <h3 class="text-lg font-black uppercase font-arvo">{{ calendarMonthName() }} {{ calendarYear() }}</h3>
+                        <div class="flex gap-1">
+                            <button (click)="previousMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 hover:bg-black hover:text-white transition-colors flex items-center justify-center">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            </button>
+                            <button (click)="nextMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 hover:bg-black hover:text-white transition-colors flex items-center justify-center">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-7 gap-1 mb-2">
+                        @for (d of ['S','M','T','W','T','F','S']; track d) {
+                            <div class="text-center text-[10px] font-black uppercase">{{d}}</div>
+                        }
+                    </div>
+                    <div class="grid grid-cols-7 gap-1">
+                        @for (day of calendarDays(); track day.date) {
+                            @if (day.isEmpty) {
+                                <div></div>
+                            } @else {
+                                <div (click)="selectDate(day.date)" 
+                                     class="aspect-square flex items-center justify-center text-xs font-mono font-bold border-2 border-transparent transition-all cursor-pointer relative"
+                                     [class.hover:bg-concrete-200]="!day.isFuture"
+                                     [class.opacity-30]="day.isFuture"
+                                     [class.pointer-events-none]="day.isFuture"
+                                     
+                                     [class.bg-black]="day.isCompleted"
+                                     [class.text-white]="day.isCompleted"
+                                     [class.border-black]="day.isCompleted"
+                                     
+                                     [class.border-electric-red]="day.isToday && !day.isCompleted"
+                                     [class.text-electric-red]="day.isToday && !day.isCompleted"
+                                     
+                                     [class.bg-concrete-100]="!day.isCompleted && !day.isToday && !day.isFuture">
+                                    {{ day.dayNumber }}
                                 </div>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm">
-                                    <thead class="border-b border-gray-100 dark:border-gray-800">
-                                        <tr>
-                                            <th class="px-6 py-4 font-bold text-gray-400">Date</th>
-                                            <th class="px-6 py-4 font-bold text-gray-400">Status</th>
-                                            <th class="px-6 py-4 font-bold text-gray-400">Value</th>
-                                            <th class="px-6 py-4 font-bold text-gray-400">Note</th>
-                                            <th class="px-6 py-4 font-bold text-gray-400 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                        @for (log of history(); track log.id) {
-                                            <tr class="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                                <td class="px-6 py-5 font-semibold">{{ log.completed_at | date:'mediumDate' }} <span class="text-xs text-gray-400 font-normal ml-1">{{ log.completed_at | date:'shortTime' }}</span></td>
-                                                <td class="px-6 py-5">
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#13ec5b]/10 text-[#13ec5b]">Completed</span>
-                                                </td>
-                                                <td class="px-6 py-5 font-medium">{{ log.value ? log.value : '-' }}</td>
-                                                <td class="px-6 py-5 text-gray-400 italic">{{ log.notes ? log.notes : 'No notes' }}</td>
-                                                <td class="px-6 py-5 text-right">
-                                                    <span class="material-symbols-outlined text-gray-300 hover:text-gray-500 cursor-pointer text-lg">more_vert</span>
-                                                </td>
-                                            </tr>
-                                        } @empty {
-                                            <tr>
-                                                <td colspan="5" class="px-6 py-10 text-center text-gray-400 italic">No history found for this period.</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                    } @else {
-                        <div class="h-96 flex flex-col items-center justify-center p-20 text-center bg-white dark:bg-[#1a2c20] rounded-[2.5rem] border border-[#e5e7eb] dark:border-[#2d3a30]">
-                            <span class="material-symbols-outlined text-6xl text-gray-200 mb-4">search_off</span>
-                            <p class="text-gray-400 font-bold text-lg">Habit not found.</p>
-                            <a routerLink="/" class="text-[#13ec5b] mt-4 inline-block font-bold hover:underline">Back to Dashboard</a>
-                        </div>
-                    }
+                            }
+                        }
+                    </div>
                 </div>
             </div>
-        </main>
+
+            <!-- History Log -->
+            <div class="bg-white rigid-border border-[4px] p-8 brutalist-shadow-md">
+                <div class="flex items-center justify-between mb-8 border-b-4 border-black pb-4">
+                    <h3 class="text-2xl font-black uppercase font-arvo">Data_Log</h3>
+                    <div class="flex gap-2 text-xs font-bold font-mono">
+                         <button [disabled]="currentPage() === 1" (click)="prevPage()" class="px-2 hover:underline disabled:opacity-30">PREV</button>
+                         <span>{{ currentPage() }} / {{ totalPages() }}</span>
+                         <button [disabled]="currentPage() >= totalPages()" (click)="nextPage()" class="px-2 hover:underline disabled:opacity-30">NEXT</button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left font-mono text-xs uppercase">
+                        <thead class="bg-black text-white">
+                            <tr>
+                                <th class="p-4 font-black">Timestamp</th>
+                                <th class="p-4 font-black">Status</th>
+                                <th class="p-4 font-black">Value</th>
+                                <th class="p-4 font-black">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-2 divide-black border-2 border-black">
+                             @for (log of history(); track log.id) {
+                                <tr class="hover:bg-concrete-100 transition-colors">
+                                    <td class="p-4 font-bold border-r-2 border-black">{{ log.completed_at | date:'yyyy-MM-dd HH:mm' }}</td>
+                                    <td class="p-4 border-r-2 border-black">
+                                        <span class="bg-electric-red text-white px-2 py-0.5 font-black text-[10px]">SUCCESS</span>
+                                    </td>
+                                    <td class="p-4 border-r-2 border-black font-bold">{{ log.value || '--' }}</td>
+                                    <td class="p-4 text-concrete-400 italic">{{ log.notes || 'N/A' }}</td>
+                                </tr>
+                             } @empty {
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center font-bold text-concrete-400">NO_DATA_AVAILABLE</td>
+                                </tr>
+                             }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Log Modal -->
+        @if (selectedDate() && habit()?.type === 'measurable') {
+             <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white rigid-border border-[4px] p-8 w-full max-w-md brutalist-shadow-active">
+                    <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-2">
+                        <h4 class="font-black uppercase font-arvo text-xl">Log: {{ selectedDate() }}</h4>
+                        <button (click)="closeLogForm()" class="hover:text-electric-red">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="space-y-4 font-manrope">
+                        <div>
+                             <label class="block text-xs font-black uppercase tracking-widest mb-1">Value</label>
+                             <input type="number" [(ngModel)]="logValue" class="w-full p-3 font-mono text-lg font-bold border-2 border-black outline-none focus:bg-concrete-100">
+                        </div>
+                        <div>
+                             <label class="block text-xs font-black uppercase tracking-widest mb-1">Notes</label>
+                             <textarea [(ngModel)]="logNotes" rows="3" class="w-full p-3 font-mono text-sm border-2 border-black outline-none focus:bg-concrete-100 resize-none"></textarea>
+                        </div>
+                        <button (click)="saveLog()" class="w-full py-4 bg-black text-white font-black uppercase hover:bg-electric-red transition-colors mt-4">Commit_Data</button>
+                    </div>
+                </div>
+             </div>
+        }
     </div>
-  `,
+    `,
     styles: [`
-    :host { font-family: 'Inter', sans-serif; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  `],
+        :host { display: block; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #e5e5e5; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
+    `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HabitDetailsComponent implements OnInit {
@@ -339,18 +253,15 @@ export class HabitDetailsComponent implements OnInit {
     habitId = computed(() => this.route.snapshot.paramMap.get('id'));
     habit = computed(() => this.habitService.habits().find(h => h.id === this.habitId()));
 
-    // History Data
-    history = signal<import('../../models/habit.model').HabitLog[]>([]);
+    history = signal<any[]>([]);
     currentPage = signal(1);
-    pageSize = signal(5); // Show 5 items per page
+    pageSize = signal(5);
     totalHistory = signal(0);
     totalPages = computed(() => Math.ceil(this.totalHistory() / this.pageSize()) || 1);
 
-    // Analytics Data
-    stats = signal<import('../../models/habit.model').HabitStats | null>(null);
+    stats = signal<any | null>(null);
     fullHeatmap: {date: string, level: number}[] = [];
 
-    // Calendar Data
     calendarMonth = signal(new Date().getMonth());
     calendarYear = signal(new Date().getFullYear());
     selectedDate = signal<string | null>(null);
@@ -358,8 +269,7 @@ export class HabitDetailsComponent implements OnInit {
     logNotes: string = '';
 
     calendarMonthName = computed(() => {
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'];
+        const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
         return monthNames[this.calendarMonth()];
     });
 
@@ -370,42 +280,35 @@ export class HabitDetailsComponent implements OnInit {
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
         const startingDayOfWeek = firstDay.getDay();
-        
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        today.setHours(0,0,0,0);
 
-        const days: Array<{
-            date: string;
-            dayNumber: number;
-            isEmpty: boolean;
-            isCompleted: boolean;
-            isToday: boolean;
-            isFuture: boolean;
-        }> = [];
-
-        // Add empty cells for days before the first day of the month
+        const days = [];
         for (let i = 0; i < startingDayOfWeek; i++) {
             days.push({ date: '', dayNumber: 0, isEmpty: true, isCompleted: false, isToday: false, isFuture: false });
         }
 
-        // Add actual days
+        const logs = this.history(); // Note: this only has current page logs. For calendar we might need full logs or use theheatmap data? 
+        // Actually, for accuracy, the stats endpoint should return a map of completed dates, or we rely on heatmap data which covers a year.
+        // Let's use heatmap data for completion check if available, or just history for now (history is paginated effectively, so might miss data).
+        // Correction: habit.completedDates might be available in the habit object? No.
+        // I'll rely on heatmap for completion check as it has all dates.
+        
+        // Wait, heatmap structure is {date, level}. level > 0 means completed? 
+        // Or level represents intensity.
+        // I will use heatmap to determine completion.
+        
+        const completedDates = new Set(this.fullHeatmap.filter(h => h.level > 0).map(h => h.date));
+
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            date.setHours(0, 0, 0, 0);
-            const dateString = date.toISOString().split('T')[0];
-            
-            // Check if this date has a log entry
-            const isCompleted = this.history().some(log => {
-                const logDate = new Date(log.completed_at);
-                logDate.setHours(0, 0, 0, 0);
-                return logDate.toISOString().split('T')[0] === dateString;
-            });
-
+            const dateStr = date.toISOString().split('T')[0];
             const isToday = date.getTime() === today.getTime();
             const isFuture = date > today;
+            const isCompleted = completedDates.has(dateStr);
 
             days.push({
-                date: dateString,
+                date: dateStr,
                 dayNumber: day,
                 isEmpty: false,
                 isCompleted,
@@ -413,41 +316,7 @@ export class HabitDetailsComponent implements OnInit {
                 isFuture
             });
         }
-
         return days;
-    });
-
-    trendLine = computed(() => {
-        const stats = this.stats();
-        if (!stats || !stats.completion_trend || stats.completion_trend.length === 0) return '';
-        
-        const data = stats.completion_trend;
-        const count = data.length;
-        if (count < 2) return '';
-        
-        // Map data to points
-        // X: 0 to 100
-        // Y: 0 to 50 (inverted, 0 is top, 50 is bottom)
-        
-        const points = data.map((item, index) => {
-            const x = (index / (count - 1)) * 100;
-            const y = 50 - ((item.rate / 100) * 50);
-            return `${x},${y}`;
-        });
-        
-        // Simple smoothing could be added, but for now polyline
-        // Use 'L' for lines. C for bezier would need control points calc.
-        // Let's try Catmull-Rom or simple L. Simple L is safer for now.
-        // Actually, let's just do straight lines for robustness.
-        
-        return `M ${points.join(' L ')}`;
-    });
-
-    trendArea = computed(() => {
-        const line = this.trendLine();
-        if (!line) return '';
-        
-        return `${line} V 50 H 0 Z`;
     });
 
     ngOnInit() {
@@ -478,6 +347,110 @@ export class HabitDetailsComponent implements OnInit {
         });
     }
 
+    generateHeatmap(apiData: any[]) {
+        const today = new Date();
+        const endDate = new Date(today);
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - 364);
+
+        const dataMap = new Map(apiData.map(item => [item.date, item.level]));
+        this.fullHeatmap = [];
+        
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            this.fullHeatmap.push({
+                date: dateStr,
+                level: dataMap.get(dateStr) || 0
+            });
+        }
+    }
+
+    toggleDone() {
+        const id = this.habitId();
+        const habit = this.habit();
+        if (id && habit) {
+            if (habit.type === 'measurable') {
+                const today = new Date().toISOString().split('T')[0];
+                this.selectDate(today);
+            } else {
+                this.habitService.toggleCompletion(id, new Date().toISOString().split('T')[0]).subscribe(() => {
+                     this.loadHistory(id);
+                     this.loadStats(id);
+                });
+            }
+        }
+    }
+
+    selectDate(date: string) {
+        if (!date) return;
+        const selectedDate = new Date(date);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        if (selectedDate > today) return;
+
+        const habit = this.habit();
+        if (!habit) return;
+
+        if (habit.type === 'yes_no') {
+            this.habitService.updateLog(habit.id, date, {}).subscribe(() => {
+                this.loadHistory(habit.id);
+                this.loadStats(habit.id);
+            });
+            return;
+        }
+
+        this.selectedDate.set(date);
+        // We need to fetch specific log for this date. 
+        // For now, scan history (might be incomplete). 
+        // Ideally we should have getLog(date) API. 
+        // I will leave it empty for new logs if not in current page history.
+        const existingLog = this.history().find(log => log.completed_at.startsWith(date));
+        if (existingLog) {
+            this.logValue = existingLog.value;
+            this.logNotes = existingLog.notes || '';
+        } else {
+            this.logValue = undefined;
+            this.logNotes = '';
+        }
+    }
+
+    closeLogForm() {
+        this.selectedDate.set(null);
+    }
+
+    saveLog() {
+        const date = this.selectedDate();
+        const id = this.habitId();
+        if (!date || !id) return;
+
+        this.habitService.updateLog(id, date, {
+            value: this.logValue,
+            notes: this.logNotes
+        }).subscribe(() => {
+            this.loadHistory(id);
+            this.loadStats(id);
+            this.closeLogForm();
+        });
+    }
+
+    deleteHabit() {
+        const id = this.habitId();
+        if (id && confirm('CONFIRM PURGE?')) {
+            this.habitService.deleteHabit(id).subscribe(() => {
+                this.routerNavigate.navigate(['/']);
+            });
+        }
+    }
+
+    editHabit() {
+        const id = this.habitId();
+        if (id) this.routerNavigate.navigate(['/edit', id]);
+    }
+
+    goBack() {
+        this.location.back();
+    }
+
     nextPage() {
         if (this.currentPage() < this.totalPages()) {
             this.currentPage.update(p => p + 1);
@@ -494,51 +467,6 @@ export class HabitDetailsComponent implements OnInit {
         }
     }
 
-    generateHeatmap(apiData: import('../../models/habit.model').HeatmapItem[]) {
-        // Generate last 364 days to fill the grid
-        const today = new Date();
-        const endDate = new Date(today);
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() - 364); // Approx 1 year
-
-        const dataMap = new Map(apiData.map(item => [item.date, item.level]));
-        
-        this.fullHeatmap = [];
-        
-        // Loop from start to end
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
-            this.fullHeatmap.push({
-                date: dateStr,
-                level: dataMap.get(dateStr) || 0
-            });
-        }
-    }
-
-    toggleDone() {
-        const id = this.habitId();
-        if (id) {
-            this.habitService.toggleCompletion(id, new Date().toISOString().split('T')[0]).subscribe();
-        }
-    }
-
-    deleteHabit() {
-        const id = this.habitId();
-        if (id && confirm('Are you sure you want to delete this habit?')) {
-            this.habitService.deleteHabit(id).subscribe(() => {
-                this.routerNavigate.navigate(['/']);
-            });
-        }
-    }
-
-    editHabit() {
-        const id = this.habitId();
-        if (id) {
-            this.routerNavigate.navigate(['/edit', id]);
-        }
-    }
-
-    // Calendar Methods
     previousMonth() {
         if (this.calendarMonth() === 0) {
             this.calendarMonth.set(11);
@@ -555,63 +483,5 @@ export class HabitDetailsComponent implements OnInit {
         } else {
             this.calendarMonth.update(m => m + 1);
         }
-    }
-
-    selectDate(date: string) {
-        if (!date) return;
-        
-        // Don't allow selecting future dates
-        const selectedDate = new Date(date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        if (selectedDate > today) return;
-        
-        this.selectedDate.set(date);
-        
-        // Load existing log data if available
-        const existingLog = this.history().find(log => {
-            const logDate = new Date(log.completed_at);
-            logDate.setHours(0, 0, 0, 0);
-            return logDate.toISOString().split('T')[0] === date;
-        });
-        
-        if (existingLog) {
-            this.logValue = existingLog.value;
-            this.logNotes = existingLog.notes || '';
-        } else {
-            this.logValue = undefined;
-            this.logNotes = '';
-        }
-    }
-
-    closeLogForm() {
-        this.selectedDate.set(null);
-        this.logValue = undefined;
-        this.logNotes = '';
-    }
-
-    saveLog() {
-        const date = this.selectedDate();
-        const id = this.habitId();
-        
-        if (!date || !id) return;
-        
-        this.habitService.updateLog(id, date, {
-            value: this.logValue,
-            notes: this.logNotes
-        }).subscribe({
-            next: () => {
-                // Reload history to reflect changes
-                this.loadHistory(id);
-                this.loadStats(id); // Reload stats too
-                this.closeLogForm();
-            },
-            error: (err) => console.error('Failed to save log', err)
-        });
-    }
-
-    goBack() {
-        this.location.back();
     }
 }

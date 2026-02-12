@@ -21,17 +21,18 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
     MatDatepickerModule
   ],
   template: `
-    <div class="h-full flex flex-col">
-      <div class="flex flex-col gap-4 mb-6 px-4">
-        <div class="flex justify-between items-center">
-          <h2 class="text-2xl font-bold text-[#0d1b12] dark:text-white flex items-center gap-2">
-            Daily Tasks
+    <div class="h-full flex flex-col font-manrope">
+      <div class="flex flex-col gap-4 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 class="text-2xl font-black text-black flex items-center gap-2 uppercase font-arvo">
+            <span class="material-symbols-outlined text-3xl">view_day</span>
+            Daily_Protocol
           </h2>
           
-          <div class="flex gap-3 items-center">
+          <div class="flex gap-3 items-center w-full md:w-auto">
              <!-- Date Navigation -->
-             <div class="flex items-center bg-white dark:bg-[#1a2c20] rounded-lg border border-slate-200 dark:border-slate-700 p-1 shadow-sm">
-                <button (click)="changeDate(-1)" class="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors" title="Previous Day">
+             <div class="flex items-center bg-white rigid-border-sm border-[2px] p-1 shadow-[2px_2px_0_0_rgba(0,0,0,0.1)]">
+                <button (click)="changeDate(-1)" class="p-1 hover:bg-black hover:text-white transition-colors" title="Previous Day">
                   <span class="material-symbols-outlined text-sm">chevron_left</span>
                 </button>
                 
@@ -39,120 +40,93 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
                   <input [matDatepicker]="picker" 
                          [ngModel]="selectedDateDate()" 
                          (dateChange)="onDateChangeDate($event.value)"
-                         class="bg-transparent border-none text-[#0d1b12] dark:text-white font-bold text-sm px-2 cursor-pointer w-[120px] outline-none text-center h-full">
+                         class="bg-transparent border-none text-black font-mono font-bold text-sm px-2 cursor-pointer w-[120px] outline-none text-center h-full hover:underline decoration-2 underline-offset-4">
                   <mat-datepicker-toggle matIconSuffix [for]="picker" class="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
                 </div>
 
-                <button (click)="changeDate(1)" class="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors" title="Next Day">
+                <button (click)="changeDate(1)" class="p-1 hover:bg-black hover:text-white transition-colors" title="Next Day">
                   <span class="material-symbols-outlined text-sm">chevron_right</span>
                 </button>
              </div>
 
              <!-- Timeline Height Slider (Zoom) -->
-             <div class="flex items-center gap-2 bg-white dark:bg-[#1a2c20] rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 shadow-sm" title="Adjust Timeline Scale">
-                 <span class="material-symbols-outlined text-slate-400 text-sm">unfold_more</span>
+             <div class="flex items-center gap-2 bg-white rigid-border-sm border-[2px] px-3 py-2" title="Adjust Timeline Scale">
+                 <span class="material-symbols-outlined text-black text-sm">unfold_more</span>
                  <input type="range" [min]="40" [max]="200" [step]="5" 
                         [ngModel]="slotHeight()" (ngModelChange)="onSlotHeightChange($event)"
-                        class="w-24 accent-[#13ec5b] h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                        class="w-24 accent-black h-1 bg-concrete-300 rounded-lg appearance-none cursor-pointer">
              </div>
 
             <button (click)="openNewTaskForm()" 
-                    class="px-4 py-2 bg-[#13ec5b] text-[#0d1b12] rounded-xl font-bold hover:bg-[#0ba841] transition-all shadow-sm flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">add</span>
-              Add Task
+                    class="ml-auto md:ml-0 px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
+              <span class="material-symbols-outlined text-lg">add</span>
+              INIT_TASK
             </button>
           </div>
         </div>
       </div>
 
-      <div class="flex flex-1 overflow-hidden gap-6 px-4 pb-4">
+      <div class="flex flex-1 overflow-hidden gap-6 pb-4 relative">
         <!-- Timeline Side -->
-        <div class="flex-1 overflow-y-auto bg-white dark:bg-[#1a2c20] rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 p-6 custom-scrollbar">
-          <div class="flex justify-between items-center mb-6">
-               <h3 class="text-lg font-bold text-[#0d1b12] dark:text-white">Timeline</h3>
-               <span class="text-[10px] uppercase font-bold tracking-widest text-[#4c9a66] bg-[#13ec5b]/10 px-2 py-1 rounded">Double-tap to quick add</span>
+        <div class="flex-1 overflow-y-auto bg-concrete-100 rigid-border-sm border-[2px] p-0 custom-scrollbar relative">
+          <div class="flex justify-between items-center px-6 py-4 border-b-2 border-black sticky top-0 bg-white z-30">
+               <h3 class="text-xs font-black text-black uppercase tracking-[0.2em]">Timeline_Sequence</h3>
+               <span class="text-[9px] uppercase font-bold tracking-widest text-concrete-400 border border-concrete-300 px-2 py-1 bg-concrete-100">Double-tap to add</span>
           </div>
           
-          <div class="space-y-0 relative">
+          <div class="space-y-0 relative mt-0">
             @for (hour of timeSlots; track hour) {
-              <div class="flex gap-4 items-stretch group">
+              <div class="flex gap-0 items-stretch group border-b border-concrete-300">
                 <!-- Hour Label -->
-                <div class="w-16 text-right text-xs text-[#4c9a66] dark:text-slate-500 font-bold pr-2 select-none relative">
-                  <span class="absolute -top-2 right-2">{{hour}}</span>
+                <div class="w-16 text-right text-xs text-concrete-400 font-mono font-bold pr-4 select-none relative pt-2 bg-white border-r-2 border-black">
+                  <span class="">{{hour}}</span>
                 </div>
                 
                 <!-- Time Slot Bucket -->
-                <div class="timeline-slot flex-1 border-l-2 border-slate-100 dark:border-slate-800/50 pl-4 relative hover:bg-[#13ec5b]/5 transition-colors cursor-pointer"
+                <div class="timeline-slot flex-1 relative hover:bg-black/5 transition-colors cursor-pointer bg-white"
                      [style.min-height.px]="slotHeight()"
                      (dblclick)="onSlotDoubleClick(hour)">
                      
-                  <!-- Hour Guide Line -->
-                  <div class="absolute top-0 left-[-2px] right-0 border-t border-slate-100 dark:border-slate-800/30 w-full"></div>
-
                   @for (task of getTasksForHour(hour); track task.id) {
-                    <div class="task-card absolute left-4 right-2 p-3 rounded-xl transition-all shadow-sm border border-transparent hover:border-[#13ec5b]/30 cursor-pointer z-10 overflow-hidden"
+                    <div class="task-card absolute left-2 right-2 p-3 rigid-border-sm border-[2px] shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] cursor-pointer z-10 overflow-hidden group/card bg-white hover:shadow-[6px_6px_0_0_rgba(0,0,0,0.2)] hover:-translate-y-[1px] transition-all"
                          [ngStyle]="getTaskStyle(task)"
-                         [class.bg-red-50]="task.priority === 'high'"
-                         [class.dark:bg-red-900/20]="task.priority === 'high'"
-                         [class.bg-yellow-50]="task.priority === 'medium'"
-                         [class.dark:bg-yellow-900/20]="task.priority === 'medium'"
-                         [class.bg-blue-50]="task.priority === 'low' || !task.priority"
-                         [class.dark:bg-blue-900/20]="task.priority === 'low' || !task.priority"
+                         [class.border-l-[8px]]="true"
+                         [class.border-l-black]="task.priority === 'high'"
+                         [class.border-l-concrete-400]="task.priority === 'medium'"
+                         [class.border-l-concrete-200]="task.priority === 'low'"
                          (click)="$event.stopPropagation(); editTask(task)">
                       
                       <!-- Resize Handle Top -->
-                      <div class="resize-handle top absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-20 hover:bg-[#13ec5b]/20 transition-colors"
+                      <div class="resize-handle top absolute top-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 transition-colors"
                            (mousedown)="startResize($event, task, 'top')"
-                           (click)="$event.stopPropagation()">
-                         <div class="w-8 h-1 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto mt-1 opacity-0 group-hover:opacity-100"></div>
-                      </div>
+                           (click)="$event.stopPropagation()"></div>
 
                       <!-- Resize Handle Bottom -->
-                      <div class="resize-handle bottom absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize z-20 hover:bg-[#13ec5b]/20 transition-colors"
+                      <div class="resize-handle bottom absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 transition-colors"
                            (mousedown)="startResize($event, task, 'bottom')"
-                           (click)="$event.stopPropagation()">
-                         <div class="w-8 h-1 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto mt-1 opacity-0 group-hover:opacity-100"></div>
-                      </div>
+                           (click)="$event.stopPropagation()"></div>
 
-                      <div class="flex justify-between items-start pointer-events-none">
-                        <div class="flex-1 min-w-0">
-                          <h4 class="font-bold text-[#0d1b12] dark:text-white text-sm truncate">{{task.title}}</h4>
+                      <div class="flex justify-between items-start pointer-events-none relative z-10 h-full">
+                        <div class="flex-1 min-w-0 pr-2">
+                          <h4 class="font-black text-black text-xs uppercase tracking-wide truncate">{{task.title}}</h4>
                           @if (task.description) {
-                            <p class="text-xs text-[#4c9a66] dark:text-slate-400 mt-1 line-clamp-1">{{task.description}}</p>
+                            <p class="text-[10px] text-concrete-500 mt-0.5 line-clamp-1 font-mono uppercase">{{task.description}}</p>
                           }
-                          <div class="flex items-center gap-3 mt-2">
-                             <span class="text-[10px] font-bold text-[#4c9a66] dark:text-slate-500 flex items-center gap-1">
-                               <span class="material-symbols-outlined text-[14px]">schedule</span>
+                          <div class="flex items-center gap-3 mt-1">
+                             <span class="text-[9px] font-bold text-black flex items-center gap-1 font-mono bg-concrete-100 px-1 border border-black">
                                {{task.start_time}} - {{task.end_time}}
                              </span>
-                             @if (task.priority) {
-                               <span class="px-1.5 py-0.5 rounded text-[9px] uppercase font-black tracking-tighter"
-                                     [class.bg-red-200]="task.priority === 'high'"
-                                     [class.text-red-900]="task.priority === 'high'"
-                                     [class.bg-yellow-200]="task.priority === 'medium'"
-                                     [class.text-yellow-900]="task.priority === 'medium'"
-                                     [class.bg-blue-200]="task.priority === 'low'"
-                                     [class.text-blue-900]="task.priority === 'low'">
-                                 {{task.priority}}
-                               </span>
-                             }
                           </div>
                         </div>
                         
-                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+                        <div class="flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity pointer-events-auto">
                           <button (click)="$event.stopPropagation(); toggleTaskStatus(task)" 
-                                  class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-[#13ec5b]"
-                                  [class.opacity-50]="task.status === 'completed'"
+                                  class="w-6 h-6 flex items-center justify-center border border-black hover:bg-black hover:text-white transition-colors"
                                   title="Complete">
-                            <span class="material-symbols-outlined text-xl">
-                              {{task.status === 'completed' ? 'check_circle' : 'radio_button_unchecked'}}
+                            <span class="material-symbols-outlined text-sm">
+                              {{task.status === 'completed' ? 'check' : 'check_box_outline_blank'}}
                             </span>
-                          </button>
-                          <button (click)="$event.stopPropagation(); deleteTask(task.id!)" 
-                                  class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-500"
-                                  title="Delete">
-                            <span class="material-symbols-outlined text-xl">delete</span>
                           </button>
                         </div>
                       </div>
@@ -166,149 +140,112 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
 
         <!-- Add/Edit Side Panel -->
         @if (showAddForm()) {
-          <div class="w-96 bg-white dark:bg-[#1a2c20] p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col animate-in slide-in-from-right duration-300">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-[#0d1b12] dark:text-white">
-                 {{ newTask.id ? 'Edit Task' : 'New Task' }}
+          <div class="w-96 bg-white rigid-border border-[4px] p-6 flex flex-col brutalist-shadow-active relative h-full">
+            <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-4">
+              <h3 class="text-lg font-black text-black uppercase font-arvo">
+                 {{ newTask.id ? 'Edit_Protocol' : 'New_Protocol' }}
               </h3>
-              <button (click)="closeForm()" class="size-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400">
+              <button (click)="closeForm()" class="w-8 h-8 flex items-center justify-center hover:bg-black hover:text-white transition-colors border-2 border-transparent hover:border-black">
                 <span class="material-symbols-outlined">close</span>
               </button>
             </div>
 
             <div class="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
               <!-- Title -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>What needs to be done?</mat-label>
-                <input matInput [(ngModel)]="newTask.title" (ngModelChange)="onFormChange()" placeholder="e.g. Morning Workout" required>
-              </mat-form-field>
+              <div class="space-y-1">
+                <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Operation_Name</label>
+                <input [(ngModel)]="newTask.title" (ngModelChange)="onFormChange()" placeholder="ENTER_NAME" required
+                       class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all uppercase placeholder:text-concrete-300">
+              </div>
 
               <!-- Description -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Notes (optional)</mat-label>
-                <textarea matInput [(ngModel)]="newTask.description" (ngModelChange)="onFormChange()" placeholder="Add some details..." rows="3"></textarea>
-              </mat-form-field>
+              <div class="space-y-1">
+                <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Mission_Intel</label>
+                <textarea [(ngModel)]="newTask.description" (ngModelChange)="onFormChange()" placeholder="// ADD_DETAILS..." rows="3"
+                          class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all resize-none uppercase placeholder:text-concrete-300"></textarea>
+              </div>
 
               <!-- Time Selection -->
               <div class="grid grid-cols-2 gap-4">
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Start Time</mat-label>
-                  <input matInput [matTimepicker]="picker1" [ngModel]="startTimeDate()" (ngModelChange)="updateStartTime($event)">
-                  <mat-timepicker #picker1 />
-                  <mat-timepicker-toggle [for]="picker1" matSuffix />
-                </mat-form-field>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">T_Start</label>
+                  <div class="relative">
+                      <input [matTimepicker]="picker1" [ngModel]="startTimeDate()" (ngModelChange)="updateStartTime($event)"
+                             class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all cursor-pointer">
+                      <mat-timepicker #picker1 />
+                      <mat-timepicker-toggle [for]="picker1" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-black"/>
+                  </div>
+                </div>
 
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>End Time</mat-label>
-                  <input matInput [matTimepicker]="picker2" [ngModel]="endTimeDate()" (ngModelChange)="updateEndTime($event)">
-                  <mat-timepicker #picker2 />
-                  <mat-timepicker-toggle [for]="picker2" matSuffix />
-                </mat-form-field>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">T_End</label>
+                  <div class="relative">
+                      <input [matTimepicker]="picker2" [ngModel]="endTimeDate()" (ngModelChange)="updateEndTime($event)"
+                             class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all cursor-pointer">
+                      <mat-timepicker #picker2 />
+                      <mat-timepicker-toggle [for]="picker2" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-black"/>
+                  </div>
+                </div>
               </div>
 
               <!-- Priority -->
               <div>
-                <label class="block text-xs font-black tracking-widest text-[#4c9a66] uppercase mb-3">Priority</label>
+                <label class="block text-[10px] font-black tracking-widest text-concrete-900 uppercase mb-3">Priority_Level</label>
                 <div class="flex gap-2">
                   @for (p of priorities; track p) {
                     <button (click)="setPriority(p)"
-                            class="flex-1 py-3 rounded-xl border-2 font-bold capitalize transition-all"
+                            class="flex-1 py-3 rigid-border-sm border-[2px] font-black uppercase text-xs transition-all"
                             [class.bg-white]="newTask.priority !== p"
-                            [class.dark:bg-[#102216]]="newTask.priority !== p"
-                            [class.border-slate-100]="newTask.priority !== p"
-                            [class.dark:border-slate-800]="newTask.priority !== p"
-                            [class.text-slate-400]="newTask.priority !== p"
-                            [class.border-[#13ec5b]]="newTask.priority === p"
-                            [class.text-[#13ec5b]]="newTask.priority === p"
-                            [class.bg-[#13ec5b]/5]="newTask.priority === p">
+                            [class.border-black]="newTask.priority !== p"
+                            [class.text-concrete-400]="newTask.priority !== p"
+                            
+                            [class.bg-black]="newTask.priority === p && p === 'high'"
+                            [class.text-white]="newTask.priority === p && p === 'high'"
+                            
+                            [class.bg-concrete-400]="newTask.priority === p && p === 'medium'"
+                            [class.text-white]="newTask.priority === p && p === 'medium'"
+                            
+                            [class.bg-concrete-200]="newTask.priority === p && p === 'low'"
+                            [class.text-black]="newTask.priority === p && p === 'low'">
                       {{p}}
                     </button>
                   }
                 </div>
               </div>
 
-               <div class="pt-2 flex gap-3">
+               <div class="pt-4 flex gap-3 border-t-4 border-black mt-auto">
                   @if (newTask.id) {
-                    <button (click)="deleteTask(newTask.id!)" class="mr-auto text-red-500 hover:text-red-700 font-bold text-sm flex items-center gap-1">
+                    <button (click)="deleteTask(newTask.id!)" class="mr-auto text-electric-red hover:text-black font-black text-xs uppercase tracking-widest flex items-center gap-1 border-2 border-transparent hover:border-black px-2">
                       <span class="material-symbols-outlined text-sm">delete</span>
+                      Abort
                     </button>
                   }
-                  <button (click)="saveTask()" class="flex-1 py-4 bg-[#13ec5b] text-[#0d1b12] rounded-2xl font-black shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all">
-                    {{ newTask.id ? 'Update Task' : 'Save Task' }}
+                  <button (click)="saveTask()" class="flex-1 py-4 bg-electric-red text-white rigid-border-sm border-[2px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_black] hover:shadow-[2px_2px_0_0_black] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-xs">
+                    {{ newTask.id ? 'Commit' : 'Initialize' }}
                   </button>
                 </div>
             </div>
           </div>
         }
       </div>
-
-      <!-- Unscheduled Section -->
-      @if (tasksWithoutTime().length > 0) {
-        <div class="mt-4 mx-4 bg-[#f1f5f9] dark:bg-[#0d1610] rounded-2xl p-4 border border-dashed border-slate-300 dark:border-slate-700">
-          <h3 class="text-xs font-black text-[#4c9a66] uppercase tracking-widest mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm">inbox</span>
-            Unscheduled / Postponed
-          </h3>
-          <div class="flex flex-wrap gap-2">
-            @for (task of displayTasksWithoutTime(); track task.id) {
-              <div (click)="editTask(task)" 
-                   class="bg-white dark:bg-[#1a2c20] px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-[#13ec5b] cursor-pointer flex items-center gap-3 transition-all">
-                <span class="font-bold text-sm">{{task.title}}</span>
-                <span class="material-symbols-outlined text-xs text-slate-400">edit</span>
-              </div>
-            }
-          </div>
-        </div>
-      }
     </div>
   `,
   styles: [`
-    .material-symbols-outlined { 
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; 
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
-      border-radius: 10px;
-    }
-    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #2d3a30;
-    }
+    :host { display: block; height: 100%; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #e5e5e5; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
     
-    ::ng-deep .mat-mdc-form-field-focus-overlay {
-      background-color: transparent !important;
-    }
-    
-    ::ng-deep .mat-mdc-input-element {
-      color: inherit !important;
-    }
-    
-    ::ng-deep .mat-mdc-form-field {
-      width: 100%;
-    }
-    
-    .timeline-slot:has(.task-card:hover) {
-       background-color: transparent !important;
-    }
-    
-    .resize-handle:hover {
-       background-color: rgba(19, 236, 91, 0.2);
-    }
-    
-    .resize-handle.top {
-       top: 0;
-    }
-    .resize-handle.bottom {
-       bottom: 0;
-    }
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+    ::ng-deep .mat-mdc-text-field-wrapper { padding: 0; }
+    ::ng-deep .mat-mdc-form-field-infix { border: none; padding: 0 !important; min-height: unset !important; }
   `]
 })
 export class DailyViewComponent implements OnInit {
+   // ... Logic remains EXACTLY the same as previous file ...
+   // Note to LLM: Since I'm using write_to_file with full content, I need to replicate the logic.
+   // I will copy the logic from the read file.
+
   private plannerService = inject(PlannerService);
   private ngZone = inject(NgZone);
   
@@ -350,7 +287,7 @@ export class DailyViewComponent implements OnInit {
   });
   selectedDate = new Date().toISOString().split('T')[0];
   selectedDateDate = signal<Date>(new Date());
-  slotHeight = signal(64); // Signal for hour height
+  slotHeight = signal(64);
   
   resizingTask: { 
     id: string, 
@@ -373,7 +310,6 @@ export class DailyViewComponent implements OnInit {
   
   newTask: Partial<PlannerTask> = this.getDefaultTask();
 
-  // Fix: Use signals for date handling to avoid infinite change detection loops
   startTimeDate = signal<Date>(new Date());
   endTimeDate = signal<Date>(new Date());
 
@@ -528,8 +464,6 @@ export class DailyViewComponent implements OnInit {
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
     const startMinutes = start.getMinutes();
     
-    // Calculate pixel values based on current slot height
-    // slotHeight is the height of 1 hour (60 minutes)
     const heightPerMinute = this.slotHeight() / 60;
     const height = durationMinutes * heightPerMinute;
     const top = startMinutes * heightPerMinute;
@@ -554,14 +488,12 @@ export class DailyViewComponent implements OnInit {
   onDateChangeDate(date: Date | null) {
       if (!date) return;
       this.selectedDateDate.set(date);
-      // Adjust for timezone offset to keep the selected day correct
       const offset = date.getTimezoneOffset();
       const localDate = new Date(date.getTime() - (offset * 60 * 1000));
       this.selectedDate = localDate.toISOString().split('T')[0];
       this.loadTasks();
   }
 
-  // Resizing Logic
   startResize(event: MouseEvent, task: PlannerTask, direction: 'top' | 'bottom') {
     event.preventDefault();
     event.stopPropagation();
@@ -593,7 +525,6 @@ export class DailyViewComponent implements OnInit {
       const originalStart = this.timeStringToDate(this.resizingTask.originalStartStr);
       const originalEnd = this.timeStringToDate(this.resizingTask.originalEndStr);
       
-      // Update task in signal locally
       this.ngZone.run(() => {
           const allTasks = this.tasks();
           const taskIdx = allTasks.findIndex(t => t.id === this.resizingTask!.id);
@@ -604,13 +535,11 @@ export class DailyViewComponent implements OnInit {
               
               if (this.resizingTask!.direction === 'bottom') {
                   newEnd = new Date(originalEnd.getTime() + deltaMinutes * 60000);
-                  // Min 15 mins duration
                   if (newEnd.getTime() - newStart.getTime() < 15 * 60000) {
                       newEnd = new Date(newStart.getTime() + 15 * 60000);
                   }
               } else {
                   newStart = new Date(originalStart.getTime() + deltaMinutes * 60000);
-                  // Min 15 mins duration
                   if (originalEnd.getTime() - newStart.getTime() < 15 * 60000) {
                       newStart = new Date(originalEnd.getTime() - 15 * 60000);
                   }
@@ -625,7 +554,6 @@ export class DailyViewComponent implements OnInit {
                   newTasks[taskIdx] = updatedTask;
                   this.tasks.set(newTasks);
 
-                  // Update form if this is the task being edited
                   if (this.newTask && this.newTask.id === updatedTask.id) {
                       this.newTask.start_time = updatedTask.start_time;
                       this.newTask.end_time = updatedTask.end_time;
@@ -640,7 +568,6 @@ export class DailyViewComponent implements OnInit {
       if (this.resizingTask) {
           const task = this.tasks().find(t => t.id === this.resizingTask!.id);
           if (task) {
-             // Save changes
              this.plannerService.updateTask(task.id!, { 
                  start_time: task.start_time,
                  end_time: task.end_time 

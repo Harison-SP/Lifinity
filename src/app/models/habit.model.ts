@@ -81,3 +81,28 @@ export interface HabitStats {
   weekly_frequency: DayFrequency[];
   completion_trend: TrendItem[];
 }
+
+export interface BinaryHabitAnalytics {
+  success_ratio: number;
+  missed_day_pattern: { [key: string]: number };
+  recovery_time: number;
+  consistency_score: number;
+}
+
+export interface MeasurableHabitAnalytics {
+  average_value: number;
+  target_achievement_rate: number;
+  best_day: number;
+  worst_day: number;
+  trend_percentage: number;
+  trend_direction: 'Up' | 'Down' | 'Flat';
+}
+
+export interface AnalyticsResponse {
+  habit_id: string;
+  type: HabitType;
+  binary_stats?: BinaryHabitAnalytics;
+  measurable_stats?: MeasurableHabitAnalytics;
+  common_stats: HabitStats;
+  period_days: number;
+}

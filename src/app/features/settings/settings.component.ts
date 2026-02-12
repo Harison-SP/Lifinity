@@ -1,88 +1,106 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-settings',
-    imports: [SidebarComponent],
+    standalone: true,
+    imports: [CommonModule],
     template: `
-    <div class="bg-[#f8faf9] dark:bg-[#0d1610] font-display text-[#0d1b12] dark:text-white antialiased min-h-screen flex flex-col md:flex-row overflow-hidden">
-        <app-sidebar />
-        
-        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
-            <header class="p-8 border-b border-[#e5e7eb] dark:border-[#2d3a30] bg-white dark:bg-[#1a2c20]">
-                <h2 class="text-3xl font-black text-[#0d1b12] dark:text-white tracking-tight">Settings</h2>
-                <p class="text-[#4c9a66] dark:text-gray-400 font-medium">Manage your preferences and account settings.</p>
-            </header>
-
-            <div class="flex-1 overflow-y-auto p-10 scrollbar-hide">
-                <div class="max-w-3xl space-y-10">
-                    <!-- Appearance Section -->
-                    <section class="space-y-6">
-                        <div class="flex items-center gap-3">
-                            <div class="size-10 rounded-xl bg-[#13ec5b]/10 flex items-center justify-center text-[#13ec5b]">
-                                <span class="material-symbols-outlined filled">palette</span>
-                            </div>
-                            <h3 class="text-xl font-black text-[#0d1b12] dark:text-white">Appearance</h3>
-                        </div>
-                        
-                        <div class="bg-white dark:bg-[#1a2c20] rounded-[2.5rem] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm overflow-hidden">
-                            <div class="flex items-center justify-between p-8 border-b border-[#e5e7eb] dark:border-[#2d3a30]">
-                                <div class="flex flex-col gap-1">
-                                    <p class="text-[#0d1b12] dark:text-white font-bold text-lg">Dark Mode</p>
-                                    <p class="text-[#4c9a66] font-medium text-sm">Optimize the interface for low-light environments.</p>
-                                </div>
-                                <label class="relative flex h-[36px] w-[60px] cursor-pointer items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 has-[:checked]:bg-[#13ec5b] transition-all duration-300">
-                                    <input class="peer sr-only" type="checkbox"/>
-                                    <span class="absolute left-1 top-1 size-7 rounded-full bg-white shadow-md transition-transform duration-300 peer-checked:translate-x-6"></span>
-                                </label>
-                            </div>
-                            
-                            <div class="flex items-center justify-between p-8">
-                                <div class="flex flex-col gap-1">
-                                    <p class="text-[#0d1b12] dark:text-white font-bold text-lg">Compact View</p>
-                                    <p class="text-[#4c9a66] font-medium text-sm">Show more content on the dashboard.</p>
-                                </div>
-                                <label class="relative flex h-[36px] w-[60px] cursor-pointer items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 has-[:checked]:bg-[#13ec5b] transition-all duration-300">
-                                    <input class="peer sr-only" type="checkbox"/>
-                                    <span class="absolute left-1 top-1 size-7 rounded-full bg-white shadow-md transition-transform duration-300 peer-checked:translate-x-6"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Notifications Section -->
-                    <section class="space-y-6">
-                        <div class="flex items-center gap-3">
-                            <div class="size-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                                <span class="material-symbols-outlined filled">notifications</span>
-                            </div>
-                            <h3 class="text-xl font-black text-[#0d1b12] dark:text-white">Notifications</h3>
-                        </div>
-                        
-                        <div class="bg-white dark:bg-[#1a2c20] rounded-[2.5rem] border border-[#e5e7eb] dark:border-[#2d3a30] shadow-sm overflow-hidden">
-                            <div class="flex items-center justify-between p-8">
-                                <div class="flex flex-col gap-1">
-                                    <p class="text-[#0d1b12] dark:text-white font-bold text-lg">Daily Reminders</p>
-                                    <p class="text-[#4c9a66] font-medium text-sm">Get notified when you have habits to complete.</p>
-                                </div>
-                                <label class="relative flex h-[36px] w-[60px] cursor-pointer items-center rounded-full bg-gray-100 dark:bg-gray-800 p-1 has-[:checked]:bg-[#13ec5b] transition-all duration-300">
-                                    <input class="peer sr-only" type="checkbox" checked/>
-                                    <span class="absolute left-1 top-1 size-7 rounded-full bg-white shadow-md transition-transform duration-300 peer-checked:translate-x-6"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </section>
+    <div class="h-full overflow-y-auto bg-concrete-200 font-manrope">
+        <header class="p-8 border-b-4 border-black pb-6 flex flex-col md:flex-row items-end justify-between gap-6 bg-white shrink-0">
+            <div>
+                 <div class="bg-black text-white px-2 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
+                    System_Control
                 </div>
+                <h1 class="text-4xl md:text-6xl font-black text-black uppercase leading-none font-arvo">
+                    Configuration
+                </h1>
             </div>
-        </main>
+            <div class="text-right hidden md:block">
+                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400">Ver. 2.4.0 // STABLE</p>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-4xl mx-auto pb-24">
+            <div class="space-y-12">
+                <!-- Appearance Section -->
+                <section class="space-y-6">
+                    <h3 class="text-2xl font-black text-black uppercase font-arvo border-b-4 border-black pb-2 flex items-center gap-3">
+                        <span class="material-symbols-outlined text-3xl">palette</span>
+                        Interface_Protocols
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Toggle Item -->
+                        <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all">
+                            <div class="flex flex-col gap-1">
+                                <p class="text-black font-black text-lg uppercase tracking-wide">Dark_Mode_Override</p>
+                                <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Force high-contrast dark theme (disabled). Brutalist Light Mode Active.</p>
+                            </div>
+                            <label class="relative flex h-[28px] w-[56px] cursor-not-allowed items-center border-[3px] border-concrete-300 p-1 opacity-50">
+                                <input class="peer sr-only" type="checkbox" disabled/>
+                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-concrete-300 transition-all"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- Toggle Item -->
+                        <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all cursor-pointer">
+                            <div class="flex flex-col gap-1">
+                                <p class="text-black font-black text-lg uppercase tracking-wide">Compact_Matrix</p>
+                                <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Increase information density on dashboard modules.</p>
+                            </div>
+                            <label class="relative flex h-[28px] w-[56px] cursor-pointer items-center border-[3px] border-black p-1 transition-all">
+                                <input class="peer sr-only" type="checkbox"/>
+                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-black transition-all peer-checked:translate-x-[26px] peer-checked:bg-electric-red"></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Notifications Section -->
+                <section class="space-y-6">
+                    <h3 class="text-2xl font-black text-black uppercase font-arvo border-b-4 border-black pb-2 flex items-center gap-3">
+                         <span class="material-symbols-outlined text-3xl">notifications</span>
+                        Notification_Relays
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all cursor-pointer">
+                            <div class="flex flex-col gap-1">
+                                <p class="text-black font-black text-lg uppercase tracking-wide">Daily_Status_Ping</p>
+                                <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Receive morning briefings on active directives.</p>
+                            </div>
+                            <label class="relative flex h-[28px] w-[56px] cursor-pointer items-center border-[3px] border-black p-1 transition-all">
+                                <input class="peer sr-only" type="checkbox" checked/>
+                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-black transition-all peer-checked:translate-x-[26px] peer-checked:bg-electric-red"></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Data Management Section -->
+                <section class="space-y-6">
+                    <h3 class="text-2xl font-black text-black uppercase font-arvo border-b-4 border-black pb-2 flex items-center gap-3">
+                        <span class="material-symbols-outlined text-3xl text-electric-red">database</span>
+                        Data_Persistence
+                    </h3>
+                    
+                    <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all">
+                            <div class="flex flex-col gap-1">
+                            <p class="text-black font-black text-lg uppercase tracking-wide group-hover:text-electric-red transition-colors">Purge_Local_Cache</p>
+                            <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Clear all locally stored session data. Irreversible.</p>
+                        </div>
+                        <button class="px-6 py-3 border-[3px] border-black bg-electric-red text-white font-black uppercase text-xs hover:bg-black transition-all tracking-widest shadow-[4px_4px_0_0_black] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_black]">
+                            EXECUTE
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
     </div>
-  `,
+    `,
     styles: [`
-    :host { font-family: 'Inter', sans-serif; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    :host { display: block; height: 100%; }
   `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
