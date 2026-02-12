@@ -1,3 +1,133 @@
 /* You can add global styles to this file, and also import other style files */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
+
 @import 'tailwindcss';
+
+@theme {
+  --color-primary: #ec5b13;
+  --color-neon-lime: #ec5b13;
+  --color-console-bg: #050608;
+  --color-panel-bg: #0c0e12;
+  --color-border-color: #2a3441;
+  --font-sans: 'Public Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  :root {
+      --primary-color: #ec5b13;
+      --console-bg: #050608;
+      --panel-bg: #0c0e12;
+      --border-color: #2a3441;
+      --grid-line: rgba(42, 52, 65, 0.4);
+  }
+  body { 
+      font-family: 'Public Sans', sans-serif; 
+      background-color: var(--console-bg);
+      background-image: 
+          linear-gradient(var(--grid-line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      color: #cbd5e1;
+  }
+}
+
+.scanline {
+  width: 100%;
+  height: 100vh;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+  );
+  position: fixed;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+}
+
+.crt-flicker {
+  animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.98; }
+}
+
+.tac-panel {
+  background-color: rgba(12, 14, 18, 0.95);
+  border: 1px solid var(--border-color);
+  position: relative;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  border-radius: 0.5rem;
+}
+
+.corner-tl, .corner-tr, .corner-bl, .corner-br {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--primary-color);
+  border-style: solid;
+  transition: all 0.3s ease;
+}
+.corner-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-top-left-radius: 0.5rem; }
+.corner-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-top-right-radius: 0.5rem; }
+.corner-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-bottom-left-radius: 0.5rem; }
+.corner-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-bottom-right-radius: 0.5rem; }
+
+.tac-panel:hover .corner-tl, 
+.tac-panel:hover .corner-tr, 
+.tac-panel:hover .corner-bl, 
+.tac-panel:hover .corner-br {
+  width: 24px;
+  height: 24px;
+  box-shadow: 0 0 8px var(--primary-color);
+}
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(53, 1fr);
+  gap: 2px;
+}
+.heatmap-cell {
+  aspect-ratio: 1/1;
+  transition: transform 0.2s, background-color 0.2s;
+  border-radius: 1px;
+}
+.heatmap-cell:hover {
+  transform: scale(1.5);
+  z-index: 10;
+  box-shadow: 0 0 5px var(--primary-color);
+}
+
+.clip-path-polygon {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #050608; border-left: 1px solid #1e2530; }
+::-webkit-scrollbar-thumb { background: #2a3441; border: 1px solid #050608; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
+
+.glitch-hover:hover {
+  animation: glitch-anim 0.3s infinite;
+  color: var(--primary-color);
+}
+@keyframes glitch-anim {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+.linear-calendar-container {
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}

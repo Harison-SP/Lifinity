@@ -1,0 +1,139 @@
+<div class="space-y-8 animate-in fade-in duration-500">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-[#2a3441] pb-4">
+        <h3 class="text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#ec5b13]">analytics</span>
+            Advanced_Analytics
+        </h3>
+        <span class="px-3 py-1 rounded bg-[#ec5b13]/10 border border-[#ec5b13]/30 text-[#ec5b13] text-[10px] font-bold uppercase tracking-widest">
+            Dataset: {{ analytics.period_days }} Days
+        </span>
+    </div>
+
+    @if (habit.type === 'yes_no' && analytics.binary_stats) {
+        <!-- BINARY HABIT ANALYTICS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- 1. Consistency Score & Recovery -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Consistency Score -->
+                <div class="p-6 rounded bg-[#0c0e12] border border-[#2a3441] flex flex-col items-center justify-center text-center group hover:border-[#ec5b13] transition-colors relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[#ec5b13]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span class="material-symbols-outlined text-4xl text-slate-500 group-hover:text-[#ec5b13] transition-colors mb-2">check_circle</span>
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500">Consistency_Score</p>
+                    <p class="text-3xl font-black text-white tracking-tighter mt-1">{{ analytics.binary_stats.consistency_score | number:'1.0-1' }}</p>
+                </div>
+
+                <!-- Recovery Time -->
+                <div class="p-6 rounded bg-[#0c0e12] border border-[#2a3441] flex flex-col items-center justify-center text-center group hover:border-[#ec5b13] transition-colors relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[#ec5b13]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <span class="material-symbols-outlined text-4xl text-slate-500 group-hover:text-[#ec5b13] transition-colors mb-2">medical_services</span>
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500">Avg_Recovery_Time</p>
+                    <p class="text-3xl font-black text-white tracking-tighter mt-1">
+                        {{ analytics.binary_stats.recovery_time | number:'1.0-1' }} <span class="text-xs font-bold text-slate-500">Days</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. Success Ratio Pie Chart -->
+            <div class="p-4 rounded bg-[#0c0e12] border border-[#2a3441] flex flex-col min-h-[250px] relative">
+                <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                    <span class="w-1 h-3 bg-[#ec5b13]"></span>
+                    Success_Ratio_Distribution
+                </h4>
+                <div class="flex-1 overflow-hidden" #containerRef> 
+                    <ngx-charts-advanced-pie-chart
+                        [view]="[containerRef.offsetWidth, 200]"
+                        [scheme]="successColorScheme"
+                        [results]="successRatioData"
+                        [gradient]="true"
+                        [animations]="true">
+                    </ngx-charts-advanced-pie-chart>
+                </div>
+            </div>
+
+            <!-- 3. Missed Day Pattern Bar Chart -->
+            <div class="col-span-1 md:col-span-2 p-4 rounded bg-[#0c0e12] border border-[#2a3441] flex flex-col min-h-[300px] relative">
+                <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                    <span class="w-1 h-3 bg-[#ec5b13]"></span>
+                    Failure_Pattern_Analysis
+                </h4>
+                 <div class="flex-1 overflow-hidden" #barContainerRef>
+                    <ngx-charts-bar-vertical
+                        [view]="[barContainerRef.offsetWidth, 250]"
+                        [scheme]="colorScheme"
+                        [results]="missedDayPatternData"
+                        [gradient]="true"
+                        [xAxis]="true"
+                        [yAxis]="true"
+                        [showXAxisLabel]="true"
+                        [showYAxisLabel]="true"
+                        xAxisLabel="Day of Week"
+                        yAxisLabel="Missed Count"
+                        [showDataLabel]="true">
+                    </ngx-charts-bar-vertical>
+                </div>
+            </div>
+
+        </div>
+    }
+
+    @if (habit.type === 'measurable' && analytics.measurable_stats) {
+        <!-- MEASURABLE HABIT ANALYTICS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- 1. Key Metrics Grid -->
+             <div class="grid grid-cols-2 gap-4">
+                <!-- Average Value -->
+                <div class="p-6 rounded bg-[#0c0e12] border border-[#2a3441] flex flex-col items-center justify-center text-center group hover:border-[#ec5b13] transition-colors">
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500">Average_Output</p>
+                    <p class="text-3xl font-black text-white tracking-tighter mt-1">{{ analytics.measurable_stats.average_value | number:'1.1-2' }}</p>
+                     <span class="text-[10px] text-[#ec5b13]">{{ habit.targetUnit }}</span>
+                </div>
+
+                <!-- Best Day -->
+                <div class="p-6 rounded bg-[#0c0e12] border border-[#2a3441] flex flex-col items-center justify-center text-center group hover:border-[#ec5b13] transition-colors">
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500">Peak_Performance</p>
+                    <p class="text-3xl font-black text-white tracking-tighter mt-1">{{ analytics.measurable_stats.best_day | number:'1.1-2' }}</p>
+                    <span class="text-[10px] text-[#ec5b13]">{{ habit.targetUnit }}</span>
+                </div>
+            </div>
+
+            <!-- 2. Achievement Rate Pie (Gauge style) -->
+            <div class="p-4 rounded bg-[#0c0e12] border border-[#2a3441] flex flex-col min-h-[250px] relative">
+                 <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                    <span class="w-1 h-3 bg-[#ec5b13]"></span>
+                    Target_Achievement_Rate
+                </h4>
+                <div class="flex-1 overflow-hidden" #gaugeContainerRef>
+                     <ngx-charts-pie-grid
+                        [view]="[gaugeContainerRef.offsetWidth, 200]"
+                        [scheme]="successColorScheme"
+                        [results]="successRatioData">
+                    </ngx-charts-pie-grid>
+                </div>
+            </div>
+            
+            <!-- 3. Trend Direction -->
+             <div class="col-span-1 md:col-span-2 p-6 rounded bg-[#0c0e12] border border-[#2a3441] flex items-center justify-between group hover:border-[#ec5b13] transition-colors relative overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">Trend_Vector</p>
+                    <div class="flex items-center gap-3">
+                        <span class="text-4xl font-black text-white tracking-tighter">{{ analytics.measurable_stats.trend_direction }}</span>
+                        @if (analytics.measurable_stats.trend_direction === 'Up') {
+                            <span class="material-symbols-outlined text-4xl text-green-500">trending_up</span>
+                        } @else if (analytics.measurable_stats.trend_direction === 'Down') {
+                            <span class="material-symbols-outlined text-4xl text-red-500">trending_down</span>
+                        } @else {
+                             <span class="material-symbols-outlined text-4xl text-slate-500">trending_flat</span>
+                        }
+                    </div>
+                </div>
+                <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#ec5b13]/10 to-transparent"></div>
+            </div>
+
+        </div>
+    }
+
+</div>

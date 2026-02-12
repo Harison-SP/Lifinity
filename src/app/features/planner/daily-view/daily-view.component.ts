@@ -24,14 +24,15 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
     <div class="h-full flex flex-col">
       <div class="flex flex-col gap-4 mb-6 px-4">
         <div class="flex justify-between items-center">
-          <h2 class="text-2xl font-bold text-[#0d1b12] dark:text-white flex items-center gap-2">
-            Daily Tasks
+          <h2 class="text-2xl font-bold text-white flex items-center gap-2 tracking-tight uppercase">
+            <span class="text-[#ec5b13] material-symbols-outlined">view_day</span>
+            Daily_Protocol
           </h2>
           
           <div class="flex gap-3 items-center">
              <!-- Date Navigation -->
-             <div class="flex items-center bg-white dark:bg-[#1a2c20] rounded-lg border border-slate-200 dark:border-slate-700 p-1 shadow-sm">
-                <button (click)="changeDate(-1)" class="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors" title="Previous Day">
+             <div class="flex items-center bg-[#050608] rounded border border-[#2a3441] p-1 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                <button (click)="changeDate(-1)" class="p-1 hover:text-[#ec5b13] hover:bg-[#ec5b13]/10 rounded transition-all" title="Previous Day">
                   <span class="material-symbols-outlined text-sm">chevron_left</span>
                 </button>
                 
@@ -39,28 +40,28 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
                   <input [matDatepicker]="picker" 
                          [ngModel]="selectedDateDate()" 
                          (dateChange)="onDateChangeDate($event.value)"
-                         class="bg-transparent border-none text-[#0d1b12] dark:text-white font-bold text-sm px-2 cursor-pointer w-[120px] outline-none text-center h-full">
-                  <mat-datepicker-toggle matIconSuffix [for]="picker" class="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"></mat-datepicker-toggle>
+                         class="bg-transparent border-none text-white font-mono font-bold text-sm px-2 cursor-pointer w-[120px] outline-none text-center h-full hover:text-[#ec5b13] transition-colors">
+                  <mat-datepicker-toggle matIconSuffix [for]="picker" class="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 hover:opacity-100 text-[#ec5b13]"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
                 </div>
 
-                <button (click)="changeDate(1)" class="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors" title="Next Day">
+                <button (click)="changeDate(1)" class="p-1 hover:text-[#ec5b13] hover:bg-[#ec5b13]/10 rounded transition-all" title="Next Day">
                   <span class="material-symbols-outlined text-sm">chevron_right</span>
                 </button>
              </div>
 
              <!-- Timeline Height Slider (Zoom) -->
-             <div class="flex items-center gap-2 bg-white dark:bg-[#1a2c20] rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 shadow-sm" title="Adjust Timeline Scale">
-                 <span class="material-symbols-outlined text-slate-400 text-sm">unfold_more</span>
+             <div class="flex items-center gap-2 bg-[#050608] rounded border border-[#2a3441] px-3 py-2 shadow-sm" title="Adjust Timeline Scale">
+                 <span class="material-symbols-outlined text-slate-500 text-sm">unfold_more</span>
                  <input type="range" [min]="40" [max]="200" [step]="5" 
                         [ngModel]="slotHeight()" (ngModelChange)="onSlotHeightChange($event)"
-                        class="w-24 accent-[#13ec5b] h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                        class="w-24 accent-[#ec5b13] h-1.5 bg-[#2a3441] rounded-lg appearance-none cursor-pointer">
              </div>
 
             <button (click)="openNewTaskForm()" 
-                    class="px-4 py-2 bg-[#13ec5b] text-[#0d1b12] rounded-xl font-bold hover:bg-[#0ba841] transition-all shadow-sm flex items-center gap-2">
-              <span class="material-symbols-outlined text-xl">add</span>
-              Add Task
+                    class="px-4 py-2 bg-[#ec5b13] text-white rounded font-bold hover:bg-white hover:text-[#ec5b13] transition-all shadow-[0_0_15px_rgba(236,91,19,0.4)] flex items-center gap-2 uppercase tracking-wider text-xs">
+              <span class="material-symbols-outlined text-lg">add</span>
+              INIT_TASK
             </button>
           </div>
         </div>
@@ -68,91 +69,88 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
 
       <div class="flex flex-1 overflow-hidden gap-6 px-4 pb-4">
         <!-- Timeline Side -->
-        <div class="flex-1 overflow-y-auto bg-white dark:bg-[#1a2c20] rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 p-6 custom-scrollbar">
-          <div class="flex justify-between items-center mb-6">
-               <h3 class="text-lg font-bold text-[#0d1b12] dark:text-white">Timeline</h3>
-               <span class="text-[10px] uppercase font-bold tracking-widest text-[#4c9a66] bg-[#13ec5b]/10 px-2 py-1 rounded">Double-tap to quick add</span>
+        <div class="flex-1 overflow-y-auto bg-[#050608]/50 rounded border border-[#2a3441] p-6 custom-scrollbar relative">
+          <div class="flex justify-between items-center mb-6 border-b border-[#2a3441] pb-4 sticky top-0 bg-[#050608]/90 z-30 backdrop-blur-sm -mx-6 px-6 -mt-6 pt-6">
+               <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Timeline_Sequence</h3>
+               <span class="text-[9px] uppercase font-bold tracking-widest text-[#ec5b13] bg-[#ec5b13]/10 px-2 py-1 rounded border border-[#ec5b13]/20">Double-tap to execute quick add</span>
           </div>
           
-          <div class="space-y-0 relative">
+          <div class="space-y-0 relative mt-4">
             @for (hour of timeSlots; track hour) {
               <div class="flex gap-4 items-stretch group">
                 <!-- Hour Label -->
-                <div class="w-16 text-right text-xs text-[#4c9a66] dark:text-slate-500 font-bold pr-2 select-none relative">
+                <div class="w-16 text-right text-xs text-slate-600 font-mono font-bold pr-2 select-none relative pt-0">
                   <span class="absolute -top-2 right-2">{{hour}}</span>
                 </div>
                 
                 <!-- Time Slot Bucket -->
-                <div class="timeline-slot flex-1 border-l-2 border-slate-100 dark:border-slate-800/50 pl-4 relative hover:bg-[#13ec5b]/5 transition-colors cursor-pointer"
+                <div class="timeline-slot flex-1 border-l border-[#2a3441] pl-4 relative hover:bg-[#ec5b13]/5 transition-colors cursor-pointer"
                      [style.min-height.px]="slotHeight()"
                      (dblclick)="onSlotDoubleClick(hour)">
                      
                   <!-- Hour Guide Line -->
-                  <div class="absolute top-0 left-[-2px] right-0 border-t border-slate-100 dark:border-slate-800/30 w-full"></div>
+                  <div class="absolute top-0 left-[-1px] right-0 border-t border-[#2a3441] w-full"></div>
 
                   @for (task of getTasksForHour(hour); track task.id) {
-                    <div class="task-card absolute left-4 right-2 p-3 rounded-xl transition-all shadow-sm border border-transparent hover:border-[#13ec5b]/30 cursor-pointer z-10 overflow-hidden"
+                    <div class="task-card absolute left-4 right-2 p-3 rounded border transition-all shadow-lg cursor-pointer z-10 overflow-hidden group/card"
                          [ngStyle]="getTaskStyle(task)"
-                         [class.bg-red-50]="task.priority === 'high'"
-                         [class.dark:bg-red-900/20]="task.priority === 'high'"
-                         [class.bg-yellow-50]="task.priority === 'medium'"
-                         [class.dark:bg-yellow-900/20]="task.priority === 'medium'"
-                         [class.bg-blue-50]="task.priority === 'low' || !task.priority"
-                         [class.dark:bg-blue-900/20]="task.priority === 'low' || !task.priority"
+                         [class.bg-red-900/40]="task.priority === 'high'"
+                         [class.border-red-500/50]="task.priority === 'high'"
+                         [class.hover:border-red-500]="task.priority === 'high'"
+                         
+                         [class.bg-yellow-900/40]="task.priority === 'medium'"
+                         [class.border-yellow-500/50]="task.priority === 'medium'"
+                         [class.hover:border-yellow-500]="task.priority === 'medium'"
+                         
+                         [class.bg-blue-900/40]="task.priority === 'low' || !task.priority"
+                         [class.border-blue-500/50]="task.priority === 'low' || !task.priority"
+                         [class.hover:border-blue-500]="task.priority === 'low' || !task.priority"
                          (click)="$event.stopPropagation(); editTask(task)">
                       
+                      <!-- Scanline effect on card -->
+                      <div class="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] opacity-20 pointer-events-none"></div>
+
                       <!-- Resize Handle Top -->
-                      <div class="resize-handle top absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-20 hover:bg-[#13ec5b]/20 transition-colors"
+                      <div class="resize-handle top absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-20 hover:bg-white/10 transition-colors"
                            (mousedown)="startResize($event, task, 'top')"
                            (click)="$event.stopPropagation()">
-                         <div class="w-8 h-1 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto mt-1 opacity-0 group-hover:opacity-100"></div>
+                         <div class="w-8 h-0.5 bg-slate-500/50 rounded-full mx-auto mt-1 opacity-0 group-hover/card:opacity-100"></div>
                       </div>
 
                       <!-- Resize Handle Bottom -->
-                      <div class="resize-handle bottom absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize z-20 hover:bg-[#13ec5b]/20 transition-colors"
+                      <div class="resize-handle bottom absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize z-20 hover:bg-white/10 transition-colors"
                            (mousedown)="startResize($event, task, 'bottom')"
                            (click)="$event.stopPropagation()">
-                         <div class="w-8 h-1 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto mt-1 opacity-0 group-hover:opacity-100"></div>
+                         <div class="w-8 h-0.5 bg-slate-500/50 rounded-full mx-auto mt-1 opacity-0 group-hover/card:opacity-100"></div>
                       </div>
 
-                      <div class="flex justify-between items-start pointer-events-none">
+                      <div class="flex justify-between items-start pointer-events-none relative z-10">
                         <div class="flex-1 min-w-0">
-                          <h4 class="font-bold text-[#0d1b12] dark:text-white text-sm truncate">{{task.title}}</h4>
+                          <h4 class="font-bold text-white text-xs uppercase tracking-wide truncate shadow-black drop-shadow-md">{{task.title}}</h4>
                           @if (task.description) {
-                            <p class="text-xs text-[#4c9a66] dark:text-slate-400 mt-1 line-clamp-1">{{task.description}}</p>
+                            <p class="text-[10px] text-slate-400 mt-1 line-clamp-1 font-mono">{{task.description}}</p>
                           }
-                          <div class="flex items-center gap-3 mt-2">
-                             <span class="text-[10px] font-bold text-[#4c9a66] dark:text-slate-500 flex items-center gap-1">
-                               <span class="material-symbols-outlined text-[14px]">schedule</span>
+                          <div class="flex items-center gap-3 mt-1">
+                             <span class="text-[9px] font-bold text-slate-400 flex items-center gap-1 font-mono bg-black/30 px-1 rounded">
                                {{task.start_time}} - {{task.end_time}}
                              </span>
-                             @if (task.priority) {
-                               <span class="px-1.5 py-0.5 rounded text-[9px] uppercase font-black tracking-tighter"
-                                     [class.bg-red-200]="task.priority === 'high'"
-                                     [class.text-red-900]="task.priority === 'high'"
-                                     [class.bg-yellow-200]="task.priority === 'medium'"
-                                     [class.text-yellow-900]="task.priority === 'medium'"
-                                     [class.bg-blue-200]="task.priority === 'low'"
-                                     [class.text-blue-900]="task.priority === 'low'">
-                                 {{task.priority}}
-                               </span>
-                             }
                           </div>
                         </div>
                         
-                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+                        <div class="flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity pointer-events-auto">
                           <button (click)="$event.stopPropagation(); toggleTaskStatus(task)" 
-                                  class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-[#13ec5b]"
-                                  [class.opacity-50]="task.status === 'completed'"
+                                  class="w-6 h-6 flex items-center justify-center rounded hover:bg-white/10"
+                                  [class.text-[#ec5b13]]="task.status !== 'completed'"
+                                  [class.text-slate-500]="task.status === 'completed'"
                                   title="Complete">
-                            <span class="material-symbols-outlined text-xl">
+                            <span class="material-symbols-outlined text-base">
                               {{task.status === 'completed' ? 'check_circle' : 'radio_button_unchecked'}}
                             </span>
                           </button>
                           <button (click)="$event.stopPropagation(); deleteTask(task.id!)" 
-                                  class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-500"
+                                  class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-500/20 text-red-500"
                                   title="Delete">
-                            <span class="material-symbols-outlined text-xl">delete</span>
+                            <span class="material-symbols-outlined text-base">delete</span>
                           </button>
                         </div>
                       </div>
@@ -166,75 +164,96 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
 
         <!-- Add/Edit Side Panel -->
         @if (showAddForm()) {
-          <div class="w-96 bg-white dark:bg-[#1a2c20] p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col animate-in slide-in-from-right duration-300">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-bold text-[#0d1b12] dark:text-white">
-                 {{ newTask.id ? 'Edit Task' : 'New Task' }}
+          <div class="w-96 bg-[#0c0e12] p-6 rounded border border-[#ec5b13] flex flex-col animate-in slide-in-from-right duration-300 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative">
+            <div class="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ec5b13]"></div>
+            <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ec5b13]"></div>
+            <div class="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ec5b13]"></div>
+            <div class="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ec5b13]"></div>
+
+            <div class="flex justify-between items-center mb-6 border-b border-[#2a3441] pb-4">
+              <h3 class="text-lg font-black text-white uppercase tracking-wider">
+                 <span class="text-[#ec5b13] mr-2">>></span>{{ newTask.id ? 'Edit_Protocol' : 'New_Protocol' }}
               </h3>
-              <button (click)="closeForm()" class="size-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400">
+              <button (click)="closeForm()" class="size-8 rounded hover:text-[#ec5b13] transition-colors flex items-center justify-center text-slate-500">
                 <span class="material-symbols-outlined">close</span>
               </button>
             </div>
 
             <div class="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
               <!-- Title -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>What needs to be done?</mat-label>
-                <input matInput [(ngModel)]="newTask.title" (ngModelChange)="onFormChange()" placeholder="e.g. Morning Workout" required>
-              </mat-form-field>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operation_Name</label>
+                <input [(ngModel)]="newTask.title" (ngModelChange)="onFormChange()" placeholder="ENTER_NAME" required
+                       class="w-full px-4 py-3 bg-[#050608] border border-[#2a3441] focus:border-[#ec5b13] text-white font-mono text-sm outline-none transition-all rounded">
+              </div>
 
               <!-- Description -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Notes (optional)</mat-label>
-                <textarea matInput [(ngModel)]="newTask.description" (ngModelChange)="onFormChange()" placeholder="Add some details..." rows="3"></textarea>
-              </mat-form-field>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mission_Intel</label>
+                <textarea [(ngModel)]="newTask.description" (ngModelChange)="onFormChange()" placeholder="// ADD_DETAILS..." rows="3"
+                          class="w-full px-4 py-3 bg-[#050608] border border-[#2a3441] focus:border-[#ec5b13] text-white font-mono text-sm outline-none transition-all resize-none rounded"></textarea>
+              </div>
 
               <!-- Time Selection -->
               <div class="grid grid-cols-2 gap-4">
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Start Time</mat-label>
-                  <input matInput [matTimepicker]="picker1" [ngModel]="startTimeDate()" (ngModelChange)="updateStartTime($event)">
-                  <mat-timepicker #picker1 />
-                  <mat-timepicker-toggle [for]="picker1" matSuffix />
-                </mat-form-field>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">T_Start</label>
+                  <div class="relative">
+                      <input [matTimepicker]="picker1" [ngModel]="startTimeDate()" (ngModelChange)="updateStartTime($event)"
+                             class="w-full px-4 py-3 bg-[#050608] border border-[#2a3441] focus:border-[#ec5b13] text-white font-mono text-sm outline-none transition-all rounded cursor-pointer">
+                      <mat-timepicker #picker1 />
+                      <mat-timepicker-toggle [for]="picker1" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-[#ec5b13]"/>
+                  </div>
+                </div>
 
-                <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>End Time</mat-label>
-                  <input matInput [matTimepicker]="picker2" [ngModel]="endTimeDate()" (ngModelChange)="updateEndTime($event)">
-                  <mat-timepicker #picker2 />
-                  <mat-timepicker-toggle [for]="picker2" matSuffix />
-                </mat-form-field>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">T_End</label>
+                  <div class="relative">
+                      <input [matTimepicker]="picker2" [ngModel]="endTimeDate()" (ngModelChange)="updateEndTime($event)"
+                             class="w-full px-4 py-3 bg-[#050608] border border-[#2a3441] focus:border-[#ec5b13] text-white font-mono text-sm outline-none transition-all rounded cursor-pointer">
+                      <mat-timepicker #picker2 />
+                      <mat-timepicker-toggle [for]="picker2" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-[#ec5b13]"/>
+                  </div>
+                </div>
               </div>
 
               <!-- Priority -->
               <div>
-                <label class="block text-xs font-black tracking-widest text-[#4c9a66] uppercase mb-3">Priority</label>
+                <label class="block text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">Priority_Level</label>
                 <div class="flex gap-2">
                   @for (p of priorities; track p) {
                     <button (click)="setPriority(p)"
-                            class="flex-1 py-3 rounded-xl border-2 font-bold capitalize transition-all"
-                            [class.bg-white]="newTask.priority !== p"
-                            [class.dark:bg-[#102216]]="newTask.priority !== p"
-                            [class.border-slate-100]="newTask.priority !== p"
-                            [class.dark:border-slate-800]="newTask.priority !== p"
-                            [class.text-slate-400]="newTask.priority !== p"
-                            [class.border-[#13ec5b]]="newTask.priority === p"
-                            [class.text-[#13ec5b]]="newTask.priority === p"
-                            [class.bg-[#13ec5b]/5]="newTask.priority === p">
+                            class="flex-1 py-2 rounded border font-bold uppercase text-xs transition-all"
+                            [class.bg-transparent]="newTask.priority !== p"
+                            [class.border-[#2a3441]]="newTask.priority !== p"
+                            [class.text-slate-500]="newTask.priority !== p"
+                            
+                            [class.border-red-500]="newTask.priority === p && p === 'high'"
+                            [class.text-red-500]="newTask.priority === p && p === 'high'"
+                            [class.bg-red-500/10]="newTask.priority === p && p === 'high'"
+                            
+                            [class.border-yellow-500]="newTask.priority === p && p === 'medium'"
+                            [class.text-yellow-500]="newTask.priority === p && p === 'medium'"
+                            [class.bg-yellow-500/10]="newTask.priority === p && p === 'medium'"
+                            
+                            [class.border-blue-500]="newTask.priority === p && p === 'low'"
+                            [class.text-blue-500]="newTask.priority === p && p === 'low'"
+                            [class.bg-blue-500/10]="newTask.priority === p && p === 'low'">
                       {{p}}
                     </button>
                   }
                 </div>
               </div>
 
-               <div class="pt-2 flex gap-3">
+               <div class="pt-4 flex gap-3 border-t border-[#2a3441] mt-4">
                   @if (newTask.id) {
-                    <button (click)="deleteTask(newTask.id!)" class="mr-auto text-red-500 hover:text-red-700 font-bold text-sm flex items-center gap-1">
+                    <button (click)="deleteTask(newTask.id!)" class="mr-auto text-red-500 hover:text-red-400 font-bold text-xs uppercase tracking-widest flex items-center gap-1">
                       <span class="material-symbols-outlined text-sm">delete</span>
+                      Abort
                     </button>
                   }
-                  <button (click)="saveTask()" class="flex-1 py-4 bg-[#13ec5b] text-[#0d1b12] rounded-2xl font-black shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all">
-                    {{ newTask.id ? 'Update Task' : 'Save Task' }}
+                  <button (click)="saveTask()" class="flex-1 py-3 bg-[#ec5b13] text-white rounded font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(236,91,19,0.3)] hover:shadow-[0_0_25px_rgba(236,91,19,0.5)] hover:scale-[1.02] transition-all text-xs">
+                    {{ newTask.id ? 'Update_Protocol' : 'Initialize_Task' }}
                   </button>
                 </div>
             </div>
@@ -244,17 +263,17 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
 
       <!-- Unscheduled Section -->
       @if (tasksWithoutTime().length > 0) {
-        <div class="mt-4 mx-4 bg-[#f1f5f9] dark:bg-[#0d1610] rounded-2xl p-4 border border-dashed border-slate-300 dark:border-slate-700">
-          <h3 class="text-xs font-black text-[#4c9a66] uppercase tracking-widest mb-3 flex items-center gap-2">
+        <div class="mt-4 mx-4 bg-[#0c0e12] rounded border border-dashed border-[#2a3441] p-4">
+          <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
             <span class="material-symbols-outlined text-sm">inbox</span>
-            Unscheduled / Postponed
+            Unscheduled_Buffer
           </h3>
           <div class="flex flex-wrap gap-2">
             @for (task of displayTasksWithoutTime(); track task.id) {
               <div (click)="editTask(task)" 
-                   class="bg-white dark:bg-[#1a2c20] px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-[#13ec5b] cursor-pointer flex items-center gap-3 transition-all">
-                <span class="font-bold text-sm">{{task.title}}</span>
-                <span class="material-symbols-outlined text-xs text-slate-400">edit</span>
+                   class="bg-[#050608] px-4 py-2 rounded border border-[#2a3441] shadow-sm hover:border-[#ec5b13] cursor-pointer flex items-center gap-3 transition-all group">
+                <span class="font-bold text-sm text-slate-300 group-hover:text-white">{{task.title}}</span>
+                <span class="material-symbols-outlined text-xs text-slate-600 group-hover:text-[#ec5b13]">edit</span>
               </div>
             }
           </div>
@@ -267,17 +286,17 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; 
     }
     .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
+      width: 4px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
       background: transparent;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
-      border-radius: 10px;
+      background: #2a3441;
+      border-radius: 2px;
     }
-    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #2d3a30;
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #ec5b13;
     }
     
     ::ng-deep .mat-mdc-form-field-focus-overlay {
@@ -292,12 +311,30 @@ import { PlannerService, PlannerTask } from '../../../services/planner.service';
       width: 100%;
     }
     
+    /* Remove default underline of Angular Material */
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+    ::ng-deep .mat-mdc-text-field-wrapper {
+        padding: 0;
+    }
+    ::ng-deep .mat-mdc-form-field-infix {
+        border: none;
+        padding: 0 !important;
+        min-height: unset !important;
+    }
+    
+    /* Timepicker Overrides */
+    ::ng-deep .mat-timepicker-toggle-button {
+        color: #ec5b13 !important;
+    }
+
     .timeline-slot:has(.task-card:hover) {
        background-color: transparent !important;
     }
     
     .resize-handle:hover {
-       background-color: rgba(19, 236, 91, 0.2);
+       background-color: rgba(236, 91, 19, 0.2);
     }
     
     .resize-handle.top {
