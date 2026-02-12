@@ -12,35 +12,18 @@ router = APIRouter(prefix="/planner", tags=["planner"])
 
 # Helper function to convert ObjectId to string
 def goal_helper(goal) -> dict:
-    return {
-        "id": str(goal["_id"]),
-        "title": goal["title"],
-        "description": goal.get("description"),
-        "period": goal["period"],
-        "year": goal.get("year"),
-        "month": goal.get("month"),
-        "week": goal.get("week"),
-        "status": goal["status"],
-        "tasks": goal.get("tasks", []),
-        "startDate": goal.get("startDate"),
-        "endDate": goal.get("endDate"),
-        "color": goal.get("color"),
-        "created_at": goal["created_at"]
-    }
+    serialized = {k: v for k, v in goal.items()}
+    if "_id" in serialized:
+        serialized["id"] = str(serialized["_id"])
+        del serialized["_id"]
+    return serialized
 
 def task_helper(task) -> dict:
-    return {
-        "id": str(task["_id"]),
-        "title": task["title"],
-        "description": task.get("description"),
-        "date": task["date"],
-        "start_time": task.get("start_time"),
-        "end_time": task.get("end_time"),
-        "status": task["status"],
-        "priority": task.get("priority"),
-        "category": task.get("category"),
-        "created_at": task["created_at"]
-    }
+    serialized = {k: v for k, v in task.items()}
+    if "_id" in serialized:
+        serialized["id"] = str(serialized["_id"])
+        del serialized["_id"]
+    return serialized
 
 # Goals endpoints
 @router.get("/goals", response_model=List[PlannerGoal])

@@ -111,6 +111,29 @@ class HabitStats(BaseModel):
     weekly_frequency: List[DayFrequency]
     completion_trend: List[TrendItem]
 
+# New Analytics Models
+class BinaryHabitAnalytics(BaseModel):
+    success_ratio: float  # Percentage
+    missed_day_pattern: List[DayFrequency] # Day of week vs missed count
+    recovery_time: float # Avg days to recover
+    consistency_score: float # Last 7 days %
+
+class MeasurableHabitAnalytics(BaseModel):
+    average_value: float
+    target_achievement_rate: float # % of days target met
+    best_day: Optional[float]
+    worst_day: Optional[float]
+    trend_percentage: float # Vs previous period
+    trend_direction: str # "up", "down", "flat"
+
+class AnalyticsResponse(BaseModel):
+    habit_id: str
+    type: str
+    binary_stats: Optional[BinaryHabitAnalytics] = None
+    measurable_stats: Optional[MeasurableHabitAnalytics] = None
+    common_stats: HabitStats # Keep existing stats as common base if needed
+
+
 # Planner Models
 class PlannerGoalBase(BaseModel):
     title: str

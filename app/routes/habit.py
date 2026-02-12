@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from app.database import habit_collection, habit_log_collection
-from app.models import Habit, HabitCreate, HabitUpdate, HabitLogCreate, HabitStats
+from app.models import Habit, HabitCreate, HabitUpdate, HabitLogCreate, HabitStats, AnalyticsResponse, BinaryHabitAnalytics, MeasurableHabitAnalytics, DayFrequency, TrendItem
 from app.serializers import habits_serializer, habit_serializer
 from bson import ObjectId
 from datetime import datetime, timezone, timedelta
@@ -253,6 +253,188 @@ async def get_habit_stats(id: str, timezone_offset: Optional[int] = 0):
         "weekly_frequency": weekly_frequency,
         "completion_trend": trend_data
     }
+
+@router.get("/{id}/analytics", response_model=AnalyticsResponse)
+async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
+    habit = habit_collection.find_one({"_id": ObjectId(id)})
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    # Fetch common stats (reuse existing logic if possible, or reimplement cleaner)
+    # We will reimplement slightly to get the raw data needed for advanced analytics
+    
+    end_date = datetime.now(timezone.utc)
+    start_date = end_date - timedelta(days=90) # Analyze last 90 days for trends/consistency
+
+    logs = list(habit_log_collection.find({
+        "habit_id": id,
+        "completed_at": {"$gte": start_date}
+    }).sort("completed_at", 1))
+
+    # --- Common Stats Calculation ---
+    total_completions = habit_log_collection.count_documents({"habit_id": id})
+    
+    # Heatmap (last 365 days) - separate query or use logs? 
+    # Existing stats endpoint uses 365 days. We should probably keep common stats consistent.
+    # Let's call the existing logic or just duplicate it for now to avoid refactoring risk.
+    common_stats = await get_habit_stats(id, timezone_offset) 
+
+    # --- Advanced Analytics ---
+    habit_type = habit.get("type", "yes_no")
+    binary_stats = None
+    measurable_stats = None
+    
+    # Helper to get local date string
+    def get_local_date_str(dt):
+        if dt.tzinfo is None: dt = dt.replace(tzinfo=timezone.utc)
+        return (dt - timedelta(minutes=timezone_offset)).strftime("%Y-%m-%d")
+
+    if habit_type == "yes_no":
+        # 1. Success Ratio (Yes vs No)
+        # Ratio = Total Completions / Total Days (since creation or fixed period?)
+        # Let's use Last 30 Days for "Current Success Ratio" to be actionable? OR All time?
+        # User request says "Yes days vs No days" pie chart. Usually implies a fixed recent period (e.g. Month)
+        # Let's use Last 30 Days.
+        
+        last_30_days_start = end_date - timedelta(days=30)
+        logs_30 = [l for l in logs if l["completed_at"] >= last_30_days_start]
+        yes_count = len(logs_30)
+        no_count = 30 - yes_count
+        success_ratio = (yes_count / 30) * 100
+
+        # 2. Missed-Day Pattern (Day of week failures)
+        # We need to find which days were NOT completed.
+        # Iterate last 90 days?
+        missed_counts = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0}
+        
+        # Create a set of completed dates (local)
+        completed_dates = set()
+        for l in logs:
+            completed_dates.add(get_local_date_str(l["completed_at"]))
+            
+        current = start_date
+        while current <= end_date:
+            d_str = get_local_date_str(current)
+            if d_str not in completed_dates:
+                # Missed
+                local_dt = current - timedelta(minutes=timezone_offset)
+                missed_counts[local_dt.weekday()] += 1
+            current += timedelta(days=1)
+            
+        missed_pattern = []
+        day_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        total_misses = sum(missed_counts.values()) or 1
+        for i in range(7):
+            cnt = missed_counts[i]
+            pct = int((cnt / total_misses) * 100)
+            missed_pattern.append(DayFrequency(day_name=day_labels[i], count=cnt, percentage=pct))
+
+        # 3. Recovery Time (Avg days to return after miss)
+        # Find gaps in sorted completed dates
+        # If dates are [1, 2, 5, 6]. Gaps: (5-2)-1 = 2 missed days. Recovery took 3 days?
+        # Definition: "Missed on Tue -> Completed on Wed" = 1 day recovery?
+        # Definition: "Recovery Time: How quickly user returns after missing a day."
+        # If I miss 1 day, and do it next day, recovery is 1 day.
+        # If I miss 3 days, and do it 4th day, recovery is 4 days?
+        # Let's calc average gap size for gaps >= 1 day.
+        
+        sorted_dates = sorted(list(completed_dates))
+        recovery_times = []
+        if len(sorted_dates) > 1:
+            for i in range(1, len(sorted_dates)):
+                d1 = datetime.strptime(sorted_dates[i-1], "%Y-%m-%d")
+                d2 = datetime.strptime(sorted_dates[i], "%Y-%m-%d")
+                diff = (d2 - d1).days
+                if diff > 1:
+                    # diff=2 means 1 day missed. Recovery time = diff?
+                    # "Missed Tue, done Wed" -> diff=1. No miss.
+                    # "Missed Tue, done Thu" -> diff=2. Missed 1 day. Return took 2 days.
+                    recovery_times.append(diff)
+        
+        avg_recovery = sum(recovery_times) / len(recovery_times) if recovery_times else 0
+        if not recovery_times and yes_count > 0: avg_recovery = 1 # Perfect streak? OR 0 if no misses? 
+        # If perfect streak, recovery time is N/A or 0 (never fell off). Let's say 0.
+        
+        # 4. Consistency Score (Last 7 days / 7 * 100)
+        last_7_start = end_date - timedelta(days=7)
+        logs_7 = [l for l in logs if l["completed_at"] >= last_7_start]
+        # unique days in logs_7
+        unique_days_7 = set()
+        for l in logs_7:
+            unique_days_7.add(get_local_date_str(l["completed_at"]))
+        consistency = (len(unique_days_7) / 7) * 100
+
+        binary_stats = BinaryHabitAnalytics(
+            success_ratio=round(success_ratio, 1),
+            missed_day_pattern=missed_pattern,
+            recovery_time=round(avg_recovery, 1),
+            consistency_score=round(consistency, 1)
+        )
+
+    elif habit_type == "measurable":
+        target = habit.get("targetValue", 0)
+        
+        # 1. Average Value (Last 30 days)
+        last_30_start = end_date - timedelta(days=30)
+        logs_30 = [l for l in logs if l["completed_at"] >= last_30_start]
+        values = [l.get("value", 0) for l in logs_30]
+        avg_val = sum(values) / len(values) if values else 0
+        
+        # 2. Target Achievement Rate
+        # Count days where value >= target (assuming >= comparator for now)
+        # TODO: Handle comparator "<="
+        met_target_count = sum(1 for v in values if v >= target)
+        # Rate over *total days* (30) or *logged days*? 
+        # "User hit target 18/30 days". So over period.
+        target_rate = (met_target_count / 30) * 100
+        
+        # 3. Best / Worst Day
+        # Max/Min in last 90? or All time? Let's do All Time (from logs fetched, currently 90)
+        # Maybe fetch all time max/min from DB aggregation for better accuracy?
+        # For now use 90 days.
+        best_day = max(values) if values else 0
+        worst_day = min(values) if values else 0
+        
+        # 4. Trend Direction
+        # Recent 7 vs Previous 7
+        last_7_start = end_date - timedelta(days=7)
+        prev_7_start = last_7_start - timedelta(days=7)
+        
+        curr_vals = [l.get("value", 0) for l in logs if l["completed_at"] >= last_7_start]
+        prev_vals = [l.get("value", 0) for l in logs if prev_7_start <= l["completed_at"] < last_7_start]
+        
+        curr_avg = sum(curr_vals) / 7 # Over 7 days or over logged days? Usually over time period.
+        prev_avg = sum(prev_vals) / 7
+        
+        trend_dir = "flat"
+        trend_pct = 0
+        if prev_avg > 0:
+            change = ((curr_avg - prev_avg) / prev_avg) * 100
+            trend_pct = change
+            if change > 5: trend_dir = "up"
+            elif change < -5: trend_dir = "down"
+        else:
+            if curr_avg > 0: 
+                trend_dir = "up"
+                trend_pct = 100 # Infinity?
+        
+        measurable_stats = MeasurableHabitAnalytics(
+            average_value=round(avg_val, 2),
+            target_achievement_rate=round(target_rate, 1),
+            best_day=best_day,
+            worst_day=worst_day,
+            trend_percentage=round(trend_pct, 1),
+            trend_direction=trend_dir
+        )
+
+    return AnalyticsResponse(
+        habit_id=id,
+        type=habit_type,
+        binary_stats=binary_stats,
+        measurable_stats=measurable_stats,
+        common_stats=common_stats
+    )
+
 
 @router.get("/{id}", response_model=Habit)
 async def get_habit(id: str, date: Optional[str] = None, timezone_offset: Optional[int] = 0):
