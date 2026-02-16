@@ -56,7 +56,7 @@ export class HabitService {
             name: habitData.name,
             description: habitData.description || '',
             frequency: habitData.frequency,
-            targetDays: habitData.targetDays,
+            weekdays: habitData.weekdays,
             icon: habitData.icon || 'star',
             color: habitData.color || '#000000',
             category: habitData.category || 'General'

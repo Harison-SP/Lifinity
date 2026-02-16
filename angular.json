@@ -25,6 +25,7 @@
               }
             ],
             "styles": [
+              "node_modules/@flogeez/angular-tiptap-editor/styles/index.css",
               "src/styles.css"
             ]
           },

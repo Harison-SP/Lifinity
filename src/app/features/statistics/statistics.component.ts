@@ -19,9 +19,16 @@ import { CommonModule } from '@angular/common';
                     Global_Metrics
                 </h1>
             </div>
-            <div class="text-right hidden md:block">
-                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400">Data_Stream: ACTIVE</p>
-                <p class="text-[10px] font-bold font-mono text-concrete-900">{{ today | date:'yyyy-MM-dd HH:mm:ss' }}</p>
+            
+            <div class="flex flex-col items-end gap-4">
+                <a routerLink="/add" class="group relative flex items-center gap-3 px-8 py-4 bg-electric-red text-white font-black uppercase tracking-[0.2em] text-sm rigid-border border-[4px] brutalist-shadow-md hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                    <span class="material-symbols-outlined text-2xl">add_box</span>
+                    <span>Initialize_New</span>
+                </a>
+                <div class="text-right hidden md:block border-t-2 border-black/10 pt-2 w-full">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400">Data_Stream: ACTIVE</p>
+                    <p class="text-[10px] font-bold font-mono text-concrete-900">{{ today | date:'yyyy-MM-dd HH:mm:ss' }}</p>
+                </div>
             </div>
         </header>
 
@@ -86,40 +93,64 @@ import { CommonModule } from '@angular/common';
         <!-- Detailed Metrics -->
          <h2 class="text-3xl font-black text-black uppercase mb-8 flex items-center gap-4">
             <span class="w-4 h-4 bg-electric-red"></span>
-            Protocol_Breakdown
+            Active_Directives
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @for (habit of habitService.habits(); track habit.id) {
-                <a [routerLink]="['/details', habit.id]" class="block bg-concrete-100 rigid-border border-[2px] hover:border-[4px] hover:bg-white transition-all group overflow-hidden relative p-6 cursor-pointer">
+                <a [routerLink]="['/details', habit.id]" class="block bg-white rigid-border border-[4px] border-black hover:bg-concrete-100 transition-all group overflow-hidden relative p-6 cursor-pointer brutalist-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+                    <!-- Decorative Corner -->
+                    <div class="absolute top-0 right-0 w-8 h-8 bg-black triangle-corner"></div>
+
                     <!-- Progress Background -->
                     <div class="absolute bottom-0 left-0 h-1 bg-black w-full opacity-10">
                          <div class="h-full bg-electric-red" [style.width.%]="habit.completionRate"></div>
                     </div>
 
                     <div class="flex justify-between items-start mb-4">
-                        <span class="material-symbols-outlined text-4xl text-black group-hover:text-electric-red transition-colors">{{ habit.icon }}</span>
-                        <span class="text-[10px] font-bold bg-black text-white px-2 py-1 uppercase tracking-wider">{{ habit.category }}</span>
+                        <div class="w-12 h-12 rigid-border-sm bg-concrete-100 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-2xl text-black group-hover:text-electric-red transition-colors">{{ habit.icon || 'star' }}</span>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="text-[10px] font-bold bg-black text-white px-2 py-1 uppercase tracking-wider">{{ habit.category || 'General' }}</span>
+                            @if (habit.completedToday) {
+                                <div class="bg-electric-red text-white text-[10px] font-black uppercase px-2 py-1 tracking-widest">
+                                    COMPLETE
+                                </div>
+                            }
+                        </div>
                     </div>
 
-                    <h3 class="text-xl font-black uppercase mb-4 truncate">{{ habit.name }}</h3>
+                    <h3 class="text-2xl font-black uppercase mb-1 truncate group-hover:underline decoration-4 decoration-electric-red underline-offset-4">{{ habit.name }}</h3>
+                    <p class="text-xs font-bold text-concrete-400 uppercase tracking-widest mb-6">{{ habit.frequencyType || 'Daily' }} // ACTIVE</p>
 
-                    <div class="grid grid-cols-2 gap-4 text-xs font-mono border-t-2 border-concrete-300 pt-4">
+                    <div class="grid grid-cols-2 gap-4 text-xs font-mono border-t-4 border-black pt-4">
                         <div>
-                            <span class="block text-concrete-400 font-bold uppercase">Streak</span>
-                            <span class="block text-lg font-black">{{ habit.streak }}</span>
+                            <span class="block text-concrete-400 font-black uppercase text-[10px]">Streak</span>
+                            <span class="block text-2xl font-black">{{ habit.streak }}</span>
                         </div>
                          <div class="text-right">
-                            <span class="block text-concrete-400 font-bold uppercase">Efficiency</span>
-                            <span class="block text-lg font-black text-electric-red">{{ habit.completionRate }}%</span>
+                            <span class="block text-concrete-400 font-black uppercase text-[10px]">Efficiency</span>
+                            <span class="block text-2xl font-black text-electric-red">{{ habit.completionRate }}%</span>
                         </div>
                     </div>
                 </a>
+            } @empty {
+                <div class="col-span-full py-20 text-center rigid-border border-[4px] border-dashed border-concrete-400 bg-concrete-100">
+                    <span class="material-symbols-outlined text-6xl text-concrete-400 mb-4">folder_off</span>
+                    <h3 class="text-xl font-black text-concrete-400 uppercase tracking-widest">No Directives Found</h3>
+                    <p class="text-xs font-mono text-concrete-400 mt-2">Initialize a new protocol to begin data collection.</p>
+                </div>
             }
         </div>
     </div>
     `,
-    styles: [`:host { display: block; }`],
+    styles: [`
+        :host { display: block; }
+        .triangle-corner {
+            clip-path: polygon(100% 0, 0 0, 100% 100%);
+        }
+    `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StatisticsComponent {
@@ -134,12 +165,7 @@ export class StatisticsComponent {
     });
 
     totalCompletions = computed(() => {
-         // This is an estimate based on what we have loaded. 
-         // Ideally backend should provide a global stats endpoint.
-         // For now, let's sum up streak * frequency approximation or just return 0 if not available
-         // Actually, habit model doesn't store total completions count directly in the list view, only in details stats.
-         // I'll leave it as a placeholder or sum streaks as a proxy for "recent activity"
-         return this.habitService.habits().reduce((acc, h) => acc + (h.streak || 0), 0);
+          return this.habitService.habits().reduce((acc, h) => acc + (h.streak || 0), 0);
     });
 
     bestHabit = computed(() => {
@@ -148,3 +174,4 @@ export class StatisticsComponent {
         return habits.reduce((prev, current) => ((prev.streak || 0) > (current.streak || 0)) ? prev : current);
     });
 }
+

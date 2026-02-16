@@ -38,7 +38,6 @@ export class NavigationOverlayComponent {
     { path: '/', label: 'DASHBOARD', icon: 'architecture' },
     { path: '/add', label: 'INITIALIZE', icon: 'add_box' },
     { path: '/planner', label: 'PLANNER', icon: 'calendar_month' },
-    { path: '/habits', label: 'ALL_PROTOCOLS', icon: 'view_list' },
     { path: '/statistics', label: 'STATISTICS', icon: 'monitoring' },
     { path: '/settings', label: 'Sys_Config', icon: 'settings_input_component' },
   ];

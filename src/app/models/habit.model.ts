@@ -15,7 +15,7 @@ export interface Habit {
   targetComparator: TargetComparator;
 
   frequencyType: string; // 'daily', 'specific_days', 'interval', 'count_per_period'
-  frequencyDays: number[];
+  weekdays: number[];
   frequencyInterval: number;
   frequencyCount: number;
   frequencyPeriod: number;
@@ -24,8 +24,6 @@ export interface Habit {
   endDate?: string;
   timeBlockStart?: string;
   timeBlockEnd?: string;
-
-  targetDays: number[]; // 0 = Sunday, 1 = Monday, etc. (Legacy/Display)
   icon?: string;
   color?: string;
   category?: string;
@@ -36,6 +34,7 @@ export interface Habit {
   created_at: string; // Changed from Date to string to match API response type usually
   latestLog?: {
       id: string;
+      habit_name?: string;
       value?: number;
       notes?: string;
       completed_at: any;
@@ -45,6 +44,7 @@ export interface Habit {
 export interface HabitLog {
   id: string;
   habit_id: string;
+  habit_name?: string;
   completed_at: string; // ISO UTC
   value?: number;
   notes?: string;

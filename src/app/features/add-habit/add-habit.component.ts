@@ -72,6 +72,24 @@ import { MatNativeDateModule } from '@angular/material/core';
                             <span class="text-[10px] mono-font block opacity-70 group-hover:opacity-100">Numeric Value Tracking</span>
                         </button>
                      </div>
+
+                     <!-- Spectra Code (Color) -->
+                     <div class="mt-8">
+                        <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Spectra_Code</label>
+                        <div class="flex gap-2 flex-wrap">
+                            @for (c of presetColors; track c) {
+                                <button type="button" (click)="color.set(c)"
+                                        class="w-8 h-8 rigid-border-sm border-[2px] transition-all hover:scale-110 flex items-center justify-center shadow-[2px_2px_0_0_black]"
+                                        [style.background-color]="c"
+                                        [class.border-black]="color() === c"
+                                        [class.border-transparent]="color() !== c">
+                                    @if(color() === c) {
+                                        <div class="w-2 h-2 bg-black"></div>
+                                    }
+                                </button>
+                            }
+                        </div>
+                     </div>
                 </div>
 
                 <!-- Measurable Options -->
@@ -140,19 +158,35 @@ import { MatNativeDateModule } from '@angular/material/core';
 
             <div class="mb-12">
                 <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Timeframe_Constraints</label>
+                <div class="grid grid-cols-1 gap-6">
+                    <mat-form-field appearance="outline" class="brutalist-input w-full">
+                        <mat-label>Timeline_Range</mat-label>
+                        <mat-date-range-input [rangePicker]="rangePicker">
+                            <input matStartDate formControlName="startDate" placeholder="START">
+                            <input matEndDate formControlName="endDate" placeholder="END">
+                        </mat-date-range-input>
+                        <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
+                        <mat-date-range-picker #rangePicker panelClass="brutalist-datepicker"></mat-date-range-picker>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Section 4: Time Block -->
+            <div class="mb-12">
+                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Time_Block_Window</label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <mat-form-field appearance="outline" class="brutalist-input w-full">
-                        <mat-label>Start_Date</mat-label>
-                        <input matInput [matDatepicker]="startPicker" formControlName="startDate">
-                        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #startPicker panelClass="brutalist-datepicker"></mat-datepicker>
+                        <mat-label>Block_Start_Time</mat-label>
+                        <input matInput [matTimepicker]="startTimePicker" formControlName="timeBlockStart">
+                        <mat-timepicker-toggle matSuffix [for]="startTimePicker"></mat-timepicker-toggle>
+                        <mat-timepicker #startTimePicker></mat-timepicker>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="brutalist-input w-full">
-                        <mat-label>End_Date</mat-label>
-                        <input matInput [matDatepicker]="endPicker" formControlName="endDate">
-                        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #endPicker panelClass="brutalist-datepicker"></mat-datepicker>
+                        <mat-label>Block_End_Time</mat-label>
+                        <input matInput [matTimepicker]="endTimePicker" formControlName="timeBlockEnd">
+                        <mat-timepicker-toggle matSuffix [for]="endTimePicker"></mat-timepicker-toggle>
+                        <mat-timepicker #endTimePicker></mat-timepicker>
                     </mat-form-field>
                 </div>
             </div>
@@ -259,14 +293,16 @@ export class AddHabitComponent implements OnInit {
         frequencyInterval: [1],
         frequencyCount: [1],
         frequencyPeriod: [7], 
-        startDate: [''],
-        endDate: [''],
-        timeBlockStart: [''],
-        timeBlockEnd: ['']
+        startDate: [new Date(), Validators.required],
+        endDate: [(() => { const d = new Date(); d.setDate(d.getDate() + 14); return d; })(), Validators.required],
+        timeBlockStart: [new Date()],
+        timeBlockEnd: [(() => { const d = new Date(); d.setHours(d.getHours() + 2); return d; })()]
     });
 
     habitType = signal<string>('yes_no');
     frequencyType = signal<string>('daily');
+    color = signal<string>('#ec5b13');
+    presetColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'];
 
     constructor() {
         effect(() => {
@@ -294,7 +330,8 @@ export class AddHabitComponent implements OnInit {
                     
                     this.habitType.set(habit.type || 'yes_no');
                     this.frequencyType.set(habit.frequencyType || 'daily');
-                    this.selectedDays.set(habit.frequencyDays || habit.targetDays || []);
+                    this.selectedDays.set(habit.weekdays || []);
+                    this.color.set(habit.color || '#ec5b13');
                 }
             }
         });
@@ -337,21 +374,19 @@ export class AddHabitComponent implements OnInit {
                 
                 frequency: 'Custom', 
                 frequencyType: this.frequencyType(),
-                frequencyDays: this.frequencyType() === 'specific_days' ? this.selectedDays() : [],
+                weekdays: this.frequencyType() === 'daily' ? [0, 1, 2, 3, 4, 5, 6] : 
+                         this.frequencyType() === 'specific_days' ? this.selectedDays() : [],
                 frequencyInterval: formVal.frequencyInterval || 1,
                 frequencyCount: formVal.frequencyCount || 1,
                 frequencyPeriod: formVal.frequencyPeriod || 7,
 
-                targetDays: this.frequencyType() === 'daily' ? [0, 1, 2, 3, 4, 5, 6] : 
-                            this.frequencyType() === 'specific_days' ? this.selectedDays() : [],
-                
                 startDate: this.dateToString(formVal.startDate as any),
                 endDate: this.dateToString(formVal.endDate as any),
                 timeBlockStart: this.timeToString(formVal.timeBlockStart as any),
                 timeBlockEnd: this.timeToString(formVal.timeBlockEnd as any),
 
                 icon: 'star',
-                color: '#ec5b13',
+                color: this.color(),
                 category: 'General'
             };
 

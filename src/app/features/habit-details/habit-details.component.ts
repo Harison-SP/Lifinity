@@ -3,11 +3,14 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
+import { HabitAnalyticsComponent } from './habit-analytics/habit-analytics';
+import { AnalyticsResponse } from '../../models/habit.model';
+import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 
 @Component({
     selector: 'app-habit-details',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, HabitAnalyticsComponent, NgxChartsModule],
     template: `
     <div class="min-h-screen bg-concrete-200 p-6 md:p-8 lg:p-12 font-manrope pb-24 relative">
         <!-- Header -->
@@ -92,33 +95,52 @@ import { HabitService } from '../../services/habit.service';
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <!-- Activity Heatmap -->
                 <div class="lg:col-span-2 bg-white rigid-border border-[4px] p-8 brutalist-shadow-md">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-6 border-b-4 border-black pb-4">
                         <h3 class="text-xl font-black text-black uppercase font-arvo">Activity_Matrix</h3>
-                        <div class="flex items-center gap-1 text-[9px] font-bold uppercase">
-                            <span>NULL</span>
-                            <div class="w-3 h-3 bg-concrete-100 border border-black"></div>
-                            <div class="w-3 h-3 bg-concrete-300 border border-black"></div>
-                            <div class="w-3 h-3 bg-concrete-400 border border-black"></div>
-                             <div class="w-3 h-3 bg-black border border-black"></div>
-                            <span>MAX</span>
+                        <div class="flex items-center gap-4">
+                            <!-- Year Selector -->
+                            <select [ngModel]="heatmapYear()" (ngModelChange)="heatmapYear.set($event)" class="bg-white rigid-border-sm border-2 border-black p-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                                @for (year of availableYears(); track year) {
+                                    <option [value]="year">{{ year }}</option>
+                                }
+                            </select>
+                            <!-- Legend -->
+                            <div class="hidden md:flex items-center gap-1 text-[9px] font-bold uppercase">
+                                <span>Less</span>
+                                <div class="w-3 h-3 bg-concrete-100 border border-black/30"></div>
+                                <div class="w-3 h-3 bg-concrete-300 border border-black/30"></div>
+                                <div class="w-3 h-3 bg-concrete-500 border border-black/30"></div>
+                                <div class="w-3 h-3 bg-black border border-black/30"></div>
+                                <span>More</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="overflow-x-auto pb-2 custom-scrollbar">
-                        <div class="flex gap-1 min-w-max">
-                            <div class="flex flex-col gap-1 pr-2 text-[9px] font-bold font-mono uppercase justify-between">
-                                <span>Mon</span><span>Wed</span><span>Fri</span><span>Sun</span>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-8">
+                        @for (monthData of yearHeatmap(); track monthData.month) {
+                            <div>
+                                <h4 class="text-sm font-bold font-mono uppercase mb-3 text-center">{{ getMonthName(monthData.month) }}</h4>
+                                <div class="grid grid-cols-7 gap-1 mb-1">
+                                    @for (d of ['S','M','T','W','T','F','S']; track d) {
+                                        <div class="text-center text-[9px] font-black text-concrete-400">{{ d }}</div>
+                                    }
+                                </div>
+                                <div class="grid grid-cols-7 gap-1">
+                                    @for (day of monthData.days; track $index) {
+                                        @if (day.isEmpty) {
+                                            <div class="aspect-square"></div>
+                                        } @else {
+                                            <div class="w-full aspect-square border border-black/10 transition-all hover:scale-125 relative cursor-help rounded-sm"
+                                                [class.bg-concrete-100]="day.level === 0"
+                                                [class.bg-concrete-300]="day.level === 1"
+                                                [class.bg-concrete-500]="day.level === 2"
+                                                [class.bg-black]="day.level >= 3"
+                                                [title]="day.date + ': Level ' + (day.level || 0)">
+                                            </div>
+                                        }
+                                    }
+                                </div>
                             </div>
-                            <div class="grid grid-flow-col grid-rows-7 gap-1">
-                                @for (item of fullHeatmap; track $index) {
-                                    <div class="w-3 h-3 border border-black transition-all hover:scale-125 relative cursor-help"
-                                         [class.bg-concrete-100]="item.level === 0"
-                                         [class.bg-concrete-300]="item.level === 1"
-                                         [class.bg-concrete-500]="item.level === 2"
-                                         [class.bg-black]="item.level >= 3"
-                                         [title]="item.date + ': ' + item.level"></div>
-                                }
-                            </div>
-                        </div>
+                        }
                     </div>
                 </div>
 
@@ -168,6 +190,67 @@ import { HabitService } from '../../services/habit.service';
                 </div>
             </div>
 
+            <!-- Weekly Distribution & Efficiency Vector -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <!-- Weekly Distribution -->
+                <div class="bg-white rigid-border border-[4px] p-8 brutalist-shadow-md">
+                    <h3 class="text-xl font-black text-black uppercase font-arvo mb-6 flex items-center gap-2 border-b-4 border-black pb-2">
+                        <span class="material-symbols-outlined text-electric-red">bubble_chart</span>
+                        Weekly_Distribution
+                    </h3>
+                    @if (stats()?.weekly_frequency) {
+                        <div class="h-48 w-full">
+                            <ngx-charts-bubble-chart
+                                [results]="weeklyBubbleData()"
+                                [xAxis]="true"
+                                [yAxis]="false"
+                                [showXAxisLabel]="false"
+                                [showYAxisLabel]="false"
+                                [legend]="false"
+                                [scheme]="colorScheme"
+                                [roundDomains]="true"
+                                [minRadius]="5"
+                                [maxRadius]="30"
+                                [autoScale]="true">
+                            </ngx-charts-bubble-chart>
+                        </div>
+                    }
+                </div>
+
+                <!-- Efficiency Vector (Trend Line) -->
+                <div class="bg-white rigid-border border-[4px] p-8 brutalist-shadow-md flex flex-col">
+                    <h3 class="text-xl font-black text-black uppercase font-arvo mb-6 flex items-center gap-2 border-b-4 border-black pb-2">
+                        <span class="material-symbols-outlined text-electric-red">trending_up</span>
+                        Efficiency_Vector
+                    </h3>
+                    <div class="flex-1 flex items-end relative h-48 w-full bg-concrete-100 border-2 border-black p-2">
+                        <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible relative z-10" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="trendGradient" x1="0" x2="0" y1="0" y2="1">
+                                    <stop offset="0%" stop-color="black" stop-opacity="0.2"/>
+                                    <stop offset="100%" stop-color="black" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <path [attr.d]="trendArea()" fill="url(#trendGradient)" />
+                            <path [attr.d]="trendLine()" fill="none" stroke="black" stroke-width="2.5" stroke-linecap="square" vector-effect="non-scaling-stroke" />
+                        </svg>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-black text-concrete-400 mt-3 font-mono uppercase">
+                        @if (stats()?.completion_trend?.length) {
+                            <span>{{ stats()!.completion_trend[0].period }}</span>
+                            <span>{{ stats()!.completion_trend[stats()!.completion_trend.length - 1].period }}</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Analytics -->
+             @if (analytics()) {
+                 <div class="bg-black rigid-border border-[4px] p-8 brutalist-shadow-md mb-12">
+                     <app-habit-analytics [habit]="habit()!" [analytics]="analytics()!"></app-habit-analytics>
+                 </div>
+             }
+
             <!-- History Log -->
             <div class="bg-white rigid-border border-[4px] p-8 brutalist-shadow-md">
                 <div class="flex items-center justify-between mb-8 border-b-4 border-black pb-4">
@@ -200,6 +283,7 @@ import { HabitService } from '../../services/habit.service';
                                     <td class="p-4 text-concrete-400 italic">{{ log.notes || 'N/A' }}</td>
                                 </tr>
                              } @empty {
+                                [diff_line_limit]
                                 <tr>
                                     <td colspan="4" class="p-8 text-center font-bold text-concrete-400">NO_DATA_AVAILABLE</td>
                                 </tr>
@@ -260,13 +344,106 @@ export class HabitDetailsComponent implements OnInit {
     totalPages = computed(() => Math.ceil(this.totalHistory() / this.pageSize()) || 1);
 
     stats = signal<any | null>(null);
-    fullHeatmap: {date: string, level: number}[] = [];
+    analytics = signal<AnalyticsResponse | null>(null);
 
+    colorScheme: Color = {
+        name: 'vivid',
+        selectable: true,
+        group: ScaleType.Ordinal,
+        domain: ['#3b82f6', '#16a34a', '#ef4444', '#f97316', '#8b5cf6', '#d946ef', '#f43f5e']
+    };
+
+    weeklyBubbleData = computed(() => {
+        const freq = this.stats()?.weekly_frequency;
+        if (!freq) return [];
+
+        const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        const series = freq.map((day: any) => ({
+            name: day.day_name,
+            x: day.day_name,
+            y: 50, 
+            r: day.count + 1 
+        }));
+
+        series.sort((a: any, b: any) => dayOrder.indexOf(a.name) - dayOrder.indexOf(b.name));
+
+        return [{
+            name: this.habit()?.name || 'Frequency',
+            series: series
+        }];
+    });
+    
+    // Heatmap state
+    heatmapYear = signal(new Date().getFullYear());
+    fullHeatmapData = signal<{date: string, level: number}[]>([]); 
+    availableYears = computed(() => {
+        const allDates = this.fullHeatmapData().map(d => new Date(d.date));
+        if (allDates.length === 0) return [new Date().getFullYear()];
+        const years = [...new Set(allDates.map(d => d.getFullYear()))];
+        return years.sort((a, b) => b - a);
+    });
+
+    yearHeatmap = computed(() => {
+        const year = this.heatmapYear();
+        const dataMap = new Map(this.fullHeatmapData().map(item => [item.date, item.level]));
+        const months = [];
+
+        for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+            const firstDay = new Date(year, monthIndex, 1);
+            const lastDay = new Date(year, monthIndex + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
+
+            const days: any[] = [];
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                days.push({ isEmpty: true });
+            }
+
+            for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+                const date = new Date(year, monthIndex, dayNum);
+                const dateStr = date.toISOString().split('T')[0];
+                days.push({
+                    isEmpty: false,
+                    date: dateStr,
+                    level: dataMap.get(dateStr) || 0
+                });
+            }
+            months.push({ month: monthIndex, days });
+        }
+        return months;
+    });
+
+    // Calendar state
     calendarMonth = signal(new Date().getMonth());
     calendarYear = signal(new Date().getFullYear());
     selectedDate = signal<string | null>(null);
     logValue: number | undefined;
     logNotes: string = '';
+
+    trendLine = computed(() => {
+        const stats = this.stats();
+        if (!stats || !stats.completion_trend || stats.completion_trend.length === 0) return '';
+        
+        const data = stats.completion_trend;
+        const count = data.length;
+        if (count < 2) return '';
+        
+        const points = data.map((item: any, index: number) => {
+            const x = (index / (count - 1)) * 100;
+            const y = 50 - ((item.rate / 100) * 50);
+            return `${x},${y}`;
+        });
+        
+        return `M ${points.join(' L ')}`;
+    });
+
+    trendArea = computed(() => {
+        const line = this.trendLine();
+        if (!line) return '';
+        
+        return `${line} V 50 H 0 Z`;
+    });
 
     calendarMonthName = computed(() => {
         const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -288,17 +465,7 @@ export class HabitDetailsComponent implements OnInit {
             days.push({ date: '', dayNumber: 0, isEmpty: true, isCompleted: false, isToday: false, isFuture: false });
         }
 
-        const logs = this.history(); // Note: this only has current page logs. For calendar we might need full logs or use theheatmap data? 
-        // Actually, for accuracy, the stats endpoint should return a map of completed dates, or we rely on heatmap data which covers a year.
-        // Let's use heatmap data for completion check if available, or just history for now (history is paginated effectively, so might miss data).
-        // Correction: habit.completedDates might be available in the habit object? No.
-        // I'll rely on heatmap for completion check as it has all dates.
-        
-        // Wait, heatmap structure is {date, level}. level > 0 means completed? 
-        // Or level represents intensity.
-        // I will use heatmap to determine completion.
-        
-        const completedDates = new Set(this.fullHeatmap.filter(h => h.level > 0).map(h => h.date));
+        const completedDates = new Set(this.fullHeatmapData().filter(h => h.level > 0).map(h => h.date));
 
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
@@ -324,6 +491,7 @@ export class HabitDetailsComponent implements OnInit {
         if (id) {
             this.loadHistory(id);
             this.loadStats(id);
+            this.loadAnalytics(id);
         }
     }
 
@@ -331,9 +499,16 @@ export class HabitDetailsComponent implements OnInit {
         this.habitService.getHabitStats(id).subscribe({
             next: (stats) => {
                 this.stats.set(stats);
-                this.generateHeatmap(stats.heatmap);
+                this.fullHeatmapData.set(stats.heatmap || []);
             },
             error: (err) => console.error('Failed to load stats', err)
+        });
+    }
+
+    loadAnalytics(id: string) {
+        this.habitService.getHabitAnalytics(id).subscribe({
+            next: (data) => this.analytics.set(data),
+            error: (err) => console.error('Failed to load analytics', err)
         });
     }
 
@@ -347,22 +522,8 @@ export class HabitDetailsComponent implements OnInit {
         });
     }
 
-    generateHeatmap(apiData: any[]) {
-        const today = new Date();
-        const endDate = new Date(today);
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() - 364);
-
-        const dataMap = new Map(apiData.map(item => [item.date, item.level]));
-        this.fullHeatmap = [];
-        
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
-            this.fullHeatmap.push({
-                date: dateStr,
-                level: dataMap.get(dateStr) || 0
-            });
-        }
+    getMonthName(monthIndex: number): string {
+        return new Date(this.heatmapYear(), monthIndex).toLocaleString('default', { month: 'short' }).toUpperCase();
     }
 
     toggleDone() {
@@ -376,6 +537,7 @@ export class HabitDetailsComponent implements OnInit {
                 this.habitService.toggleCompletion(id, new Date().toISOString().split('T')[0]).subscribe(() => {
                      this.loadHistory(id);
                      this.loadStats(id);
+                     this.loadAnalytics(id);
                 });
             }
         }
@@ -392,18 +554,34 @@ export class HabitDetailsComponent implements OnInit {
         if (!habit) return;
 
         if (habit.type === 'yes_no') {
-            this.habitService.updateLog(habit.id, date, {}).subscribe(() => {
-                this.loadHistory(habit.id);
-                this.loadStats(habit.id);
+            const currentData = this.fullHeatmapData();
+            const dayIndex = currentData.findIndex(d => d.date === date);
+            
+            let newLevel = 1;
+            if (dayIndex > -1) {
+                const currentLevel = currentData[dayIndex].level;
+                newLevel = currentLevel > 0 ? 0 : 1;
+                const newData = [...currentData];
+                newData[dayIndex] = { ...newData[dayIndex], level: newLevel };
+                this.fullHeatmapData.set(newData);
+            } else {
+                this.fullHeatmapData.set([...currentData, { date, level: newLevel }]);
+            }
+
+            this.habitService.updateLog(habit.id, date, { value: newLevel }).subscribe({
+                next: () => {
+                    this.loadStats(habit.id!);
+                    this.loadHistory(habit.id!);
+                },
+                error: (err) => {
+                    console.error("Failed to update log, reverting UI", err);
+                    this.fullHeatmapData.set(currentData);
+                }
             });
             return;
         }
 
         this.selectedDate.set(date);
-        // We need to fetch specific log for this date. 
-        // For now, scan history (might be incomplete). 
-        // Ideally we should have getLog(date) API. 
-        // I will leave it empty for new logs if not in current page history.
         const existingLog = this.history().find(log => log.completed_at.startsWith(date));
         if (existingLog) {
             this.logValue = existingLog.value;
@@ -429,6 +607,7 @@ export class HabitDetailsComponent implements OnInit {
         }).subscribe(() => {
             this.loadHistory(id);
             this.loadStats(id);
+            this.loadAnalytics(id);
             this.closeLogForm();
         });
     }

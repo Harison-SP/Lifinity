@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewEncapsulation, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 import { Habit, AnalyticsResponse, BinaryHabitAnalytics, MeasurableHabitAnalytics } from '../../../models/habit.model';
@@ -11,27 +11,22 @@ import { Habit, AnalyticsResponse, BinaryHabitAnalytics, MeasurableHabitAnalytic
   styleUrl: './habit-analytics.css',
   encapsulation: ViewEncapsulation.None
 })
-export class HabitAnalytics implements OnChanges {
-  @Input() habit!: Habit;
-  @Input() analytics!: AnalyticsResponse;
+export class HabitAnalyticsComponent implements OnChanges {
+  @Input({ required: true }) habit!: Habit;
+  @Input({ required: true }) analytics!: AnalyticsResponse;
 
   // Chart Data
-  successRatioData: any[] = [];
-  missedDayPatternData: any[] = [];
-  trendData: any[] = [];
-  
-  // Chart Options
-  view: [number, number] = [700, 300]; // Responsive view
+  successRatioData = signal<any[]>([]);
+  missedDayPatternData = signal<any[]>([]);
   
   // Colors
   colorScheme: Color = {
     name: 'custom',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: ['#ec5b13', '#2a3441', '#1a2c20', '#A10A28', '#C7B42C', '#AAAAAA']
+    domain: ['#ec5b13', '#2a3441', '#1e293b', '#475569', '#94a3b8']
   };
   
-  // Specific colors for pie chart (Success/Failure)
   successColorScheme: Color = {
     name: 'success',
     selectable: true,
@@ -40,12 +35,12 @@ export class HabitAnalytics implements OnChanges {
   };
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['analytics'] && this.analytics) {
+    if ((changes['analytics'] || changes['habit']) && this.analytics && this.habit) {
       this.processData();
     }
   }
 
-  processData() {
+  private processData() {
     if (this.habit.type === 'yes_no') {
       if (this.analytics.binary_stats) {
         this.processBinaryData(this.analytics.binary_stats);
@@ -58,39 +53,23 @@ export class HabitAnalytics implements OnChanges {
   }
 
   private processBinaryData(data: BinaryHabitAnalytics) {
-    // 1. Success Ratio (Pie Chart)
-    this.successRatioData = [
-      {
-        name: 'Success',
-        value: data.success_ratio
-      },
-      {
-        name: 'Missed',
-        value: 100 - data.success_ratio
-      }
-    ];
+    this.successRatioData.set([
+      { name: 'Success', value: data.success_ratio },
+      { name: 'Missed', value: Math.max(0, 100 - data.success_ratio) }
+    ]);
 
-    // 2. Missed Day Pattern (Bar Chart)
-    // data.missed_day_pattern is { "Monday": 5, "Tuesday": 2 ... }
-    this.missedDayPatternData = Object.keys(data.missed_day_pattern).map(day => ({
-      name: day.substring(0, 3), // Mon, Tue
-      value: data.missed_day_pattern[day]
-    }));
+    if (data.missed_day_pattern && Array.isArray(data.missed_day_pattern)) {
+      this.missedDayPatternData.set(data.missed_day_pattern.map(item => ({
+        name: item.day_name.substring(0, 3),
+        value: item.count
+      })));
+    }
   }
 
   private processMeasurableData(data: MeasurableHabitAnalytics) {
-    // 1. Trend Direction 
-    
-    // Let's create a gauge-like data for Target Achievement
-    this.successRatioData = [ // Reusing this variable for simplicity or rename it
-      {
-        name: 'Achieved',
-        value: data.target_achievement_rate
-      },
-      {
-        name: 'Remaining',
-        value: Math.max(0, 100 - data.target_achievement_rate)
-      }
-    ];
+    this.successRatioData.set([
+      { name: 'Achieved', value: data.target_achievement_rate },
+      { name: 'Remaining', value: Math.max(0, 100 - data.target_achievement_rate) }
+    ]);
   }
 }

@@ -1,111 +1,119 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PlannerService, PlannerGoal } from '../../../services/planner.service';
+import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop';
+
+// Data Structures
+interface WeeklyTask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+interface WeekDay {
+  date: Date;
+  name: string;
+  tasks: WeeklyTask[];
+}
 
 @Component({
   selector: 'app-weekly-view',
-  imports: [CommonModule, FormsModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule, DragDropModule],
   template: `
-    <div class="h-full flex flex-col font-manrope">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-4">
-        <h2 class="text-2xl font-black text-black flex items-center gap-2 uppercase font-arvo">
-          <span class="material-symbols-outlined text-3xl">view_week</span>
-          Weekly_Objectives
-        </h2>
-        
-        <button (click)="showAddForm.set(!showAddForm())" 
-                class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black uppercase tracking-wider text-xs shadow-[4px_4px_0_0_black] hover:shadow-[2px_2px_0_0_black] hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center gap-2">
-          <span class="material-symbols-outlined text-lg">add</span>
-          INIT_GOAL
-        </button>
+    <div class="h-full flex flex-col font-manrope p-4 gap-6">
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-2">
+          <button (click)="changeWeek(-1)" class="p-2 hover:bg-black hover:text-white transition-colors rigid-border-sm border-[2px]">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <h2 class="text-xl font-black text-black uppercase font-arvo text-center">
+            {{ weekDateRange() }}
+          </h2>
+          <button (click)="changeWeek(1)" class="p-2 hover:bg-black hover:text-white transition-colors rigid-border-sm border-[2px]">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Add Goal Form -->
-      @if (showAddForm()) {
-        <div class="mb-8 mx-4 bg-white rigid-border border-[4px] p-6 relative brutalist-shadow-active">
-            <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-2">
-                <h3 class="text-lg font-black text-black uppercase tracking-wider font-arvo">New_Objective_Parameters</h3>
-                <button (click)="showAddForm.set(false)" class="border-2 border-transparent hover:border-black w-8 h-8 flex items-center justify-center">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
+        <!-- Left Panel: Targets & Metrics -->
+        <div class="lg:col-span-1 flex flex-col gap-6">
+          <!-- Weekly Targets -->
+          <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg flex-1 flex flex-col">
+            <h3 class="text-lg font-black text-black uppercase font-arvo border-b-4 border-black pb-2 mb-4">Weekly Targets</h3>
+            <div class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+              @for(target of weeklyTargets(); track target.id) {
+                <div class="flex items-center gap-2 group">
+                  <input type="checkbox" [checked]="target.completed" (change)="toggleTargetCompletion(target.id)" class="size-4 accent-black"/>
+                  <input [(ngModel)]="target.text" (ngModelChange)="saveData()" class="flex-1 bg-transparent border-b-2 border-concrete-300 focus:border-black outline-none text-sm py-1 font-mono uppercase" [class.line-through]="target.completed">
+                  <button (click)="deleteTarget(target.id)" class="opacity-0 group-hover:opacity-100 text-red-500">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+              }
             </div>
-
-          <div class="space-y-4">
-              <div class="space-y-1">
-                 <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Objective_Title</label>
-                 <input [(ngModel)]="newGoal.title" placeholder="ENTER_TITLE" 
-                        class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all rounded-none uppercase placeholder:text-concrete-300">
-              </div>
-              
-              <div class="space-y-1">
-                 <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Calculated_Params</label>
-                 <textarea [(ngModel)]="newGoal.description" placeholder="// ADD_DETAILS..." 
-                        class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all resize-none rounded-none uppercase placeholder:text-concrete-300" rows="3"></textarea>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1">
-                   <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Cycle_Year</label>
-                   <input type="number" [(ngModel)]="newGoal.year" [placeholder]="currentYear.toString()" 
-                          class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all rounded-none">
-                </div>
-                <div class="space-y-1">
-                   <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Sequence_Week</label>
-                   <input type="number" [(ngModel)]="newGoal.week" placeholder="1-52" min="1" max="52"
-                          class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all rounded-none">
-                </div>
-              </div>
+            <div class="flex gap-2 mt-4">
+               <input [(ngModel)]="newTargetText" placeholder="New Target" (keyup.enter)="addTarget()" class="flex-1 px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none uppercase placeholder:text-concrete-300">
+               <button (click)="addTarget()" class="px-4 py-2 bg-black text-white rigid-border-sm border-[2px] font-black uppercase text-xs">Add</button>
+            </div>
           </div>
-          
-          <div class="flex gap-3 mt-6 border-t-4 border-black pt-4">
-            <button (click)="addGoal()" class="flex-1 px-6 py-3 bg-black text-white rigid-border-sm border-[2px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all text-xs shadow-[4px_4px_0_0_concrete-400]">
-                Initialize_Objective
-            </button>
+
+          <!-- Weekly Metrics -->
+          <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg">
+             <h3 class="text-lg font-black text-black uppercase font-arvo border-b-4 border-black pb-2 mb-4">Weekly Metrics</h3>
+             <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold uppercase">Total Focus Hours</span>
+                    <input type="number" [(ngModel)]="metrics().focusHours" (ngModelChange)="saveData()" class="w-20 text-center px-2 py-1 bg-white rigid-border-sm border-[2px] font-mono">
+                </div>
+                 <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold uppercase">Tasks Completed</span>
+                    <span class="font-mono font-black text-lg">{{ tasksCompleted() }} / {{ totalTasks() }}</span>
+                </div>
+                 <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold uppercase">Consistency</span>
+                    <span class="font-mono font-black text-lg">{{ consistencyScore() | number:'1.0-0' }}%</span>
+                </div>
+             </div>
           </div>
         </div>
-      }
 
-      <!-- Goals List -->
-      <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar space-y-4">
-        @for (goal of goals(); track goal.id) {
-          <div class="bg-white p-6 rigid-border-sm border-[2px] transition-all group relative overflow-hidden hover:shadow-[4px_4px_0_0_black] cursor-pointer">
-            <div class="flex justify-between items-start mb-4 relative z-10">
-              <div class="flex items-start gap-4">
-                  <div class="p-3 bg-black text-white border-2 border-black rigid-border-sm flex items-center justify-center">
-                      <span class="material-symbols-outlined">flag</span>
-                  </div>
-                  <div>
-                    <h3 class="text-lg font-black text-black uppercase tracking-wide font-arvo">{{goal.title}}</h3>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[10px] bg-concrete-200 text-black px-1.5 py-0.5 font-mono border border-black font-bold">W{{goal.week}} // {{goal.year}}</span>
-                        <span class="text-[10px] text-electric-red font-mono tracking-widest uppercase font-bold">
-                            ACTIVE
-                        </span>
+        <!-- Right Panel: Task Distribution -->
+        <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto custom-scrollbar" cdkDropListGroup>
+           @for(day of weekDays(); track day.date) {
+            <div class="bg-white rigid-border-sm border-[2px] p-4 flex flex-col gap-3">
+              <h4 class="font-black uppercase text-center border-b-2 border-black pb-2">{{ day.name }} <span class="text-concrete-500 font-mono">{{ day.date | date:'d' }}</span></h4>
+              <div class="flex-1 min-h-[150px] space-y-2 overflow-y-auto custom-scrollbar-sm"
+                   cdkDropList
+                   [cdkDropListData]="day.tasks"
+                   (cdkDropListDropped)="drop($event)">
+                 @for(task of day.tasks; track task.id) {
+                    <div cdkDrag class="p-2 rigid-border border-2 border-black bg-concrete-100 cursor-grab active:cursor-grabbing flex justify-between items-center group">
+                       <span class="font-mono text-xs uppercase">{{ task.text }}</span>
+                       <button (click)="deleteTask(day, task.id)" class="opacity-0 group-hover:opacity-100 text-red-500">
+                         <span class="material-symbols-outlined text-sm">close</span>
+                       </button>
                     </div>
-                  </div>
+                 }
               </div>
-              <button (click)="deleteGoal(goal.id!)" class="text-concrete-400 hover:text-electric-red transition-colors p-2 border-2 border-transparent hover:border-black">
-                <span class="material-symbols-outlined text-lg">delete</span>
-              </button>
+              <input #taskInput (keyup.enter)="addTask(day, taskInput)" placeholder="Add task..." class="w-full mt-auto px-2 py-1 bg-white rigid-border-sm border-[2px] font-mono text-sm outline-none">
             </div>
-            
-            @if (goal.description) {
-              <div class="pl-[60px] relative z-10">
-                  <p class="text-black text-sm font-mono border-l-4 border-black pl-3 py-1 uppercase">{{goal.description}}</p>
-              </div>
-            }
-          </div>
-        } @empty {
-          <div class="flex flex-col items-center justify-center py-20 border-4 border-dashed border-concrete-300">
-             <span class="material-symbols-outlined text-6xl text-concrete-400 mb-4">track_changes</span>
-             <p class="text-concrete-500 font-mono uppercase tracking-widest font-bold">NO_OBJECTIVES_DETECTED</p>
-             <button (click)="showAddForm.set(true)" class="mt-4 text-black hover:bg-black hover:text-white px-4 py-2 border-2 border-black text-xs font-black uppercase tracking-wider transition-colors">
-                 Initialize_First_Objective
-             </button>
-          </div>
-        }
+           }
+        </div>
       </div>
+      
+       <!-- Weekly Review Section -->
+        <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg">
+          <h3 class="text-lg font-black text-black uppercase font-arvo border-b-4 border-black pb-2 mb-4">Weekly Review</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             <textarea [(ngModel)]="review().achieved" (ngModelChange)="saveData()" placeholder="Achieved?" rows="3" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+             <textarea [(ngModel)]="review().missed" (ngModelChange)="saveData()" placeholder="Missed?" rows="3" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+             <textarea [(ngModel)]="review().why" (ngModelChange)="saveData()" placeholder="Why?" rows="3" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+             <textarea [(ngModel)]="review().carryForward" (ngModelChange)="saveData()" placeholder="Carry forward?" rows="3" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+          </div>
+        </div>
     </div>
   `,
   styles: [`
@@ -113,83 +121,160 @@ import { PlannerService, PlannerGoal } from '../../../services/planner.service';
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #e5e5e5; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
-    
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+    .custom-scrollbar-sm::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar-sm::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar-sm::-webkit-scrollbar-thumb { background: #ccc; }
+    .cdk-drag-placeholder {
+      opacity: 0.2;
+      background: #eab308;
+      border: 2px dashed black;
+    }
+    .cdk-drag-animating {
+      transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
     }
   `]
 })
 export class WeeklyViewComponent implements OnInit {
-  // Logic remains identical
-  private plannerService = inject(PlannerService);
-  
-  goals = signal<PlannerGoal[]>([]);
-  showAddForm = signal(false);
-  currentYear = new Date().getFullYear();
-  currentWeek = this.getWeekNumber(new Date());
-  
-  newGoal: Partial<PlannerGoal> = {
-    title: '',
-    description: '',
-    year: this.currentYear,
-    week: this.currentWeek,
-    period: 'weekly',
-    status: 'active',
-    tasks: []
-  };
+  currentDate = signal(new Date());
+
+  weekDays = signal<WeekDay[]>([]);
+  weeklyTargets = signal<WeeklyTask[]>([]);
+  review = signal({ achieved: '', missed: '', why: '', carryForward: '' });
+  metrics = signal({ focusHours: 0 });
+
+  newTargetText = '';
+
+  private readonly DATA_KEY_PREFIX = 'weekly_data_';
 
   ngOnInit() {
-    this.loadGoals();
+    this.generateWeekDays(this.currentDate());
+    this.loadData();
+  }
+  
+  generateWeekDays(date: Date) {
+      const startOfWeek = this.getStartOfWeek(date);
+      const days: WeekDay[] = [];
+      for (let i = 0; i < 7; i++) {
+          const dayDate = new Date(startOfWeek);
+          dayDate.setDate(dayDate.getDate() + i);
+          days.push({
+              date: dayDate,
+              name: dayDate.toLocaleDateString('en-US', { weekday: 'long' }),
+              tasks: []
+          });
+      }
+      this.weekDays.set(days);
   }
 
-  loadGoals() {
-    this.plannerService.getGoals({ period: 'weekly' }).subscribe(goals => {
-      this.goals.set(goals);
-    });
-  }
+  loadData() {
+      const key = this.getStorageKey(this.weekDays()[0].date);
+      const data = JSON.parse(localStorage.getItem(key) || '{}');
+      
+      this.weeklyTargets.set(data.targets || []);
+      this.review.set(data.review || { achieved: '', missed: '', why: '', carryForward: '' });
+      this.metrics.set(data.metrics || { focusHours: 0 });
 
-  addGoal() {
-    if (!this.newGoal.title?.trim()) return;
-    
-    const goalToCreate = {
-        ...this.newGoal,
-        year: this.newGoal.year || this.currentYear,
-        week: this.newGoal.week || this.currentWeek,
-        period: 'weekly' as const,
-        status: 'active' as const,
-        tasks: []
-    } as PlannerGoal;
-
-    this.plannerService.createGoal(goalToCreate).subscribe(() => {
-      this.loadGoals();
-      this.newGoal = {
-        title: '',
-        description: '',
-        year: this.currentYear,
-        week: this.currentWeek,
-        period: 'weekly',
-        status: 'active',
-        tasks: []
-      };
-      this.showAddForm.set(false);
-    });
-  }
-
-  deleteGoal(id: string) {
-    if (confirm('Are you sure you want to delete this goal?')) {
-      this.plannerService.deleteGoal(id).subscribe(() => {
-        this.loadGoals();
+      // Merge tasks into weekdays
+      this.weekDays.update(days => {
+          if (data.tasks) {
+              return days.map((day, index) => ({
+                  ...day,
+                  tasks: data.tasks[index] || []
+              }));
+          }
+          return days;
       });
-    }
   }
 
-  getWeekNumber(date: Date): number {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  saveData() {
+      const key = this.getStorageKey(this.weekDays()[0].date);
+      const data = {
+          targets: this.weeklyTargets(),
+          tasks: this.weekDays().map(d => d.tasks),
+          review: this.review(),
+          metrics: this.metrics()
+      };
+      localStorage.setItem(key, JSON.stringify(data));
   }
+
+  getStartOfWeek(date: Date): Date {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to make Monday the first day
+      return new Date(d.setDate(diff));
+  }
+  
+  getStorageKey(date: Date): string {
+    const d = this.getStartOfWeek(date);
+    return `${this.DATA_KEY_PREFIX}${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  }
+
+  changeWeek(delta: number) {
+      const newDate = new Date(this.currentDate());
+      newDate.setDate(newDate.getDate() + (delta * 7));
+      this.currentDate.set(newDate);
+      this.generateWeekDays(newDate);
+      this.loadData();
+  }
+
+  weekDateRange = computed(() => {
+    const days = this.weekDays();
+    if (days.length === 0) return '';
+    const start = days[0].date;
+    const end = days[days.length - 1].date;
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  });
+
+  // Target Methods
+  addTarget() {
+      if (!this.newTargetText.trim()) return;
+      this.weeklyTargets.update(t => [...t, {id: Date.now().toString(), text: this.newTargetText, completed: false}]);
+      this.newTargetText = '';
+      this.saveData();
+  }
+
+  toggleTargetCompletion(id: string) {
+      this.weeklyTargets.update(targets => targets.map(t => t.id === id ? {...t, completed: !t.completed} : t));
+      this.saveData();
+  }
+  
+  deleteTarget(id: string) {
+      this.weeklyTargets.update(targets => targets.filter(t => t.id !== id));
+      this.saveData();
+  }
+
+  // Task Methods
+  addTask(day: WeekDay, input: HTMLInputElement) {
+      if (!input.value.trim()) return;
+      day.tasks.push({ id: Date.now().toString(), text: input.value, completed: false });
+      input.value = '';
+      this.saveData();
+  }
+  
+  deleteTask(day: WeekDay, taskId: string) {
+    day.tasks = day.tasks.filter(t => t.id !== taskId);
+    this.saveData();
+  }
+
+  drop(event: CdkDragDrop<WeeklyTask[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+    }
+    this.saveData();
+  }
+
+  // Computed Metrics
+  tasksCompleted = computed(() => this.weekDays().reduce((sum, day) => sum + day.tasks.filter(t => t.completed).length, 0));
+  totalTasks = computed(() => this.weekDays().reduce((sum, day) => sum + day.tasks.length, 0));
+  consistencyScore = computed(() => {
+      const total = this.totalTasks();
+      return total === 0 ? 0 : (this.tasksCompleted() / total) * 100;
+  });
 }

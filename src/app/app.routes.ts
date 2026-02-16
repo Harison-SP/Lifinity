@@ -19,7 +19,8 @@ export const routes: Routes = [
     },
     {
         path: 'habits',
-        loadComponent: () => import('./features/habits-list/habits-list.component').then(m => m.HabitsListComponent)
+        redirectTo: 'statistics',
+        pathMatch: 'full'
     },
     {
         path: 'details/:id',
