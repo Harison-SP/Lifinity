@@ -29,6 +29,7 @@ export interface PlannerTask {
   priority?: 'low' | 'medium' | 'high';
   category?: 'Study' | 'Work' | 'Health' | 'Personal';
   linkedGoalId?: string;
+  habitId?: string;
   colorTag?: string;
   reminder?: boolean;
   created_at?: string;

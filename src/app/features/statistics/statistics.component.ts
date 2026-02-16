@@ -122,7 +122,25 @@ import { CommonModule } from '@angular/common';
                     </div>
 
                     <h3 class="text-2xl font-black uppercase mb-1 truncate group-hover:underline decoration-4 decoration-electric-red underline-offset-4">{{ habit.name }}</h3>
-                    <p class="text-xs font-bold text-concrete-400 uppercase tracking-widest mb-6">{{ habit.frequencyType || 'Daily' }} // ACTIVE</p>
+                    <p class="text-xs font-bold text-concrete-400 uppercase tracking-widest mb-4">{{ habit.frequencyType || 'Daily' }} // ACTIVE</p>
+
+                    <!-- Timing & Dates -->
+                    <div class="flex flex-col gap-2 mb-6 bg-concrete-50 p-2 rigid-border-sm border-2">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase">
+                            <span class="text-concrete-400 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs">calendar_today</span>
+                                Period:
+                            </span>
+                            <span class="text-black">{{ habit.startDate | date:'MMM d' }} - {{ habit.endDate ? (habit.endDate | date:'MMM d') : 'UNTIL HALT' }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase">
+                            <span class="text-concrete-400 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs">schedule</span>
+                                Window:
+                            </span>
+                            <span class="text-black">{{ habit.timeBlockStart || 'NOT SET' }} - {{ habit.timeBlockEnd || 'NOT SET' }}</span>
+                        </div>
+                    </div>
 
                     <div class="grid grid-cols-2 gap-4 text-xs font-mono border-t-4 border-black pt-4">
                         <div>

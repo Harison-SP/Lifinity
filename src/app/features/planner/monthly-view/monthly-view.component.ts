@@ -1,12 +1,13 @@
-import { Component, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed, Injector, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PlannerService, MonthlyReflection, HabitCompletions, HabitNote } from '../../../services/planner.service';
 import { HabitService } from '../../../services/habit.service';
 import { MultiSelectChipsComponent, MultiSelectOption } from '../../../shared/components/multi-select-chips/multi-select-chips.component';
 import { AngularTiptapEditorComponent } from '@flogeez/angular-tiptap-editor';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil, take } from 'rxjs/operators';
 
 interface MonthlyHabit {
   id: string;
@@ -512,6 +513,9 @@ interface MonthlyHabit {
 export class MonthlyViewComponent implements OnInit, OnDestroy {
   private plannerService = inject(PlannerService);
   private habitService = inject(HabitService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private injector = inject(Injector);
   
   private destroy$ = new Subject<void>();
   private reflectionSave$ = new Subject<void>();
@@ -797,7 +801,6 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Debounce reflection saves: wait 800ms after last keystroke before saving
     this.reflectionSave$.pipe(
       debounceTime(800),
       takeUntil(this.destroy$)
@@ -805,7 +808,6 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
       this.doSaveReflection();
     });
 
-    // Debounce note saves: wait 600ms after last keystroke
     this.noteSave$.pipe(
       debounceTime(600),
       takeUntil(this.destroy$)
@@ -813,7 +815,30 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
       this.doSaveNote();
     });
 
-    this.loadDataForMonth();
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      const habitId = params['habitId'];
+      const dateStr = params['date'];
+
+      if (dateStr) {
+        this.currentDate.set(new Date(dateStr));
+      }
+
+      this.loadDataForMonth();
+
+      if (habitId) {
+        const effectRef = effect(() => {
+          const habits = this.monthHabits();
+          if (habits.length > 0) {
+            const habitToSelect = habits.find(h => h.id === habitId);
+            if (habitToSelect) {
+              this.selectHabitForNotes(habitToSelect);
+              this.router.navigate([], { queryParams: { habitId: null, date: null }, queryParamsHandling: 'merge' });
+            }
+            effectRef.destroy();
+          }
+        }, { injector: this.injector });
+      }
+    });
   }
 
   ngOnDestroy() {

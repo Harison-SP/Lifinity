@@ -1,5 +1,6 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { YearlyViewComponent } from './yearly-view/yearly-view.component';
 import { MonthlyViewComponent } from './monthly-view/monthly-view.component';
 import { WeeklyViewComponent } from './weekly-view/weekly-view.component';
@@ -69,8 +70,9 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
     .footer-pb { padding-bottom: 100px; }
   `]
 })
-export class PlannerComponent {
+export class PlannerComponent implements OnInit {
   private location = inject(Location);
+  private route = inject(ActivatedRoute);
   activePeriod = signal<'yearly' | 'monthly' | 'weekly' | 'daily'>('daily');
   
   periods = [
@@ -79,6 +81,15 @@ export class PlannerComponent {
     { value: 'weekly' as const, label: 'Weekly', icon: 'view_week' },
     { value: 'daily' as const, label: 'Daily', icon: 'schedule' }
   ];
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const view = params['view'];
+      if (view && this.periods.some(p => p.value === view)) {
+        this.activePeriod.set(view);
+      }
+    });
+  }
 
   goBack() {
     this.location.back();

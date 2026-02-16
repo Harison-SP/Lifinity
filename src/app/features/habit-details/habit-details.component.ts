@@ -40,18 +40,27 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                 </button>
                 <button (click)="toggleDone()" 
                         class="px-6 py-2 rigid-border-sm border-[2px] font-black uppercase tracking-widest text-xs transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none shadow-[4px_4px_0_0_black]"
-                        [class.bg-electric-red]="!habit()?.completedToday"
-                        [class.text-white]="!habit()?.completedToday"
-                        [class.bg-concrete-900]="habit()?.completedToday"
-                        [class.text-white]="habit()?.completedToday">
-                    {{ habit()?.completedToday ? 'COMPLETED' : 'MARK_COMPLETE' }}
+                        [class.bg-electric-red]="!isCompletedOnSelectedDate()"
+                        [class.text-white]="!isCompletedOnSelectedDate()"
+                        [class.bg-concrete-900]="isCompletedOnSelectedDate()"
+                        [class.text-white]="isCompletedOnSelectedDate()">
+                    {{ isCompletedOnSelectedDate() ? 'COMPLETED' : 'MARK_COMPLETE' }}
                 </button>
             </div>
         </header>
 
         @if (habit()) {
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+                <!-- Date Selector (New) -->
+                <div class="bg-yellow-400 rigid-border border-[4px] p-6 relative group overflow-hidden brutalist-shadow-sm flex flex-col justify-center">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-black/60 mb-2 border-b-2 border-black pb-1">Observation_Point</p>
+                    <input type="date" 
+                           [ngModel]="viewDate()" 
+                           (ngModelChange)="onDateChange($event)"
+                           class="bg-transparent border-none text-xl font-black font-mono outline-none cursor-pointer uppercase w-full">
+                </div>
+
                 <!-- Streak -->
                 <div class="bg-white rigid-border border-[4px] p-6 relative group overflow-hidden brutalist-shadow-sm">
                     <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-2 border-b-2 border-black pb-1">Current_Sequence</p>
@@ -337,6 +346,12 @@ export class HabitDetailsComponent implements OnInit {
     habitId = computed(() => this.route.snapshot.paramMap.get('id'));
     habit = computed(() => this.habitService.habits().find(h => h.id === this.habitId()));
 
+    viewDate = signal(new Date().toISOString().split('T')[0]);
+    isCompletedOnSelectedDate = computed(() => {
+        const date = this.viewDate();
+        return this.fullHeatmapData().some(d => d.date === date && d.level > 0);
+    });
+
     history = signal<any[]>([]);
     currentPage = signal(1);
     pageSize = signal(5);
@@ -489,10 +504,22 @@ export class HabitDetailsComponent implements OnInit {
     ngOnInit() {
         const id = this.habitId();
         if (id) {
-            this.loadHistory(id);
-            this.loadStats(id);
-            this.loadAnalytics(id);
+            this.loadAllData(id);
         }
+    }
+
+    onDateChange(newDate: string) {
+        this.viewDate.set(newDate);
+        const id = this.habitId();
+        if (id) {
+            this.loadAllData(id);
+        }
+    }
+
+    loadAllData(id: string) {
+        this.loadHistory(id);
+        this.loadStats(id);
+        this.loadAnalytics(id);
     }
 
     loadStats(id: string) {
@@ -529,15 +556,13 @@ export class HabitDetailsComponent implements OnInit {
     toggleDone() {
         const id = this.habitId();
         const habit = this.habit();
+        const date = this.viewDate();
         if (id && habit) {
             if (habit.type === 'measurable') {
-                const today = new Date().toISOString().split('T')[0];
-                this.selectDate(today);
+                this.selectDate(date);
             } else {
-                this.habitService.toggleCompletion(id, new Date().toISOString().split('T')[0]).subscribe(() => {
-                     this.loadHistory(id);
-                     this.loadStats(id);
-                     this.loadAnalytics(id);
+                this.habitService.toggleCompletion(id, date).subscribe(() => {
+                     this.loadAllData(id);
                 });
             }
         }
