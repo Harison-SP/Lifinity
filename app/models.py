@@ -14,7 +14,7 @@ class HabitBase(BaseModel):
 
     # New Fields for Advanced Frequency
     frequencyType: str = "daily"  # "daily", "specific_days", "interval", "count_per_period"
-    frequencyDays: List[int] = Field(default_factory=list)  # Replaces targetDays for specific days
+    weekdays: List[int] = Field(default_factory=list)  # Replaces targetDays and frequencyDays for specific days
     frequencyInterval: int = 1  # Every X days
     frequencyCount: int = 1  # X times...
     frequencyPeriod: int = 7  # ...per Y days (default week)
@@ -24,9 +24,6 @@ class HabitBase(BaseModel):
     endDate: Optional[str] = None
     timeBlockStart: Optional[str] = None
     timeBlockEnd: Optional[str] = None
-
-    # Deprecated but kept for backward compatibility (will map to new fields)
-    targetDays: List[int] = Field(default_factory=lambda: [0, 1, 2, 3, 4, 5, 6])
     
     icon: Optional[str] = None
     color: Optional[str] = None
@@ -50,7 +47,7 @@ class HabitUpdate(BaseModel):
     targetComparator: Optional[str] = None
 
     frequencyType: Optional[str] = None
-    frequencyDays: Optional[List[int]] = None
+    weekdays: Optional[List[int]] = None
     frequencyInterval: Optional[int] = None
     frequencyCount: Optional[int] = None
     frequencyPeriod: Optional[int] = None
@@ -59,8 +56,6 @@ class HabitUpdate(BaseModel):
     endDate: Optional[str] = None
     timeBlockStart: Optional[str] = None
     timeBlockEnd: Optional[str] = None
-    
-    targetDays: Optional[List[int]] = None
     icon: Optional[str] = None
     color: Optional[str] = None
     category: Optional[str] = None
@@ -78,6 +73,7 @@ class Habit(HabitBase):
 
 class HabitLogBase(BaseModel):
     habit_id: str
+    habit_name: Optional[str] = None
     completed_at: datetime # UTC timestamp
     value: Optional[float] = 1.0 # Default to 1.0 for yes/no, actual value for measurable
     notes: Optional[str] = None
@@ -193,6 +189,88 @@ class PlannerTaskUpdate(BaseModel):
 class PlannerTask(PlannerTaskBase):
     id: str
     created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Note Models
+class NoteBase(BaseModel):
+    content: str
+    date: str  # YYYY-MM-DD format
+    tags: List[str] = Field(default_factory=list)
+    category: Optional[str] = None
+
+class NoteCreate(NoteBase):
+    pass
+
+class NoteUpdate(BaseModel):
+    content: Optional[str] = None
+    date: Optional[str] = None
+    tags: Optional[List[str]] = None
+    category: Optional[str] = None
+
+class Note(NoteBase):
+    id: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Monthly Reflection Models
+class MonthlyReflectionBase(BaseModel):
+    year: int
+    month: int  # 1-12
+    primary_focus: List[str] = Field(default_factory=list)  # List of habit IDs
+    secondary_focus: List[str] = Field(default_factory=list)  # List of habit IDs
+    targeted_goals: str = ""  # What user planned to achieve
+    achieved_goals: str = ""  # What user actually achieved
+    worked: str = ""  # What worked well
+    failed: str = ""  # What didn't work
+    improve: str = ""  # What to improve
+    study_hours: float = 0.0  # Calculated from task time blocks
+
+class MonthlyReflectionCreate(MonthlyReflectionBase):
+    pass
+
+class MonthlyReflectionUpdate(BaseModel):
+    primary_focus: Optional[List[str]] = None
+    secondary_focus: Optional[List[str]] = None
+    targeted_goals: Optional[str] = None
+    achieved_goals: Optional[str] = None
+    worked: Optional[str] = None
+    failed: Optional[str] = None
+    improve: Optional[str] = None
+    study_hours: Optional[float] = None
+
+class MonthlyReflection(MonthlyReflectionBase):
+    id: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+# Habit Note Models (Rich-text notes linked to habits)
+class HabitNoteBase(BaseModel):
+    habit_id: str
+    title: str = ""
+    content: str = ""  # HTML content from rich-text editor
+    tags: List[str] = Field(default_factory=list)
+    is_pinned: bool = False
+
+class HabitNoteCreate(HabitNoteBase):
+    pass
+
+class HabitNoteUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    tags: Optional[List[str]] = None
+    is_pinned: Optional[bool] = None
+
+class HabitNote(HabitNoteBase):
+    id: str
+    created_at: datetime
+    updated_at: datetime
     
     class Config:
         from_attributes = True

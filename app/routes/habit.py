@@ -64,6 +64,7 @@ async def get_habits(date: Optional[str] = None, timezone_offset: Optional[int] 
             if log:
                 habit["latestLog"] = {
                     "id": str(log["_id"]),
+                    "habit_name": log.get("habit_name"),
                     "value": log.get("value"),
                     "notes": log.get("notes"),
                     "completed_at": log.get("completed_at")
@@ -551,6 +552,12 @@ async def toggle_habit_completion(id: str, payload: dict):
              if req_value is not None: update_fields["value"] = req_value
              if req_notes is not None: update_fields["notes"] = req_notes
              
+             # Also ensure habit_name is present if it was missing
+             if not existing_log.get("habit_name"):
+                 habit_doc = habit_collection.find_one({"_id": ObjectId(id)})
+                 if habit_doc:
+                     update_fields["habit_name"] = habit_doc.get("name")
+             
              habit_log_collection.update_one(
                  {"_id": existing_log["_id"]},
                  {"$set": update_fields}
@@ -562,8 +569,13 @@ async def toggle_habit_completion(id: str, payload: dict):
             update_data["completedToday"] = False
     else:
         # Toggle ON: Insert log
+        # Fetch habit name to store it with the log
+        habit_doc = habit_collection.find_one({"_id": ObjectId(id)})
+        habit_name = habit_doc.get("name") if habit_doc else "Unknown Habit"
+        
         new_log = {
             "habit_id": id,
+            "habit_name": habit_name,
             "completed_at": completed_at,
             "value": req_value,
             "notes": req_notes

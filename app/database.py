@@ -12,3 +12,6 @@ db = client[DB_NAME]
 collection_name = "habits"
 habit_collection = db[collection_name]
 habit_log_collection = db["habit_logs"]
+note_collection = db["notes"]
+monthly_reflection_collection = db["monthly_reflections"]
+habit_note_collection = db["habit_notes"]

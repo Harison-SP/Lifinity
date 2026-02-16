@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import habit, planner
+from app.routes import habit, planner, habit_maintenance
 
 app = FastAPI()
 
@@ -9,6 +9,7 @@ origins = [
     "http://localhost:1234", # Current running port
     "http://127.0.0.1:4200",
     "http://127.0.0.1:1234",
+    "*"
 ]
 
 app.add_middleware(
@@ -21,6 +22,7 @@ app.add_middleware(
 
 app.include_router(habit.router, prefix="/habits", tags=["habits"])
 app.include_router(planner.router)
+app.include_router(habit_maintenance.router)
 
 
 @app.get("/")

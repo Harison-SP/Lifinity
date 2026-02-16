@@ -6,7 +6,7 @@ def habit_serializer(habit) -> dict:
         "name": habit.get("name"),
         "description": habit.get("description"),
         "frequency": habit.get("frequency", "Daily"),
-        "targetDays": habit.get("targetDays", []),
+        "weekdays": habit.get("weekdays") or habit.get("frequencyDays") or habit.get("targetDays", []),
         "icon": habit.get("icon"),
         "color": habit.get("color"),
         "category": habit.get("category"),
