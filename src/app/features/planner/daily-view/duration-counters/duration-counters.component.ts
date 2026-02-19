@@ -7,18 +7,18 @@ import { PlannerTask } from '../../../../services/planner.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="flex gap-4 mb-4">
-      <div class="flex-1 bg-white p-4 rounded-lg shadow">
-        <h3 class="text-sm font-bold text-gray-500">Total Focus Time Today</h3>
-        <p class="text-2xl font-bold">{{ totalFocusTime() | number:'1.0-1' }}h</p>
+    <div class="flex flex-col md:flex-row gap-4 mb-4">
+      <div class="flex-1 bg-white dark:bg-concrete-800 p-4 rigid-border-sm border-[2px] dark:border-concrete-100 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0_0_white]">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400 mb-1">Total Focus Time Today</h3>
+        <p class="text-2xl font-black font-mono text-black dark:text-white">{{ totalFocusTime() | number:'1.0-1' }}h</p>
       </div>
-      <div class="flex-1 bg-white p-4 rounded-lg shadow">
-        <h3 class="text-sm font-bold text-gray-500">Deep Work Hours</h3>
-        <p class="text-2xl font-bold">{{ deepWorkHours() | number:'1.0-1' }}h</p>
+      <div class="flex-1 bg-white dark:bg-concrete-800 p-4 rigid-border-sm border-[2px] dark:border-concrete-100 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0_0_white]">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400 mb-1">Deep Work Hours</h3>
+        <p class="text-2xl font-black font-mono text-black dark:text-white">{{ deepWorkHours() | number:'1.0-1' }}h</p>
       </div>
-      <div class="flex-1 bg-white p-4 rounded-lg shadow">
-        <h3 class="text-sm font-bold text-gray-500">Distraction Time</h3>
-        <p class="text-2xl font-bold">{{ distractionTime() | number:'1.0-1' }}h</p>
+      <div class="flex-1 bg-white dark:bg-concrete-800 p-4 rigid-border-sm border-[2px] dark:border-concrete-100 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0_0_white]">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400 mb-1">Distraction Time</h3>
+        <p class="text-2xl font-black font-mono text-black dark:text-white">{{ distractionTime() | number:'1.0-1' }}h</p>
       </div>
     </div>
   `,

@@ -16,24 +16,25 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
     <div class="h-full flex flex-col gap-4 relative font-manrope">
       <div class="flex flex-col gap-4 px-4 pt-2">
          <div class="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-            <h2 class="text-2xl font-black text-black flex items-center gap-2 uppercase font-arvo">
-              <span class="text-black material-symbols-outlined text-3xl">calendar_view_week</span>
-              <button (click)="changeYear(-1)" class="p-1 hover:bg-black hover:text-white rounded-none border border-transparent hover:border-black transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
-              <span class="font-mono text-black underline decoration-4 decoration-electric-red">{{ currentYear() }}</span>
-              <button (click)="changeYear(1)" class="p-1 hover:bg-black hover:text-white rounded-none border border-transparent hover:border-black transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+            <h2 class="text-2xl font-black text-black dark:text-white flex items-center gap-2 uppercase font-arvo">
+              <span class="text-black dark:text-white material-symbols-outlined text-3xl">calendar_view_week</span>
+              <button (click)="changeYear(-1)" class="p-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black rounded-none border border-transparent hover:border-black dark:hover:border-white transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
+              <span class="font-mono text-black dark:text-white underline decoration-4 decoration-electric-red">{{ currentYear() }}</span>
+              <button (click)="changeYear(1)" class="p-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black rounded-none border border-transparent hover:border-black dark:hover:border-white transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
               <span class="text-sm text-concrete-500 ml-2 tracking-widest font-mono font-bold">_CYCLE_OVERVIEW</span>
             </h2>
 
              <!-- Filter Chips -->
              <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar-x w-full md:w-auto">
-                 <span class="text-[10px] uppercase font-black text-concrete-900 tracking-widest mr-2 whitespace-nowrap">Filter_Spectra:</span>
+                 <span class="text-[10px] uppercase font-black text-concrete-900 dark:text-concrete-200 tracking-widest mr-2 whitespace-nowrap">Filter_Spectra:</span>
                  <div class="flex gap-2">
                     @for (color of presetColors; track color) {
                       <button (click)="toggleFilter(color)" 
-                              class="size-6 rigid-border-sm border-[2px] transition-all hover:scale-110 flex items-center justify-center relative group"
+                              class="size-6 rigid-border-sm border-[2px] transition-all hover:scale-110 flex items-center justify-center relative group shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white]"
                               [style.background-color]="color"
                               [class.ring-2]="selectedColors().has(color)"
                               [class.ring-black]="selectedColors().has(color)"
+                              [class.dark:ring-white]="selectedColors().has(color)"
                               [class.opacity-40]="selectedColors().size > 0 && !selectedColors().has(color)">
                           @if(selectedColors().has(color)) {
                               <span class="absolute text-[10px] text-white font-black inset-0 flex items-center justify-center bg-black/20">✓</span>
@@ -44,7 +45,7 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
              </div>
 
             <a routerLink="/add" 
-                    class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs ml-auto md:ml-0 whitespace-nowrap active:translate-y-1 active:shadow-none cursor-pointer decoration-0">
+                    class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs ml-auto md:ml-0 whitespace-nowrap active:translate-y-1 active:shadow-none cursor-pointer decoration-0 dark:border-concrete-100">
               <span class="material-symbols-outlined text-lg">add</span>
               INIT_EVENT
             </a>
@@ -53,7 +54,7 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
 
       <div class="flex-1 flex overflow-hidden gap-4 px-4 pb-4">
         <!-- Linear Calendar -->
-        <div class="flex-1 bg-white rigid-border border-[4px] p-0 overflow-hidden h-full flex flex-col relative group/calendar brutalist-shadow-active">
+        <div class="flex-1 bg-white dark:bg-concrete-900 rigid-border border-[4px] dark:border-concrete-100 p-0 overflow-hidden h-full flex flex-col relative group/calendar brutalist-shadow-active dark:shadow-[8px_8px_0_0_white]">
           <div class="absolute inset-x-0 top-0 h-1 bg-electric-red z-20"></div>
           <app-linear-calendar 
             [events]="calendarEvents()"
@@ -65,52 +66,52 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
 
         <!-- Details Panel -->
         @if (selectedGoal()) {
-          <div class="w-80 bg-white rigid-border border-[4px] p-6 overflow-y-auto h-full flex flex-col transition-all relative animate-in slide-in-from-right duration-300 shadow-[0_0_50px_rgba(0,0,0,0.2)] z-30 brutalist-shadow-active">
-            <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-2">
-                <h3 class="text-lg font-black text-black uppercase tracking-wider font-arvo">
+          <div class="w-80 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 overflow-y-auto h-full flex flex-col transition-all relative animate-in slide-in-from-right duration-300 shadow-[0_0_50px_rgba(0,0,0,0.2)] dark:shadow-[0_0_50px_rgba(255,255,255,0.1)] z-30 brutalist-shadow-active dark:shadow-[8px_8px_0_0_white]">
+            <div class="flex justify-between items-center mb-6 border-b-4 border-black dark:border-concrete-100 pb-2">
+                <h3 class="text-lg font-black text-black dark:text-white uppercase tracking-wider font-arvo">
                     PROTOCOL_DETAILS
                 </h3>
-                 <button (click)="closeDetails()" class="border-2 border-transparent hover:border-black w-8 h-8 flex items-center justify-center">
+                 <button (click)="closeDetails()" class="border-2 border-transparent hover:border-black dark:hover:border-white w-8 h-8 flex items-center justify-center dark:text-white">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
             <div class="space-y-6 flex-1">
                 <div>
-                     <span class="text-[10px] font-black text-concrete-900 uppercase tracking-widest block mb-1">DESIGNATION</span>
-                     <p class="text-xl font-black text-black uppercase break-words leading-tight">{{ selectedGoal()!.title }}</p>
+                     <span class="text-[10px] font-black text-concrete-900 dark:text-concrete-200 uppercase tracking-widest block mb-1">DESIGNATION</span>
+                     <p class="text-xl font-black text-black dark:text-white uppercase break-words leading-tight">{{ selectedGoal()!.title }}</p>
                 </div>
                 
                 <div>
-                     <span class="text-[10px] font-black text-concrete-900 uppercase tracking-widest block mb-1">TIMEFRAME</span>
-                     <div class="font-mono text-sm font-bold bg-concrete-100 p-2 border-2 border-concrete-200">
+                     <span class="text-[10px] font-black text-concrete-900 dark:text-concrete-200 uppercase tracking-widest block mb-1">TIMEFRAME</span>
+                     <div class="font-mono text-sm font-bold bg-concrete-100 dark:bg-concrete-900 dark:text-white p-2 border-2 border-concrete-200 dark:border-concrete-600">
                         {{ selectedGoal()!.startDate }} <span class="text-electric-red">>>></span> {{ selectedGoal()!.endDate }}
                      </div>
                 </div>
 
                 @if (selectedGoal()!.description) {
                     <div>
-                         <span class="text-[10px] font-black text-concrete-900 uppercase tracking-widest block mb-1">OPERATIONAL_NOTES</span>
-                         <p class="text-sm font-bold text-concrete-600 font-mono p-3 bg-concrete-50 border-2 border-dashed border-concrete-300">
+                         <span class="text-[10px] font-black text-concrete-900 dark:text-concrete-200 uppercase tracking-widest block mb-1">OPERATIONAL_NOTES</span>
+                         <p class="text-sm font-bold text-concrete-600 dark:text-concrete-400 font-mono p-3 bg-concrete-50 dark:bg-concrete-900 border-2 border-dashed border-concrete-300 dark:border-concrete-600">
                             {{ selectedGoal()!.description }}
                          </p>
                     </div>
                 }
 
                 <div>
-                     <span class="text-[10px] font-black text-concrete-900 uppercase tracking-widest block mb-1">SPECTRA_ID</span>
-                     <div class="h-6 w-full border-2 border-black" [style.background-color]="selectedGoal()!.color"></div>
+                     <span class="text-[10px] font-black text-concrete-900 dark:text-concrete-200 uppercase tracking-widest block mb-1">SPECTRA_ID</span>
+                     <div class="h-6 w-full border-2 border-black dark:border-white" [style.background-color]="selectedGoal()!.color"></div>
                 </div>
             </div>
 
-            <div class="pt-6 border-t-4 border-black mt-auto flex flex-col gap-3">
-                <button (click)="navigateToEdit()" class="w-full py-3 bg-black text-white rigid-border-sm border-[2px] font-black uppercase tracking-widest hover:bg-electric-red hover:text-white transition-all text-xs shadow-[4px_4px_0_0_concrete-400] flex items-center justify-center gap-2">
+            <div class="pt-6 border-t-4 border-black dark:border-concrete-100 mt-auto flex flex-col gap-3">
+                <button (click)="navigateToEdit()" class="w-full py-3 bg-black dark:bg-concrete-100 text-white dark:text-black rigid-border-sm border-[2px] dark:border-concrete-900 font-black uppercase tracking-widest hover:bg-electric-red hover:text-white dark:hover:bg-electric-red dark:hover:text-white transition-all text-xs shadow-[4px_4px_0_0_concrete-400] dark:shadow-[4px_4px_0_0_white] flex items-center justify-center gap-2">
                   <span class="material-symbols-outlined text-sm">edit</span>
                   INITIATE_OVERRIDE
                 </button>
 
                 @if (!isConfirmingDelete()) {
-                    <button (click)="deleteGoal()" class="w-full py-3 bg-white text-electric-red rigid-border-sm border-[2px] border-electric-red font-black uppercase tracking-widest hover:bg-electric-red hover:text-white transition-all text-xs flex items-center justify-center gap-2 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+                    <button (click)="deleteGoal()" class="w-full py-3 bg-white dark:bg-concrete-900 text-electric-red rigid-border-sm border-[2px] border-electric-red font-black uppercase tracking-widest hover:bg-electric-red hover:text-white transition-all text-xs flex items-center justify-center gap-2 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0_0_white] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
                         <span class="material-symbols-outlined text-sm">delete</span>
                         TERMINATE_PROTOCOL
                     </button>
@@ -137,6 +138,9 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
     .custom-scrollbar-x::-webkit-scrollbar { height: 4px; }
     .custom-scrollbar-x::-webkit-scrollbar-track { background: #e5e5e5; }
     .custom-scrollbar-x::-webkit-scrollbar-thumb { background: black; }
+
+    :host-context(.dark) .custom-scrollbar-x::-webkit-scrollbar-track { background: #262626; }
+    :host-context(.dark) .custom-scrollbar-x::-webkit-scrollbar-thumb { background: white; }
   `]
 })
 export class YearlyViewComponent implements OnInit {

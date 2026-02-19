@@ -39,42 +39,44 @@ interface DragState {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="yearly-grid-container w-full h-full flex flex-col bg-white text-black overflow-auto custom-scrollbar select-none font-manrope relative" #container>
+    <div class="yearly-grid-container w-full h-full flex flex-col bg-white dark:bg-concrete-900 text-black dark:text-white overflow-auto custom-scrollbar select-none font-manrope relative transition-colors duration-300" #container>
       
       <!-- Header Row (Days) -->
-      <div class="grid grid-cols-[60px_repeat(31,1fr)_60px] gap-0 border-b-4 border-black mb-2 sticky top-0 bg-white z-20 pb-2 shadow-sm">
-        <div class="text-[10px] text-black font-black uppercase tracking-wider text-center self-end pb-1 border-r-2 border-black font-arvo">MON</div>
+      <div class="grid grid-cols-[60px_repeat(31,1fr)_60px] gap-0 border-b-4 border-black dark:border-concrete-100 mb-2 sticky top-0 bg-white dark:bg-concrete-800 z-20 pb-2 shadow-sm">
+        <div class="text-[10px] text-black dark:text-white font-black uppercase tracking-wider text-center self-end pb-1 border-r-2 border-black dark:border-concrete-100 font-arvo">MON</div>
         @for (day of daysHeader; track day) {
-          <div class="text-[10px] text-center text-black font-bold border-l border-black/30 flex items-center justify-center h-6 hover:bg-black hover:text-white transition-colors cursor-default relative group">
+          <div class="text-[10px] text-center text-black dark:text-white font-bold border-l border-black/30 dark:border-white/20 flex items-center justify-center h-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors cursor-default relative group">
               <span class="group-hover:scale-110 transition-transform">{{ day }}</span>
           </div>
         }
-        <div class="text-xs text-black font-black uppercase tracking-wider text-center self-end pl-2"></div>
+        <div class="text-xs text-black dark:text-white font-black uppercase tracking-wider text-center self-end pl-2"></div>
       </div>
 
       <!-- Month Rows -->
       <div class="flex flex-col gap-0 relative z-10">
         @for (row of monthRows(); track row.name) {
           <!-- Row container -->
-          <div class="grid grid-cols-[60px_repeat(31,1fr)_60px] gap-0 transition-colors relative group border-b-2 border-black hover:bg-concrete-100"
+          <div class="grid grid-cols-[60px_repeat(31,1fr)_60px] gap-0 transition-colors relative group border-b-2 border-black dark:border-concrete-100 hover:bg-concrete-100 dark:hover:bg-concrete-800"
                [style.height.px]="math.max(row.maxLanes * 32 + 10, 48)">
             
             <!-- Month Label -->
-            <div class="text-xs font-black text-black flex items-center justify-center border-r-2 border-black uppercase tracking-widest bg-white sticky left-0 z-10 select-none cursor-pointer group-hover:bg-black group-hover:text-white transition-colors font-arvo"
+            <div class="text-xs font-black text-black dark:text-white flex items-center justify-center border-r-2 border-black dark:border-concrete-100 uppercase tracking-widest bg-white dark:bg-concrete-900 sticky left-0 z-10 select-none cursor-pointer group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors font-arvo"
                  (dblclick)="onCellDoubleClick(row.index, 1)">
               {{ row.name }}
             </div>
 
             <!-- Days Grid Cells background -->
             @for (day of daysHeader; track day) {
-               <div class="border-r border-black/10 h-full relative"
+               <div class="border-r border-black/10 dark:border-white/10 h-full relative"
                     [class.bg-concrete-200]="isWeekend(row.index, day)"
+                    [class.dark:bg-concrete-800]="isWeekend(row.index, day)"
                     [class.bg-concrete-300]="!isWeekend(row.index, day) && day > row.days"
+                    [class.dark:bg-concrete-700]="!isWeekend(row.index, day) && day > row.days"
                     [class.diagonal-stripe]="!isWeekend(row.index, day) && day > row.days"
                     (click)="onCellClick(row.index, day)"
                     (dblclick)="onCellDoubleClick(row.index, day)">
                     @if (day <= row.days) {
-                      <span class="absolute inset-x-0 bottom-1 text-[7px] text-center text-concrete-500 pointer-events-none uppercase opacity-0 group-hover:opacity-100 transition-opacity font-mono font-bold">
+                      <span class="absolute inset-x-0 bottom-1 text-[7px] text-center text-concrete-500 dark:text-concrete-400 pointer-events-none uppercase opacity-0 group-hover:opacity-100 transition-opacity font-mono font-bold">
                         {{ getWeekdayLabel(row.index, day) }}
                       </span>
                     }
@@ -85,11 +87,12 @@ interface DragState {
             <div class="absolute inset-0 left-[60px] right-[60px] pointer-events-none grid grid-cols-[repeat(31,1fr)]">
                @for (seg of row.segments; track seg.id + '-' + seg.startDay) {
                  <!-- Event Segment -->
-                 <div class="absolute rigid-border-sm border-[2px] pointer-events-auto flex items-center px-1 overflow-hidden transition-all shadow-[2px_2px_0_0_rgba(0,0,0,0.2)]"
+                 <div class="absolute rigid-border-sm border-[2px] pointer-events-auto flex items-center px-1 overflow-hidden transition-all shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] dark:shadow-[2px_2px_0_0_rgba(255,255,255,0.4)]"
                       [class.z-30]="isSegmentActive(seg)"
                       [class.z-10]="!isSegmentActive(seg)"
                       [class.ring-2]="isSegmentActive(seg)"
                       [class.ring-black]="isSegmentActive(seg)"
+                      [class.dark:ring-white]="isSegmentActive(seg)"
                       [class.scale-[1.02]]="isSegmentActive(seg)"
                       [style.left.%]="getSegmentLeft(seg, row)"
                       [style.width.%]="getSegmentWidth(seg, row)"
@@ -112,7 +115,7 @@ interface DragState {
             </div>
 
              <!-- End Label (Year) -->
-             <div class="text-[10px] font-black text-black flex items-center justify-center border-l-2 border-black bg-white sticky right-0 z-10 writing-vertical-lr text-center font-mono">
+             <div class="text-[10px] font-black text-black dark:text-white flex items-center justify-center border-l-2 border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 sticky right-0 z-10 writing-vertical-lr text-center font-mono">
                //{{ currentYear() }}
              </div>
 
@@ -127,11 +130,19 @@ interface DragState {
     .custom-scrollbar::-webkit-scrollbar-thumb { background: black; border: 2px solid white; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ff0000; }
     
+    /* Dark scrollbar */
+    :host-context(.dark) .custom-scrollbar::-webkit-scrollbar-track { background: #262626; border-left: 2px solid white; }
+    :host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb { background: white; border: 2px solid #262626; }
+    
     .writing-vertical-lr { writing-mode: vertical-lr; }
     .diagonal-stripe {
         background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent);
         background-size: 4px 4px;
         opacity: 0.1;
+    }
+    
+    :host-context(.dark) .diagonal-stripe {
+        background-image: linear-gradient(45deg, #fff 25%, transparent 25%, transparent 50%, #fff 50%, #fff 75%, transparent 75%, transparent);
     }
   `]
 })

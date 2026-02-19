@@ -8,20 +8,20 @@ import { HabitService } from '../../services/habit.service';
     selector: 'app-dashboard',
     imports: [RouterLink, CommonModule, FormsModule],
     template: `
-    <div class="min-h-screen bg-concrete-200 p-6 md:p-8 lg:p-12 font-manrope">
+    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope transition-colors duration-300">
         <!-- Dashboard Header -->
         <header class="flex flex-col md:flex-row items-start justify-between gap-4 mb-8">
             <div class="space-y-1">
-                <div class="bg-concrete-900 text-white px-3 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.15em]">User Profile // Identity Verified</div>
-                <h1 class="text-4xl md:text-5xl font-black text-concrete-900 uppercase leading-none font-arvo">STATUS: COMMANDER</h1>
+                <div class="bg-concrete-900 dark:bg-concrete-100 text-white dark:text-black px-3 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.15em]">User Profile // Identity Verified</div>
+                <h1 class="text-4xl md:text-5xl font-black text-concrete-900 dark:text-white uppercase leading-none font-arvo">STATUS: COMMANDER</h1>
                 <div class="flex items-center gap-3 pt-1">
                     <div class="h-4 w-1 bg-electric-red"></div>
                     <p class="text-xs font-bold uppercase tracking-widest text-concrete-400">
-                        Pending Tasks: <span class="text-concrete-900 underline">{{ remainingHabits() }} UNITS</span>
+                        Pending Tasks: <span class="text-concrete-900 dark:text-white underline">{{ remainingHabits() }} UNITS</span>
                     </p>
                 </div>
             </div>
-            <a routerLink="/add" class="rigid-border border-[3px] brutalist-shadow-md bg-electric-red text-white font-black py-3 px-6 flex items-center gap-2 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter cursor-pointer text-sm">
+            <a routerLink="/add" class="rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] bg-electric-red text-white font-black py-3 px-6 flex items-center gap-2 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter cursor-pointer text-sm">
                 <span class="material-symbols-outlined text-xl">add_box</span>
                 <span>Initialize New Process</span>
             </a>
@@ -30,31 +30,31 @@ import { HabitService } from '../../services/habit.service';
         <!-- Stats Grid -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <!-- Efficiency Rating -->
-            <div class="bg-concrete-100 rigid-border border-[3px] brutalist-shadow-md p-4 flex flex-col active-scan relative overflow-hidden">
-                <span class="text-[9px] font-black text-concrete-400 uppercase mb-4 border-b-2 border-concrete-900 pb-1 z-10 relative">Efficiency_Rating // 01</span>
+            <div class="bg-concrete-100 dark:bg-concrete-800 rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-4 flex flex-col active-scan relative overflow-hidden">
+                <span class="text-[9px] font-black text-concrete-400 uppercase mb-4 border-b-2 border-concrete-900 dark:border-concrete-100 pb-1 z-10 relative">Efficiency_Rating // 01</span>
                 <div class="flex items-end gap-2 mb-3 z-10 relative">
-                    <span class="text-5xl font-black leading-none">{{ completionPercent() }}%</span>
+                    <span class="text-5xl font-black leading-none dark:text-white">{{ completionPercent() }}%</span>
                     <span class="text-[10px] font-bold text-electric-red pb-1 underline">NOMINAL</span>
                 </div>
-                <div class="w-full h-3 bg-concrete-300 mt-auto z-10 relative">
-                    <div class="bg-concrete-900 h-full transition-all duration-1000" [style.width.%]="completionPercent()"></div>
+                <div class="w-full h-3 bg-concrete-300 dark:bg-concrete-600 mt-auto z-10 relative">
+                    <div class="bg-concrete-900 dark:bg-white h-full transition-all duration-1000" [style.width.%]="completionPercent()"></div>
                 </div>
             </div>
 
             <!-- Uptime Sequence (Best Streak) -->
-            <div class="bg-concrete-900 rigid-border border-[3px] brutalist-shadow-md p-4 text-white flex flex-col justify-between">
-                <span class="text-[9px] font-bold text-concrete-400 uppercase mb-3 border-b border-concrete-400 pb-1">Uptime_Sequence</span>
+            <div class="bg-concrete-900 dark:bg-white rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-4 text-white dark:text-black flex flex-col justify-between">
+                <span class="text-[9px] font-bold text-concrete-400 dark:text-concrete-500 uppercase mb-3 border-b border-concrete-400 dark:border-concrete-500 pb-1">Uptime_Sequence</span>
                 <div class="flex items-center gap-3">
-                    <span class="text-6xl font-black italic leading-none text-yellow-400">{{ bestStreak() }}</span>
+                    <span class="text-6xl font-black italic leading-none text-yellow-400 dark:text-electric-red">{{ bestStreak() }}</span>
                     <div class="text-[10px] font-bold leading-tight uppercase">Consecutive<br/>Cycles<br/>Recorded</div>
                 </div>
             </div>
 
             <!-- Aggregate Output (Total Habits) -->
-            <div class="bg-concrete-100 rigid-border border-[3px] brutalist-shadow-md p-4 flex flex-col">
-                <span class="text-[9px] font-black text-concrete-400 uppercase mb-4 border-b-2 border-concrete-900 pb-1">Total_Protocols</span>
+            <div class="bg-concrete-100 dark:bg-concrete-800 rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-4 flex flex-col">
+                <span class="text-[9px] font-black text-concrete-400 uppercase mb-4 border-b-2 border-concrete-900 dark:border-concrete-100 pb-1">Total_Protocols</span>
                 <div class="flex items-baseline gap-1 mb-2">
-                    <span class="text-5xl font-black text-concrete-900 leading-none">{{ habitService.habits().length }}</span>
+                    <span class="text-5xl font-black text-concrete-900 dark:text-white leading-none">{{ habitService.habits().length }}</span>
                     <span class="text-xl font-black text-concrete-400">ACTIVE</span>
                 </div>
             </div>
@@ -65,27 +65,31 @@ import { HabitService } from '../../services/habit.service';
             <section class="lg:col-span-8">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-baseline gap-3">
-                        <h2 class="text-3xl font-black text-concrete-900 uppercase font-arvo">Active_Protocols</h2>
+                        <h2 class="text-3xl font-black text-concrete-900 dark:text-white uppercase font-arvo">Active_Protocols</h2>
                         <span class="text-lg font-bold text-concrete-400">[{{ remainingHabits() }}]</span>
                     </div>
-                    <a routerLink="/planner" class="text-xs font-black uppercase tracking-widest border-2 border-concrete-900 px-3 py-1 hover:bg-concrete-900 hover:text-white transition-colors cursor-pointer">
+                    <a routerLink="/planner" class="text-xs font-black uppercase tracking-widest border-2 border-concrete-900 dark:border-concrete-100 px-3 py-1 hover:bg-concrete-900 dark:hover:bg-concrete-100 hover:text-white dark:hover:text-black transition-colors cursor-pointer dark:text-white">
                         View_Planner
                     </a>
                 </div>
                 <div class="space-y-3">
                     @for (habit of todaysHabits(); track habit.id) {
-                        <div class="rigid-border border-[2px] brutalist-shadow-sm p-3 flex items-center gap-4 cursor-pointer transition-all hover:translate-x-1"
+                        <div class="rigid-border border-[2px] dark:border-concrete-400 brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white] p-3 flex items-center gap-4 cursor-pointer transition-all hover:translate-x-1"
                              [class.bg-white]="!habit.completedToday"
+                             [class.dark:bg-concrete-800]="!habit.completedToday"
                              [class.bg-concrete-100]="habit.completedToday"
+                             [class.dark:bg-concrete-900]="habit.completedToday"
                              [class.opacity-60]="habit.completedToday"
                              [class.grayscale]="habit.completedToday"
                              [class.border-l-electric-red]="!habit.completedToday"
                              [class.border-l-[10px]]="!habit.completedToday"
                              (click)="handleHabitClick(habit)">
                             
-                            <div class="w-9 h-9 border-2 border-concrete-900 flex items-center justify-center transition-colors"
+                            <div class="w-9 h-9 border-2 border-concrete-900 dark:border-concrete-100 flex items-center justify-center transition-colors"
                                  [class.bg-concrete-900]="habit.completedToday"
+                                 [class.dark:bg-concrete-100]="habit.completedToday"
                                  [class.text-white]="habit.completedToday"
+                                 [class.dark:text-black]="habit.completedToday"
                                  [class.bg-transparent]="!habit.completedToday">
                                 @if (habit.completedToday) {
                                     <span class="material-symbols-outlined text-xl">done_all</span>
@@ -93,24 +97,28 @@ import { HabitService } from '../../services/habit.service';
                             </div>
                             
                             <div class="flex-1">
-                                <h3 class="text-xl font-black text-concrete-900 uppercase transition-all"
+                                <h3 class="text-xl font-black text-concrete-900 dark:text-white uppercase transition-all"
                                     [class.line-through]="habit.completedToday">{{ habit.name }}</h3>
-                                <span class="text-[9px] font-bold px-2 py-0.5 uppercase border border-concrete-900"
+                                <span class="text-[9px] font-bold px-2 py-0.5 uppercase border border-concrete-900 dark:border-concrete-100"
                                       [class.bg-concrete-200]="habit.completedToday"
+                                      [class.dark:bg-concrete-800]="habit.completedToday"
                                       [class.bg-concrete-900]="!habit.completedToday"
-                                      [class.text-white]="!habit.completedToday">
+                                      [class.dark:bg-concrete-100]="!habit.completedToday"
+                                      [class.text-white]="!habit.completedToday"
+                                      [class.dark:text-black]="!habit.completedToday"
+                                      [class.dark:text-concrete-300]="habit.completedToday">
                                     {{ habit.category || 'GEN' }} // {{ habit.frequencyType || 'DAILY' }}
                                 </span>
                             </div>
                             
                             <div class="flex items-center gap-2">
-                                <button (click)="$event.stopPropagation(); navigateToDetails(habit.id)" class="w-7 h-7 flex items-center justify-center border-2 border-transparent hover:border-concrete-900 rounded-full transition-colors">
-                                    <span class="material-symbols-outlined text-concrete-900 text-xl">arrow_forward</span>
+                                <button (click)="$event.stopPropagation(); navigateToDetails(habit.id)" class="w-7 h-7 flex items-center justify-center border-2 border-transparent hover:border-concrete-900 dark:hover:border-concrete-100 rounded-full transition-colors">
+                                    <span class="material-symbols-outlined text-concrete-900 dark:text-white text-xl">arrow_forward</span>
                                 </button>
                             </div>
                         </div>
                     } @empty {
-                        <div class="p-6 text-center border-3 border-dashed border-concrete-300">
+                        <div class="p-6 text-center border-3 border-dashed border-concrete-300 dark:border-concrete-600">
                             <p class="text-concrete-400 font-bold uppercase tracking-widest text-sm">No Active Protocols For Today</p>
                         </div>
                     }
@@ -119,7 +127,7 @@ import { HabitService } from '../../services/habit.service';
 
             <!-- Quote / Side Panel -->
             <section class="lg:col-span-4 space-y-6">
-                <div class="bg-yellow-400 rigid-border border-[3px] brutalist-shadow-md p-6 relative overflow-hidden">
+                <div class="bg-yellow-400 rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-6 relative overflow-hidden">
                     <span class="material-symbols-outlined text-[8rem] absolute -right-6 -bottom-6 opacity-20 text-black select-none">format_quote</span>
                     <div class="w-9 h-9 bg-black flex items-center justify-center text-white mb-4 relative z-10">
                         <span class="material-symbols-outlined text-xl">bolt</span>
@@ -134,36 +142,36 @@ import { HabitService } from '../../services/habit.service';
         <!-- Log Modal (Brutalist Style) -->
         @if (selectedHabit()) {
             <div class="fixed inset-0 z-[200] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm" (click)="closeLogModal()">
-                <div class="bg-white rigid-border border-[4px] p-8 w-full max-w-md brutalist-shadow-md relative" (click)="$event.stopPropagation()">
-                    <div class="bg-black text-white p-2 absolute -top-4 -left-4 font-black uppercase tracking-widest text-xs">
+                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 w-full max-w-md brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] relative" (click)="$event.stopPropagation()">
+                    <div class="bg-black dark:bg-concrete-100 text-white dark:text-black p-2 absolute -top-4 -left-4 font-black uppercase tracking-widest text-xs">
                         Input_Required
                     </div>
                     
                     <div class="flex items-start justify-between mb-8">
                         <div>
                             <span class="text-xs font-bold text-electric-red uppercase tracking-widest block mb-1">MEASURABLE_PROTOCOL</span>
-                            <h3 class="text-3xl font-black text-concrete-900 uppercase leading-none font-arvo">{{ selectedHabit()?.name }}</h3>
+                            <h3 class="text-3xl font-black text-concrete-900 dark:text-white uppercase leading-none font-arvo">{{ selectedHabit()?.name }}</h3>
                         </div>
-                        <button (click)="closeLogModal()" class="w-10 h-10 bg-concrete-100 border-2 border-black flex items-center justify-center hover:bg-electric-red hover:text-white transition-colors">
+                        <button (click)="closeLogModal()" class="w-10 h-10 bg-concrete-100 dark:bg-concrete-700 border-2 border-black dark:border-concrete-100 flex items-center justify-center hover:bg-electric-red hover:text-white transition-colors dark:text-white">
                             <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
 
                     <div class="space-y-6">
                         <div class="space-y-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900">Value_Input</label>
+                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900 dark:text-white">Value_Input</label>
                             <input type="number" 
                                    [(ngModel)]="logValue" 
                                    placeholder="ENTER_DATA"
-                                   class="w-full h-16 rigid-border-sm bg-concrete-100 px-4 text-2xl font-black font-mono outline-none focus:bg-white focus:border-electric-red transition-colors">
+                                   class="w-full h-16 rigid-border-sm border-[2px] dark:border-concrete-500 bg-concrete-100 dark:bg-concrete-900 px-4 text-2xl font-black font-mono outline-none focus:bg-white dark:focus:bg-black focus:border-electric-red transition-colors dark:text-white">
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900">Mission_Notes</label>
+                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900 dark:text-white">Mission_Notes</label>
                             <textarea rows="3" 
                                       [(ngModel)]="logNotes" 
                                       placeholder="// OPTIONAL_LOG_ENTRY..."
-                                      class="w-full p-4 rigid-border-sm bg-concrete-100 text-sm font-bold font-mono outline-none focus:bg-white focus:border-electric-red transition-colors resize-none"></textarea>
+                                      class="w-full p-4 rigid-border-sm border-[2px] dark:border-concrete-500 bg-concrete-100 dark:bg-concrete-900 text-sm font-bold font-mono outline-none focus:bg-white dark:focus:bg-black focus:border-electric-red transition-colors resize-none dark:text-white"></textarea>
                         </div>
                     </div>
 

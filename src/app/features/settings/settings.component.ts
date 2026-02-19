@@ -1,23 +1,24 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
     selector: 'app-settings',
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div class="h-full overflow-y-auto bg-concrete-200 font-manrope">
-        <header class="p-8 border-b-4 border-black pb-6 flex flex-col md:flex-row items-end justify-between gap-6 bg-white shrink-0">
+    <div class="h-full overflow-y-auto bg-concrete-200 dark:bg-concrete-800 font-manrope transition-colors duration-300">
+        <header class="p-8 border-b-4 border-black dark:border-concrete-100 pb-6 flex flex-col md:flex-row items-end justify-between gap-6 bg-white dark:bg-concrete-900 shrink-0 transition-colors duration-300">
             <div>
-                 <div class="bg-black text-white px-2 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
+                 <div class="bg-black dark:bg-concrete-100 text-white dark:text-black px-2 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
                     System_Control
                 </div>
-                <h1 class="text-4xl md:text-6xl font-black text-black uppercase leading-none font-arvo">
+                <h1 class="text-4xl md:text-6xl font-black text-black dark:text-white uppercase leading-none font-arvo">
                     Configuration
                 </h1>
             </div>
             <div class="text-right hidden md:block">
-                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400">Ver. 2.4.0 // STABLE</p>
+                <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500">Ver. 2.4.0 // STABLE</p>
             </div>
         </header>
 
@@ -25,33 +26,33 @@ import { CommonModule } from '@angular/common';
             <div class="space-y-12">
                 <!-- Appearance Section -->
                 <section class="space-y-6">
-                    <h3 class="text-2xl font-black text-black uppercase font-arvo border-b-4 border-black pb-2 flex items-center gap-3">
+                    <h3 class="text-2xl font-black text-black dark:text-white uppercase font-arvo border-b-4 border-black dark:border-concrete-100 pb-2 flex items-center gap-3">
                         <span class="material-symbols-outlined text-3xl">palette</span>
                         Interface_Protocols
                     </h3>
                     
                     <div class="space-y-4">
                         <!-- Toggle Item -->
-                        <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all">
+                        <div class="bg-white dark:bg-concrete-900 p-6 rigid-border border-[3px] dark:border-concrete-100 flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] dark:hover:shadow-[4px_4px_0_0_white] transition-all cursor-pointer" (click)="toggleDarkMode()">
                             <div class="flex flex-col gap-1">
-                                <p class="text-black font-black text-lg uppercase tracking-wide">Dark_Mode_Override</p>
-                                <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Force high-contrast dark theme (disabled). Brutalist Light Mode Active.</p>
+                                <p class="text-black dark:text-white font-black text-lg uppercase tracking-wide">Dark_Mode_Override</p>
+                                <p class="text-concrete-500 dark:text-concrete-400 font-mono text-xs uppercase font-bold">Force high-contrast dark theme. Brutalist Mode Active.</p>
                             </div>
-                            <label class="relative flex h-[28px] w-[56px] cursor-not-allowed items-center border-[3px] border-concrete-300 p-1 opacity-50">
-                                <input class="peer sr-only" type="checkbox" disabled/>
-                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-concrete-300 transition-all"></span>
+                            <label class="relative flex h-[28px] w-[56px] cursor-pointer items-center border-[3px] border-concrete-300 dark:border-concrete-100 p-1">
+                                <input class="peer sr-only" type="checkbox" [checked]="themeService.currentTheme() === 'dark'" (change)="toggleDarkMode()"/>
+                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-concrete-300 dark:bg-concrete-100 transition-all peer-checked:translate-x-[26px] peer-checked:bg-black dark:peer-checked:bg-white"></span>
                             </label>
                         </div>
                         
                         <!-- Toggle Item -->
-                        <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all cursor-pointer">
+                        <div class="bg-white dark:bg-concrete-900 p-6 rigid-border border-[3px] dark:border-concrete-100 flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] dark:hover:shadow-[4px_4px_0_0_white] transition-all cursor-pointer">
                             <div class="flex flex-col gap-1">
-                                <p class="text-black font-black text-lg uppercase tracking-wide">Compact_Matrix</p>
-                                <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Increase information density on dashboard modules.</p>
+                                <p class="text-black dark:text-white font-black text-lg uppercase tracking-wide">Compact_Matrix</p>
+                                <p class="text-concrete-500 dark:text-concrete-400 font-mono text-xs uppercase font-bold">Increase information density on dashboard modules.</p>
                             </div>
-                            <label class="relative flex h-[28px] w-[56px] cursor-pointer items-center border-[3px] border-black p-1 transition-all">
+                            <label class="relative flex h-[28px] w-[56px] cursor-pointer items-center border-[3px] border-black dark:border-concrete-100 p-1 transition-all">
                                 <input class="peer sr-only" type="checkbox"/>
-                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-black transition-all peer-checked:translate-x-[26px] peer-checked:bg-electric-red"></span>
+                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-black dark:bg-concrete-100 transition-all peer-checked:translate-x-[26px] peer-checked:bg-electric-red"></span>
                             </label>
                         </div>
                     </div>
@@ -65,14 +66,14 @@ import { CommonModule } from '@angular/common';
                     </h3>
                     
                     <div class="space-y-4">
-                        <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all cursor-pointer">
+                        <div class="bg-white dark:bg-concrete-900 p-6 rigid-border border-[3px] dark:border-concrete-100 flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] dark:hover:shadow-[4px_4px_0_0_white] transition-all cursor-pointer">
                             <div class="flex flex-col gap-1">
-                                <p class="text-black font-black text-lg uppercase tracking-wide">Daily_Status_Ping</p>
-                                <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Receive morning briefings on active directives.</p>
+                                <p class="text-black dark:text-white font-black text-lg uppercase tracking-wide">Daily_Status_Ping</p>
+                                <p class="text-concrete-500 dark:text-concrete-400 font-mono text-xs uppercase font-bold">Receive morning briefings on active directives.</p>
                             </div>
-                            <label class="relative flex h-[28px] w-[56px] cursor-pointer items-center border-[3px] border-black p-1 transition-all">
+                            <label class="relative flex h-[28px] w-[56px] cursor-pointer items-center border-[3px] border-black dark:border-concrete-100 p-1 transition-all">
                                 <input class="peer sr-only" type="checkbox" checked/>
-                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-black transition-all peer-checked:translate-x-[26px] peer-checked:bg-electric-red"></span>
+                                <span class="absolute left-0.5 top-0.5 size-[18px] bg-black dark:bg-concrete-100 transition-all peer-checked:translate-x-[26px] peer-checked:bg-electric-red"></span>
                             </label>
                         </div>
                     </div>
@@ -85,12 +86,12 @@ import { CommonModule } from '@angular/common';
                         Data_Persistence
                     </h3>
                     
-                    <div class="bg-white p-6 rigid-border border-[3px] flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] transition-all">
+                    <div class="bg-white dark:bg-concrete-900 p-6 rigid-border border-[3px] dark:border-concrete-100 flex items-center justify-between group hover:shadow-[4px_4px_0_0_black] dark:hover:shadow-[4px_4px_0_0_white] transition-all">
                             <div class="flex flex-col gap-1">
-                            <p class="text-black font-black text-lg uppercase tracking-wide group-hover:text-electric-red transition-colors">Purge_Local_Cache</p>
-                            <p class="text-concrete-500 font-mono text-xs uppercase font-bold">Clear all locally stored session data. Irreversible.</p>
+                            <p class="text-black dark:text-white font-black text-lg uppercase tracking-wide group-hover:text-electric-red transition-colors">Purge_Local_Cache</p>
+                            <p class="text-concrete-500 dark:text-concrete-400 font-mono text-xs uppercase font-bold">Clear all locally stored session data. Irreversible.</p>
                         </div>
-                        <button class="px-6 py-3 border-[3px] border-black bg-electric-red text-white font-black uppercase text-xs hover:bg-black transition-all tracking-widest shadow-[4px_4px_0_0_black] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_black]">
+                        <button class="px-6 py-3 border-[3px] border-black dark:border-concrete-100 bg-electric-red text-white font-black uppercase text-xs hover:bg-black dark:hover:bg-concrete-100 dark:hover:text-black transition-all tracking-widest shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_black] dark:active:shadow-[2px_2px_0_0_white]">
                             EXECUTE
                         </button>
                     </div>
@@ -104,4 +105,10 @@ import { CommonModule } from '@angular/common';
   `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingsComponent { }
+export class SettingsComponent {
+    themeService = inject(ThemeService);
+
+    toggleDarkMode() {
+        this.themeService.toggleTheme();
+    }
+}

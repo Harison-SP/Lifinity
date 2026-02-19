@@ -25,42 +25,44 @@ interface MonthlyHabit {
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div class="flex items-center gap-2">
-          <button (click)="changeMonth(-1)" class="p-2 hover:bg-black hover:text-white transition-colors rigid-border-sm border-[2px]">
+          <button (click)="changeMonth(-1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors rigid-border-sm border-[2px] dark:border-concrete-100 dark:text-white">
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
-          <h2 class="text-2xl font-black text-black uppercase font-arvo">
+          <h2 class="text-2xl font-black text-black dark:text-white uppercase font-arvo">
             {{ getMonthName(currentMonth()) }} {{ currentYear() }}
           </h2>
-          <button (click)="changeMonth(1)" class="p-2 hover:bg-black hover:text-white transition-colors rigid-border-sm border-[2px]">
+          <button (click)="changeMonth(1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors rigid-border-sm border-[2px] dark:border-concrete-100 dark:text-white">
             <span class="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
       </div>
 
       <!-- Monthly Grid -->
-      <div class="overflow-x-auto custom-scrollbar rigid-border-sm border-[2px]">
+      <div class="overflow-x-auto custom-scrollbar rigid-border-sm border-[2px] dark:border-concrete-500">
         <div class="grid" [style.grid-template-columns]="'150px repeat(' + daysInMonth().length + ', 40px)'">
           <!-- Header -->
-          <div class="sticky left-0 bg-white font-black text-xs uppercase text-black p-2 border-r-2 border-b-2 border-black z-10">Habit</div>
+          <div class="sticky left-0 bg-white dark:bg-concrete-900 font-black text-xs uppercase text-black dark:text-white p-2 border-r-2 border-b-2 border-black dark:border-concrete-100 z-10">Habit</div>
           @for(day of daysInMonth(); track day) {
-            <div class="font-bold text-xs text-center p-2 border-b-2 border-black"
+            <div class="font-bold text-xs text-center p-2 border-b-2 border-black dark:border-concrete-100 dark:text-white"
                  [class.bg-yellow-100]="isToday(day)"
+                 [class.dark:bg-concrete-800]="isToday(day)"
                  [class.font-black]="isToday(day)">{{ day }}</div>
           }
 
           <!-- Body -->
           @for(habit of monthHabits(); track habit.id) {
-            <div class="sticky left-0 bg-white font-bold text-sm text-black p-2 border-r-2 border-b border-concrete-300 z-10 truncate flex items-center gap-1 cursor-pointer hover:bg-concrete-100 transition-colors group"
+            <div class="sticky left-0 bg-white dark:bg-concrete-900 font-bold text-sm text-black dark:text-white p-2 border-r-2 border-b border-concrete-300 dark:border-concrete-700 z-10 truncate flex items-center gap-1 cursor-pointer hover:bg-concrete-100 dark:hover:bg-concrete-800 transition-colors group"
                  [title]="habit.name"
                  (click)="selectHabitForNotes(habit)">
               <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100 transition-opacity text-concrete-400">edit_note</span>
               <span class="truncate" [class.text-primary]="selectedHabitId() === habit.id">{{ habit.name }}</span>
             </div>
             @for(day of daysInMonth(); track day) {
-              <div class="flex items-center justify-center border-b border-r border-concrete-300"
-                   [class.bg-yellow-50]="isToday(day)">
+              <div class="flex items-center justify-center border-b border-r border-concrete-300 dark:border-concrete-700"
+                   [class.bg-yellow-50]="isToday(day)"
+                   [class.dark:bg-concrete-800]="isToday(day)">
                 <button (click)="toggleCompletion(habit, day)" 
-                        class="w-full h-full text-lg hover:bg-concrete-200 transition-colors py-1"
+                        class="w-full h-full text-lg hover:bg-concrete-200 dark:hover:bg-concrete-700 transition-colors py-1"
                         [class.cursor-not-allowed]="isFutureDay(day)"
                         [disabled]="isFutureDay(day)">
                   @if(habit.completions[day] === true) { <span class="text-green-500">✔</span> }
@@ -349,6 +351,17 @@ interface MonthlyHabit {
       --ate-border-radius: 0px;
     }
 
+    :host-context(.dark) .obsidian-editor {
+      --ate-bg: #1a1a1a;
+      --ate-text: #ffffff;
+      --ate-border: #333;
+    }
+
+    :host-context(.dark) .bg-white { background-color: #1a1a1a !important; }
+    :host-context(.dark) .text-black { color: #ffffff !important; }
+    :host-context(.dark) .border-black { border-color: #ffffff !important; }
+    :host-context(.dark) .bg-concrete-100 { background-color: #262626 !important; }
+
     /* Code Block Styling Fix */
     :host ::ng-deep .obsidian-editor .ate-content pre {
       background: #0d0d0d !important;
@@ -357,6 +370,10 @@ interface MonthlyHabit {
       border: 2px solid #000 !important;
       border-radius: 4px !important;
       font-family: 'Space Mono', monospace !important;
+    }
+    
+    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content pre {
+       border-color: #555 !important;
     }
     
     :host ::ng-deep .obsidian-editor .ate-content pre code {
@@ -444,6 +461,12 @@ interface MonthlyHabit {
       border-bottom: 3px solid #000 !important;
       padding-bottom: 6px !important;
       margin-bottom: 16px !important;
+    }
+
+    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content h1,
+    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content h2,
+    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content h3 {
+        border-bottom-color: #ffffff !important;
     }
 
     :host ::ng-deep .obsidian-editor .ate-content h1 { font-size: 1.75em !important; }

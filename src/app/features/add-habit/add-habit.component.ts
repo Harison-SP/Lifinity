@@ -23,51 +23,59 @@ import { MatNativeDateModule } from '@angular/material/core';
         MatNativeDateModule
     ],
     template: `
-    <div class="min-h-screen bg-concrete-200 p-6 md:p-8 lg:p-12 font-manrope pb-24">
-        <header class="mb-12 flex justify-between items-end border-b-4 border-black pb-4">
+    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope pb-24 transition-colors duration-300">
+        <header class="mb-12 flex justify-between items-end border-b-4 border-black dark:border-concrete-100 pb-4">
             <div>
-                <button (click)="goBack()" class="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest hover:text-electric-red transition-colors">
+                <button (click)="goBack()" class="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest hover:text-electric-red dark:text-concrete-400 dark:hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-sm">arrow_back</span>
                     Return_To_Base
                 </button>
-                <h1 class="text-4xl md:text-6xl font-black text-black uppercase leading-none font-arvo">
+                <h1 class="text-4xl md:text-6xl font-black text-black dark:text-white uppercase leading-none font-arvo">
                     {{ isEditMode() ? 'System_Override' : 'Initialize_Protocol' }}
                 </h1>
             </div>
             <div class="hidden md:block text-right">
-                <div class="text-[10px] font-black uppercase tracking-[0.2em] bg-black text-white px-2 py-1 inline-block">
+                <div class="text-[10px] font-black uppercase tracking-[0.2em] bg-black dark:bg-concrete-100 text-white dark:text-black px-2 py-1 inline-block">
                     Status: {{ isEditMode() ? 'Reconfiguration' : 'New_Entry' }}
                 </div>
             </div>
         </header>
 
-        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-4xl mx-auto bg-white rigid-border border-[4px] brutalist-shadow-active p-8 md:p-12 relative">
+        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-4xl mx-auto bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] p-8 md:p-12 relative">
             
             <!-- Section 1: Identification -->
             <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Protocol_Identity</label>
-                <input formControlName="name" class="w-full text-3xl font-black font-arvo uppercase border-b-4 border-black focus:border-electric-red outline-none py-2 placeholder:text-concrete-300 transition-colors bg-transparent" placeholder="ENTER_DESIGNATION" type="text"/>
+                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Protocol_Identity</label>
+                <input formControlName="name" class="w-full text-3xl font-black font-arvo uppercase border-b-4 border-black dark:border-concrete-100 focus:border-electric-red outline-none py-2 placeholder:text-concrete-300 dark:placeholder:text-concrete-600 transition-colors bg-transparent text-black dark:text-white" placeholder="ENTER_DESIGNATION" type="text"/>
             </div>
 
             <!-- Section 2: Parameters -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
                 <!-- Type Selection -->
                 <div>
-                     <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">System_Type</label>
+                     <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">System_Type</label>
                      <div class="flex flex-col gap-4">
                         <button type="button" (click)="setHabitType('yes_no')"
-                            class="text-left p-4 rigid-border-sm border-[2px] hover:bg-black hover:text-white transition-all group"
+                            class="text-left p-4 rigid-border-sm border-[2px] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black dark:border-concrete-500 transition-all group"
                             [class.bg-black]="habitType() === 'yes_no'"
+                            [class.dark:bg-white]="habitType() === 'yes_no'"
                             [class.text-white]="habitType() === 'yes_no'"
-                            [class.bg-white]="habitType() !== 'yes_no'">
+                            [class.dark:text-black]="habitType() === 'yes_no'"
+                            [class.bg-white]="habitType() !== 'yes_no'"
+                            [class.dark:bg-concrete-900]="habitType() !== 'yes_no'"
+                            [class.dark:text-white]="habitType() !== 'yes_no'">
                             <span class="font-black uppercase tracking-wider block text-lg mb-1">Binary_State</span>
                             <span class="text-[10px] mono-font block opacity-70 group-hover:opacity-100">Simple Completion Toggle (0/1)</span>
                         </button>
                         <button type="button" (click)="setHabitType('measurable')"
-                            class="text-left p-4 rigid-border-sm border-[2px] hover:bg-black hover:text-white transition-all group"
+                            class="text-left p-4 rigid-border-sm border-[2px] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black dark:border-concrete-500 transition-all group"
                             [class.bg-black]="habitType() === 'measurable'"
+                            [class.dark:bg-white]="habitType() === 'measurable'"
                             [class.text-white]="habitType() === 'measurable'"
-                            [class.bg-white]="habitType() !== 'measurable'">
+                            [class.dark:text-black]="habitType() === 'measurable'"
+                            [class.bg-white]="habitType() !== 'measurable'"
+                            [class.dark:bg-concrete-900]="habitType() !== 'measurable'"
+                            [class.dark:text-white]="habitType() !== 'measurable'">
                             <span class="font-black uppercase tracking-wider block text-lg mb-1">Quantitative</span>
                             <span class="text-[10px] mono-font block opacity-70 group-hover:opacity-100">Numeric Value Tracking</span>
                         </button>
@@ -75,13 +83,14 @@ import { MatNativeDateModule } from '@angular/material/core';
 
                      <!-- Spectra Code (Color) -->
                      <div class="mt-8">
-                        <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Spectra_Code</label>
+                        <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Spectra_Code</label>
                         <div class="flex gap-2 flex-wrap">
                             @for (c of presetColors; track c) {
                                 <button type="button" (click)="color.set(c)"
-                                        class="w-8 h-8 rigid-border-sm border-[2px] transition-all hover:scale-110 flex items-center justify-center shadow-[2px_2px_0_0_black]"
+                                        class="w-8 h-8 rigid-border-sm border-[2px] transition-all hover:scale-110 flex items-center justify-center shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white]"
                                         [style.background-color]="c"
                                         [class.border-black]="color() === c"
+                                        [class.dark:border-white]="color() === c"
                                         [class.border-transparent]="color() !== c">
                                     @if(color() === c) {
                                         <div class="w-2 h-2 bg-black"></div>
@@ -94,20 +103,20 @@ import { MatNativeDateModule } from '@angular/material/core';
 
                 <!-- Measurable Options -->
                 @if (habitType() === 'measurable') {
-                    <div class="bg-concrete-100 p-6 rigid-border-sm border-[2px] border-dashed">
-                        <label class="block text-xs font-black uppercase tracking-[0.2em] mb-6 text-concrete-900">Metric_Config</label>
+                    <div class="bg-concrete-100 dark:bg-concrete-900 p-6 rigid-border-sm border-[2px] border-dashed dark:border-concrete-600">
+                        <label class="block text-xs font-black uppercase tracking-[0.2em] mb-6 text-concrete-900 dark:text-concrete-200">Metric_Config</label>
                         <div class="space-y-4">
                             <div>
-                                <span class="text-[10px] font-bold uppercase block mb-1">Target_Value</span>
-                                <input formControlName="targetValue" type="number" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white"/>
+                                <span class="text-[10px] font-bold uppercase block mb-1 dark:text-concrete-400">Target_Value</span>
+                                <input formControlName="targetValue" type="number" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white dark:bg-concrete-800 dark:text-white dark:border-concrete-500 dark:focus:bg-black"/>
                             </div>
                             <div>
-                                <span class="text-[10px] font-bold uppercase block mb-1">Unit_Label</span>
-                                <input formControlName="targetUnit" type="text" placeholder="UNITS" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white uppercase"/>
+                                <span class="text-[10px] font-bold uppercase block mb-1 dark:text-concrete-400">Unit_Label</span>
+                                <input formControlName="targetUnit" type="text" placeholder="UNITS" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white uppercase dark:bg-concrete-800 dark:text-white dark:border-concrete-500 dark:focus:bg-black dark:placeholder:text-concrete-600"/>
                             </div>
                             <div>
-                                <span class="text-[10px] font-bold uppercase block mb-1">Logic_Gate</span>
-                                <select formControlName="targetComparator" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white bg-transparent">
+                                <span class="text-[10px] font-bold uppercase block mb-1 dark:text-concrete-400">Logic_Gate</span>
+                                <select formControlName="targetComparator" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white bg-transparent dark:bg-concrete-800 dark:text-white dark:border-concrete-500 dark:focus:bg-black">
                                     <option value=">=">AT_LEAST (>=)</option>
                                     <option value="<=">AT_MOST (<=)</option>
                                     <option value="==">EXACTLY (==)</option>
@@ -120,14 +129,18 @@ import { MatNativeDateModule } from '@angular/material/core';
 
             <!-- Section 3: Recurrence -->
             <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Temporality_Matrix</label>
+                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Temporality_Matrix</label>
                 <div class="flex flex-wrap gap-2 mb-6">
                     @for (type of ['daily', 'specific_days', 'interval']; track type) {
                         <button type="button" (click)="setFrequencyType(type)" 
-                            class="px-4 py-2 text-xs font-black uppercase tracking-wider border-2 border-black hover:bg-black hover:text-white transition-all"
+                            class="px-4 py-2 text-xs font-black uppercase tracking-wider border-2 border-black dark:border-concrete-500 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
                             [class.bg-black]="frequencyType() === type"
+                            [class.dark:bg-white]="frequencyType() === type"
                             [class.text-white]="frequencyType() === type"
-                            [class.bg-white]="frequencyType() !== type">
+                            [class.dark:text-black]="frequencyType() === type"
+                            [class.bg-white]="frequencyType() !== type"
+                            [class.dark:bg-concrete-900]="frequencyType() !== type"
+                            [class.dark:text-white]="frequencyType() !== type">
                             {{ type === 'daily' ? 'DAILY_CYCLE' : type === 'specific_days' ? 'FIXED_DAYS' : 'INTERVAL_LOOP' }}
                         </button>
                     }
@@ -137,10 +150,12 @@ import { MatNativeDateModule } from '@angular/material/core';
                     <div class="flex flex-wrap gap-2">
                         @for (day of daysOfWeek; track day.value) {
                             <button type="button" (click)="toggleDay(day.value)"
-                                    class="w-10 h-10 flex items-center justify-center border-2 border-black font-black text-xs transition-all hover:translate-y-[-2px] hover:shadow-[2px_2px_0_0_black]"
+                                    class="w-10 h-10 flex items-center justify-center border-2 border-black dark:border-concrete-500 font-black text-xs transition-all hover:translate-y-[-2px] hover:shadow-[2px_2px_0_0_black] dark:hover:shadow-[2px_2px_0_0_white]"
                                     [class.bg-electric-red]="selectedDays().includes(day.value)"
                                     [class.text-white]="selectedDays().includes(day.value)"
-                                    [class.bg-white]="!selectedDays().includes(day.value)">
+                                    [class.bg-white]="!selectedDays().includes(day.value)"
+                                    [class.dark:bg-concrete-900]="!selectedDays().includes(day.value)"
+                                    [class.dark:text-white]="!selectedDays().includes(day.value)">
                                 {{ day.label.substring(0, 1) }}
                             </button>
                         }
@@ -148,16 +163,16 @@ import { MatNativeDateModule } from '@angular/material/core';
                 }
 
                 @if (frequencyType() === 'interval') {
-                    <div class="flex items-center gap-4 rigid-border-sm border-[2px] p-4 inline-flex bg-concrete-100">
-                        <span class="font-black text-xs uppercase">REPEAT_EVERY</span>
-                        <input formControlName="frequencyInterval" type="number" min="1" class="w-16 p-1 text-center font-black border-b-2 border-black bg-transparent outline-none"/>
-                        <span class="font-black text-xs uppercase">DAYS</span>
+                    <div class="flex items-center gap-4 rigid-border-sm border-[2px] dark:border-concrete-500 p-4 inline-flex bg-concrete-100 dark:bg-concrete-900">
+                        <span class="font-black text-xs uppercase dark:text-concrete-200">REPEAT_EVERY</span>
+                        <input formControlName="frequencyInterval" type="number" min="1" class="w-16 p-1 text-center font-black border-b-2 border-black dark:border-concrete-500 bg-transparent outline-none dark:text-white"/>
+                        <span class="font-black text-xs uppercase dark:text-concrete-200">DAYS</span>
                     </div>
                 }
             </div>
 
             <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Timeframe_Constraints</label>
+                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Timeframe_Constraints</label>
                 <div class="grid grid-cols-1 gap-6">
                     <mat-form-field appearance="outline" class="brutalist-input w-full">
                         <mat-label>Timeline_Range</mat-label>
@@ -173,7 +188,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 
             <!-- Section 4: Time Block -->
             <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900">Time_Block_Window</label>
+                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Time_Block_Window</label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <mat-form-field appearance="outline" class="brutalist-input w-full">
                         <mat-label>Block_Start_Time</mat-label>
@@ -192,11 +207,11 @@ import { MatNativeDateModule } from '@angular/material/core';
             </div>
 
             <!-- Actions -->
-            <div class="flex flex-col md:flex-row gap-4 pt-8 border-t-4 border-black">
-                <button type="button" (click)="goBack()" class="flex-1 py-4 border-4 border-black font-black uppercase tracking-widest hover:bg-concrete-200 transition-colors">
+            <div class="flex flex-col md:flex-row gap-4 pt-8 border-t-4 border-black dark:border-concrete-100">
+                <button type="button" (click)="goBack()" class="flex-1 py-4 border-4 border-black dark:border-concrete-100 font-black uppercase tracking-widest hover:bg-concrete-200 dark:text-white dark:hover:bg-concrete-700 transition-colors">
                     Abort_Sequence
                 </button>
-                <button type="submit" [disabled]="habitForm.invalid" class="flex-[2] py-4 bg-electric-red text-white font-black uppercase tracking-widest border-4 border-black shadow-[4px_4px_0_0_black] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_black] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                <button type="submit" [disabled]="habitForm.invalid" class="flex-[2] py-4 bg-electric-red text-white font-black uppercase tracking-widest border-4 border-black dark:border-concrete-100 shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_black] dark:hover:shadow-[2px_2px_0_0_white] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                     {{ isEditMode() ? 'Commit_Changes' : 'Initialize_Objective' }}
                 </button>
             </div>
@@ -258,6 +273,43 @@ import { MatNativeDateModule } from '@angular/material/core';
     ::ng-deep .brutalist-datepicker .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
         background-color: #e5e5e5 !important;
         border-radius: 0 !important;
+    }
+
+    /* Dark Mode Overrides */
+    :host-context(.dark) ::ng-deep .brutalist-input .mat-mdc-form-field-flex {
+        border-color: white !important;
+    }
+
+    :host-context(.dark) ::ng-deep .brutalist-input.mat-focused .mat-mdc-form-field-flex {
+        border-color: #ff3e3e !important;
+        box-shadow: 4px 4px 0 0 rgba(255,255,255,0.4) !important;
+    }
+
+    :host-context(.dark) ::ng-deep .brutalist-input .mat-mdc-input-element {
+        color: white !important;
+    }
+
+    :host-context(.dark) ::ng-deep .brutalist-input .mat-mdc-floating-label {
+        color: #a3a3a3 !important;
+    }
+
+    :host-context(.dark) ::ng-deep .brutalist-datepicker .mat-datepicker-content {
+        background-color: #262626 !important;
+        border-color: white !important;
+        box-shadow: 8px 8px 0 0 rgba(255,255,255,1) !important;
+    }
+
+    :host-context(.dark) ::ng-deep .mat-calendar-body-label,
+    :host-context(.dark) ::ng-deep .mat-calendar-table-header th {
+        color: white !important;
+    }
+
+    :host-context(.dark) ::ng-deep .mat-calendar-body-cell-content {
+        color: white !important;
+    }
+
+    :host-context(.dark) ::ng-deep .mat-day-picker .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
+        background-color: #525252 !important;
     }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -2,6 +2,7 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-primary: #2b8cee;
@@ -66,8 +67,7 @@
 @layer base {
   body { 
       font-family: 'Manrope', sans-serif; 
-      background-color: #b1b1b1;
-      color: #000000;
+      @apply bg-concrete-100 text-black dark:bg-concrete-900 dark:text-concrete-100;
   }
 }
 

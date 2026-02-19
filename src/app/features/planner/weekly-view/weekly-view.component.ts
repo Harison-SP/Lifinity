@@ -26,18 +26,18 @@ interface WeekDay {
   standalone: true,
   imports: [CommonModule, FormsModule, DragDropModule],
   template: `
-    <div class="h-full flex flex-col font-manrope p-4 gap-6 bg-concrete-50">
+    <div class="h-full flex flex-col font-manrope p-4 gap-6 bg-concrete-50 dark:bg-concrete-900 transition-colors duration-300">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
-            <button (click)="changeWeek(-1)" class="p-2 hover:bg-black hover:text-white transition-all rigid-border-sm border-[2px] bg-white">
+            <button (click)="changeWeek(-1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-concrete-100 dark:hover:text-black transition-all rigid-border-sm border-[2px] bg-white dark:bg-black dark:text-white dark:border-concrete-100">
               <span class="material-symbols-outlined">chevron_left</span>
             </button>
-            <h2 class="text-2xl font-black text-black uppercase font-arvo min-w-[250px] text-center">
+            <h2 class="text-2xl font-black text-black dark:text-white uppercase font-arvo min-w-[250px] text-center">
               {{ weekDateRange() }}
             </h2>
-            <button (click)="changeWeek(1)" class="p-2 hover:bg-black hover:text-white transition-all rigid-border-sm border-[2px] bg-white">
+            <button (click)="changeWeek(1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-concrete-100 dark:hover:text-black transition-all rigid-border-sm border-[2px] bg-white dark:bg-black dark:text-white dark:border-concrete-100">
               <span class="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
@@ -54,17 +54,17 @@ interface WeekDay {
         <!-- Left Panel: Targets & Metrics -->
         <div class="lg:col-span-1 flex flex-col gap-8 overflow-y-auto custom-scrollbar pr-2">
           <!-- Weekly Targets -->
-          <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg flex flex-col min-h-[400px]">
-            <h3 class="text-xl font-black text-black uppercase font-arvo border-b-4 border-black pb-3 mb-6 flex items-center gap-2">
+          <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white] flex flex-col min-h-[400px]">
+            <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo border-b-4 border-black dark:border-concrete-100 pb-3 mb-6 flex items-center gap-2">
               <span class="material-symbols-outlined">target</span>
               Weekly Targets
             </h3>
             <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar">
               @for(target of weeklyTargets(); track target.id) {
-                <div class="flex items-center gap-3 group bg-concrete-50 p-2 rigid-border-sm border-[2px] hover:border-black transition-colors">
+                <div class="flex items-center gap-3 group bg-concrete-50 dark:bg-concrete-900 p-2 rigid-border-sm border-[2px] dark:border-concrete-500 hover:border-black dark:hover:border-white transition-colors">
                   <input type="checkbox" [checked]="target.completed" (change)="toggleTargetCompletion(target)" class="size-5 accent-black cursor-pointer"/>
                   <input [(ngModel)]="target.text" (ngModelChange)="updateTarget(target)" 
-                         class="flex-1 bg-transparent border-none focus:outline-none text-sm font-mono uppercase font-bold" 
+                         class="flex-1 bg-transparent border-none focus:outline-none text-sm font-mono uppercase font-bold dark:text-white" 
                          [class.line-through]="target.completed"
                          [disabled]="target.completed">
                   <button (click)="deleteTarget(target.id)" class="opacity-0 group-hover:opacity-100 text-red-500 transition-opacity">
@@ -73,35 +73,35 @@ interface WeekDay {
                 </div>
               }
             </div>
-            <div class="flex flex-col gap-2 mt-6 pt-4 border-t-4 border-black">
+            <div class="flex flex-col gap-2 mt-6 pt-4 border-t-4 border-black dark:border-concrete-100">
                <input [(ngModel)]="newTargetText" placeholder="New Target" (keyup.enter)="addTarget()" 
-                      class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none uppercase placeholder:text-concrete-400">
-               <button (click)="addTarget()" class="w-full py-3 bg-black text-white rigid-border-sm border-[2px] font-black uppercase text-sm hover:bg-gray-800 transition-colors">Add Target</button>
+                      class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none uppercase placeholder:text-concrete-400">
+               <button (click)="addTarget()" class="w-full py-3 bg-black dark:bg-concrete-100 text-white dark:text-black rigid-border-sm border-[2px] font-black uppercase text-sm hover:bg-gray-800 dark:hover:bg-concrete-200 transition-colors">Add Target</button>
             </div>
           </div>
 
-          <!-- Weekly Metrics -->
-          <div class="bg-yellow-100 rigid-border border-[4px] p-6 brutalist-shadow-lg">
-             <h3 class="text-xl font-black text-black uppercase font-arvo border-b-4 border-black pb-3 mb-6 flex items-center gap-2">
-               <span class="material-symbols-outlined">analytics</span>
-               Weekly Metrics
-             </h3>
-             <div class="space-y-4">
-                <div class="flex justify-between items-center p-3 bg-white rigid-border-sm border-[2px]">
-                    <span class="text-sm font-black uppercase">Focus Hours</span>
+           <!-- Weekly Metrics -->
+           <div class="bg-yellow-100 dark:bg-yellow-600 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white]">
+              <h3 class="text-xl font-black text-black uppercase font-arvo border-b-4 border-black dark:border-black pb-3 mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined">analytics</span>
+                Weekly Metrics
+              </h3>
+              <div class="space-y-4">
+                 <div class="flex justify-between items-center p-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500">
+                     <span class="text-sm font-black uppercase dark:text-white">Focus Hours</span>
                     <div class="flex items-center gap-2">
-                      <input type="number" [(ngModel)]="metrics().focus_hours" (ngModelChange)="updateMetrics()" 
-                             class="w-16 text-center py-1 bg-transparent font-mono font-bold text-lg outline-none border-none">
-                      <span class="font-bold text-xs">HRS</span>
+                       <input type="number" [(ngModel)]="metrics().focus_hours" (ngModelChange)="updateMetrics()" 
+                              class="w-16 text-center py-1 bg-transparent font-mono font-bold text-lg outline-none border-none dark:text-white">
+                       <span class="font-bold text-xs dark:text-white">HRS</span>
                     </div>
                 </div>
-                 <div class="flex justify-between items-center p-3 bg-white rigid-border-sm border-[2px]">
-                    <span class="text-sm font-black uppercase">Completion</span>
-                    <span class="font-mono font-black text-xl text-blue-600">{{ tasksCompleted() }}/{{ totalTasks() }}</span>
-                </div>
-                 <div class="flex justify-between items-center p-3 bg-white rigid-border-sm border-[2px]">
-                    <span class="text-sm font-black uppercase">Consistency</span>
-                    <span class="font-mono font-black text-xl text-green-600">{{ consistencyScore() | number:'1.0-0' }}%</span>
+                 <div class="flex justify-between items-center p-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500">
+                     <span class="text-sm font-black uppercase dark:text-white">Completion</span>
+                     <span class="font-mono font-black text-xl text-blue-600 dark:text-blue-400">{{ tasksCompleted() }}/{{ totalTasks() }}</span>
+                 </div>
+                  <div class="flex justify-between items-center p-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500">
+                     <span class="text-sm font-black uppercase dark:text-white">Consistency</span>
+                     <span class="font-mono font-black text-xl text-green-600 dark:text-green-400">{{ consistencyScore() | number:'1.0-0' }}%</span>
                 </div>
              </div>
           </div>
@@ -110,10 +110,10 @@ interface WeekDay {
         <!-- Right Panel: Task Distribution - NOW 2 COLUMNS AND BIGGER -->
         <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto custom-scrollbar p-1" cdkDropListGroup>
           @for(day of weekDays(); track day.dateString) {
-            <div class="bg-white rigid-border border-[4px] p-6 flex flex-col gap-4 brutalist-shadow-lg min-h-[450px]">
-              <div class="flex justify-between items-center border-b-4 border-black pb-3 mb-2">
-                <h4 class="text-xl font-black uppercase font-arvo">{{ day.name }}</h4>
-                <span class="bg-black text-white px-3 py-1 font-mono text-sm font-bold">{{ day.date | date:'MMMM d' }}</span>
+            <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 flex flex-col gap-4 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white] min-h-[450px]">
+              <div class="flex justify-between items-center border-b-4 border-black dark:border-concrete-100 pb-3 mb-2">
+                <h4 class="text-xl font-black uppercase font-arvo dark:text-white">{{ day.name }}</h4>
+                <span class="bg-black dark:bg-concrete-100 text-white dark:text-black px-3 py-1 font-mono text-sm font-bold">{{ day.date | date:'MMMM d' }}</span>
               </div>
               
               <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2 min-h-[250px]"
@@ -121,28 +121,33 @@ interface WeekDay {
                    [cdkDropListData]="day.tasks"
                    (cdkDropListDropped)="drop($event, day)">
                 @for(task of day.tasks; track task.id) {
-                   <div cdkDrag class="p-3 rigid-border-sm border-[2px] bg-concrete-50 cursor-grab active:cursor-grabbing flex items-start gap-3 group hover:border-black transition-all"
+                   <div cdkDrag class="p-3 rigid-border-sm border-[2px] bg-concrete-50 dark:bg-concrete-700 dark:border-concrete-500 cursor-grab active:cursor-grabbing flex items-start gap-3 group hover:border-black dark:hover:border-white transition-all"
                         [class.border-blue-500]="task.task_type === 'habit'"
-                        [class.bg-blue-50]="task.task_type === 'habit'">
+                        [class.dark:border-blue-400]="task.task_type === 'habit'"
+                        [class.bg-blue-50]="task.task_type === 'habit'"
+                        [class.dark:bg-blue-900]="task.task_type === 'habit'">
                       
                       <button (click)="toggleTaskCompletion(task)" class="mt-1 flex-shrink-0">
                         <span class="material-symbols-outlined text-2xl" 
                               [class.text-green-600]="task.completed"
-                              [class.text-concrete-300]="!task.completed">
+                              [class.dark:text-green-400]="task.completed"
+                              [class.text-concrete-300]="!task.completed"
+                              [class.dark:text-concrete-500]="!task.completed">
                           {{ task.completed ? 'check_box' : 'check_box_outline_blank' }}
                         </span>
                       </button>
                       
                       <div class="flex-1 flex flex-col min-w-0">
                         @if(task.habit_id) {
-                          <span class="text-[10px] font-black text-blue-600 uppercase mb-1 flex items-center gap-1">
+                          <span class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase mb-1 flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">label</span>
                             {{ getHabitName(task.habit_id) }}
                           </span>
                         }
-                        <span class="font-mono text-sm uppercase font-bold break-words" 
+                        <span class="font-mono text-sm uppercase font-bold break-words dark:text-white" 
                               [class.line-through]="task.completed" 
-                              [class.text-concrete-400]="task.completed">
+                              [class.text-concrete-400]="task.completed"
+                              [class.dark:text-concrete-500]="task.completed">
                           {{ task.text }}
                         </span>
                       </div>
@@ -164,10 +169,10 @@ interface WeekDay {
               </div>
 
               <!-- Input Section with Habit Tagging -->
-              <div class="mt-auto flex flex-col gap-3 pt-4 border-t-4 border-black">
-                <div class="flex items-center gap-2 px-2 py-1 bg-concrete-100 rigid-border-sm border-[2px]">
-                  <span class="material-symbols-outlined text-sm text-concrete-500 uppercase font-black">sell</span>
-                  <select #habitSelect class="flex-1 bg-transparent border-none text-[10px] font-black uppercase outline-none text-concrete-700 cursor-pointer hover:text-black">
+              <div class="mt-auto flex flex-col gap-3 pt-4 border-t-4 border-black dark:border-concrete-100">
+                <div class="flex items-center gap-2 px-2 py-1 bg-concrete-100 dark:bg-concrete-700 rigid-border-sm border-[2px] dark:border-concrete-500">
+                  <span class="material-symbols-outlined text-sm text-concrete-500 dark:text-concrete-300 uppercase font-black">sell</span>
+                  <select #habitSelect class="flex-1 bg-transparent border-none text-[10px] font-black uppercase outline-none text-concrete-700 dark:text-concrete-300 cursor-pointer hover:text-black dark:hover:text-white">
                     <option value="">No Habit Tag</option>
                     @for(habit of weeklyHabits(); track habit.id) {
                       <option [value]="habit.id">{{ habit.name }}</option>
@@ -177,9 +182,9 @@ interface WeekDay {
                 <div class="flex gap-2">
                   <input #taskInput (keyup.enter)="addTaskManually(day, taskInput, habitSelect)" 
                          placeholder="What's the plan?..." 
-                         class="flex-1 px-3 py-2 bg-white rigid-border-sm border-[2px] font-mono text-sm outline-none placeholder:text-concrete-400 focus:border-black">
+                         class="flex-1 px-3 py-2 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 font-mono text-sm outline-none placeholder:text-concrete-400 focus:border-black dark:focus:border-white dark:text-white">
                   <button (click)="addTaskManually(day, taskInput, habitSelect)" 
-                          class="bg-black text-white px-4 py-2 rigid-border-sm border-[2px] hover:bg-gray-800 transition-colors">
+                          class="bg-black dark:bg-concrete-100 text-white dark:text-black px-4 py-2 rigid-border-sm border-[2px] hover:bg-gray-800 dark:hover:bg-concrete-200 transition-colors">
                     <span class="material-symbols-outlined">add</span>
                   </button>
                 </div>
@@ -190,31 +195,31 @@ interface WeekDay {
       </div>
       
        <!-- Weekly Review Section -->
-        <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg mt-4">
-          <h3 class="text-xl font-black text-black uppercase font-arvo border-b-4 border-black pb-3 mb-6 flex items-center gap-2">
+        <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white] mt-4">
+          <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo border-b-4 border-black dark:border-concrete-100 pb-3 mb-6 flex items-center gap-2">
             <span class="material-symbols-outlined">rate_review</span>
             Weekly Review
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
              <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 ml-1">What was achieved?</label>
+               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">What was achieved?</label>
                <textarea [(ngModel)]="review().achieved" (ngModelChange)="updateReview()" placeholder="List achievements..." 
-                         rows="4" class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-50 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
              </div>
              <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 ml-1">What was missed?</label>
+               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">What was missed?</label>
                <textarea [(ngModel)]="review().missed" (ngModelChange)="updateReview()" placeholder="List misses..." 
-                         rows="4" class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-50 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
              </div>
              <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 ml-1">Why things happened?</label>
+               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">Why things happened?</label>
                <textarea [(ngModel)]="review().why" (ngModelChange)="updateReview()" placeholder="Analyze root causes..." 
-                         rows="4" class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-50 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
              </div>
              <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 ml-1">Carry forward plan?</label>
+               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">Carry forward plan?</label>
                <textarea [(ngModel)]="review().carry_forward" (ngModelChange)="updateReview()" placeholder="Define next steps..." 
-                         rows="4" class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-50 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
              </div>
           </div>
         </div>

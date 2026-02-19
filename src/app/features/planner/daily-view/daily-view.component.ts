@@ -9,6 +9,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { PlannerService, PlannerTask, PlannerGoal } from '../../../services/planner.service';
 import { DurationCountersComponent } from './duration-counters/duration-counters.component';
 import { HabitService } from '../../../services/habit.service';
+import { ThemeService } from '../../../services/theme.service';
 import { Router } from '@angular/router';
 
 
@@ -27,18 +28,18 @@ import { Router } from '@angular/router';
     
   ],
   template: `
-    <div class="h-full flex flex-col font-manrope">
+    <div class="h-full flex flex-col font-manrope text-black dark:text-white">
       <!-- Header Section -->
       <div class="flex flex-col gap-4 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <h2 class="text-2xl font-black text-black flex items-center gap-2 uppercase font-arvo">
+          <h2 class="text-2xl font-black text-black dark:text-white flex items-center gap-2 uppercase font-arvo">
             <span class="material-symbols-outlined text-3xl">view_day</span>
             Daily Planner
           </h2>
           
           <div class="flex gap-3 items-center w-full md:w-auto flex-wrap">
              <!-- Date Navigation -->
-             <div class="flex items-center bg-white rigid-border-sm border-[2px] p-1 shadow-[2px_2px_0_0_rgba(0,0,0,0.1)]">
+             <div class="flex items-center bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-500 p-1 shadow-[2px_2px_0_0_rgba(0,0,0,0.1)] dark:shadow-[2px_2px_0_0_white]">
                 <button (click)="changeDate(-1)" class="p-1 hover:bg-black hover:text-white transition-colors" title="Previous Day">
                   <span class="material-symbols-outlined text-sm">chevron_left</span>
                 </button>
@@ -47,7 +48,7 @@ import { Router } from '@angular/router';
                   <input [matDatepicker]="picker" 
                          [ngModel]="selectedDateDate()" 
                          (dateChange)="onDatePickerChange($event.value)"
-                         class="bg-transparent border-none text-black font-mono font-bold text-sm px-2 cursor-pointer w-[120px] outline-none text-center h-full hover:underline decoration-2 underline-offset-4">
+                         class="bg-transparent border-none text-black dark:text-white font-mono font-bold text-sm px-2 cursor-pointer w-[120px] outline-none text-center h-full hover:underline decoration-2 underline-offset-4">
                   <mat-datepicker-toggle matIconSuffix [for]="picker" class="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
                 </div>
@@ -57,24 +58,24 @@ import { Router } from '@angular/router';
                 </button>
 
                 <button (click)="goToToday()" 
-                        class="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider hover:bg-black hover:text-white transition-colors border-l-2 border-black ml-1"
+                        class="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors border-l-2 border-black dark:border-concrete-500 ml-1"
                         title="Go to Today">
                   Today
                 </button>
              </div>
 
              <!-- Timeline Zoom -->
-             <div class="flex items-center gap-2 bg-white rigid-border-sm border-[2px] px-3 py-2" title="Zoom: Adjust timeline row height">
-                 <span class="material-symbols-outlined text-black text-sm">zoom_in</span>
+             <div class="flex items-center gap-2 bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-500 px-3 py-2" title="Zoom: Adjust timeline row height">
+                 <span class="material-symbols-outlined text-black dark:text-white text-sm">zoom_in</span>
                  <input type="range" [min]="40" [max]="200" [step]="15" 
                         [ngModel]="slotHeight()" (ngModelChange)="onSlotHeightChange($event)"
-                        class="w-24 accent-black h-1 bg-concrete-300 rounded-lg appearance-none cursor-pointer">
+                        class="w-24 accent-black dark:accent-white h-1 bg-concrete-300 rounded-lg appearance-none cursor-pointer">
              </div>
 
              <!-- Task Summary Stats -->
-             <div class="flex items-center gap-2 bg-white rigid-border-sm border-[2px] px-3 py-2 text-[10px] font-mono font-bold uppercase tracking-wider">
+             <div class="flex items-center gap-2 bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-500 px-3 py-2 text-[10px] font-mono font-bold uppercase tracking-wider">
                <span class="text-concrete-500">Tasks:</span>
-               <span class="text-black">{{ tasks().length }}</span>
+               <span class="text-black dark:text-white">{{ tasks().length }}</span>
                <span class="text-concrete-300">|</span>
                <span class="text-green-600">{{ completedCount() }} done</span>
                <span class="text-concrete-300">|</span>
@@ -82,13 +83,13 @@ import { Router } from '@angular/router';
              </div>
 
             <button (click)="showNotes.set(true)"
-                    class="ml-auto md:ml-0 px-4 py-2 bg-white text-black rigid-border-sm border-[2px] font-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
+                    class="ml-auto md:ml-0 px-4 py-2 bg-white text-black dark:text-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-500 font-black hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
               <span class="material-symbols-outlined text-lg">description</span>
               Notes
             </button>
 
             <button (click)="openNewTaskForm()" 
-                    class="ml-auto md:ml-0 px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
+                    class="ml-auto md:ml-0 px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
               <span class="material-symbols-outlined text-lg">add</span>
               New Task
             </button>
@@ -96,7 +97,7 @@ import { Router } from '@angular/router';
         </div>
         <app-duration-counters [tasks]="tasks()"></app-duration-counters>
         @if (hasOverlap()) {
-          <div class="flex items-center gap-2 bg-amber-50 border-l-4 border-amber-500 text-amber-800 p-3 rigid-border-sm border-[2px]" role="alert">
+          <div class="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-3 rigid-border-sm border-[2px] dark:border-amber-500/50" role="alert">
             <span class="material-symbols-outlined text-amber-500">warning</span>
             <div>
               <p class="font-black text-xs uppercase tracking-wider">Schedule Conflict</p>
@@ -108,27 +109,27 @@ import { Router } from '@angular/router';
 
       <div class="flex flex-1 overflow-hidden gap-6 pb-4 relative">
         <!-- Timeline -->
-        <div class="flex-1 overflow-y-auto bg-concrete-100 rigid-border-sm border-[2px] p-0 custom-scrollbar relative">
-          <div class="flex justify-between items-center px-6 py-4 border-b-2 border-black sticky top-0 bg-white z-30">
-               <h3 class="text-xs font-black text-black uppercase tracking-[0.2em]">Timeline</h3>
-               <span class="text-[9px] uppercase font-bold tracking-widest text-concrete-400 border border-concrete-300 px-2 py-1 bg-concrete-100">Double-click to add task</span>
+        <div class="flex-1 overflow-y-auto bg-concrete-100 dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 p-0 custom-scrollbar relative">
+          <div class="flex justify-between items-center px-6 py-4 border-b-2 border-black dark:border-concrete-500 sticky top-0 bg-white dark:bg-concrete-800 z-30">
+               <h3 class="text-xs font-black text-black dark:text-white uppercase tracking-[0.2em]">Timeline</h3>
+               <span class="text-[9px] uppercase font-bold tracking-widest text-concrete-400 border border-concrete-300 dark:border-concrete-500 px-2 py-1 bg-concrete-100 dark:bg-concrete-700">Double-click to add task</span>
           </div>
           
           <div class="space-y-0 relative mt-0">
             @for (hour of timeSlots; track hour) {
-              <div class="flex gap-0 items-stretch group border-b border-concrete-300">
+              <div class="flex gap-0 items-stretch group border-b border-concrete-300 dark:border-concrete-700">
                 <!-- Hour Label -->
-                <div class="w-16 text-right text-xs text-concrete-400 font-mono font-bold pr-4 select-none relative pt-2 bg-white border-r-2 border-black">
+                <div class="w-16 text-right text-xs text-concrete-400 font-mono font-bold pr-4 select-none relative pt-2 bg-white dark:bg-concrete-800 border-r-2 border-black dark:border-concrete-500">
                   <span>{{formatHour(hour)}}</span>
                 </div>
                 
                 <!-- Time Slot -->
-                <div class="timeline-slot flex-1 relative hover:bg-black/5 transition-colors cursor-pointer bg-white"
+                <div class="timeline-slot flex-1 relative hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer bg-white dark:bg-concrete-800"
                      [style.min-height.px]="slotHeight()"
                      (dblclick)="onSlotDoubleClick(hour)">
                      
                   @for (task of getTasksForHour(hour); track task.id) {
-                    <div class="task-card absolute left-2 right-2 p-3 rigid-border-sm border-[2px] shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] cursor-pointer z-10 overflow-hidden group/card hover:shadow-[6px_6px_0_0_rgba(0,0,0,0.2)] hover:-translate-y-[1px] transition-all"
+                    <div class="task-card absolute left-2 right-2 p-3 rigid-border-sm border-[2px] dark:border-concrete-300 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0_0_white] cursor-pointer z-10 overflow-hidden group/card hover:shadow-[6px_6px_0_0_rgba(0,0,0,0.2)] dark:hover:shadow-[6px_6px_0_0_white] hover:-translate-y-[1px] transition-all"
                          [ngStyle]="getTaskStyle(task)"
                          [style.border-left-color]="task.colorTag"
                          [style.background-color]="getTaskBgColor(task)"
@@ -138,36 +139,36 @@ import { Router } from '@angular/router';
                          (click)="$event.stopPropagation(); editTask(task)">
                       
                       <!-- Resize Handle Top -->
-                      <div class="resize-handle top absolute top-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 transition-colors"
+                      <div class="resize-handle top absolute top-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                            (mousedown)="startResize($event, task, 'top')"
                            (click)="$event.stopPropagation()"></div>
 
                       <!-- Resize Handle Bottom -->
-                      <div class="resize-handle bottom absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 transition-colors"
+                      <div class="resize-handle bottom absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
                            (mousedown)="startResize($event, task, 'bottom')"
                            (click)="$event.stopPropagation()"></div>
 
                       <div class="flex justify-between items-start pointer-events-none relative z-10 h-full">
                         <div class="flex-1 min-w-0 pr-2">
-                          <h4 class="font-black text-black text-xs uppercase tracking-wide truncate"
+                          <h4 class="font-black text-black dark:text-black text-xs uppercase tracking-wide truncate"
                               [class.line-through]="task.status === 'completed'">
                             {{task.title}}
                           </h4>
                           @if (task.category) {
-                            <p class="text-[10px] text-concrete-500 mt-0.5 line-clamp-1 font-mono uppercase">
+                            <p class="text-[10px] text-concrete-500 dark:text-concrete-400 mt-0.5 line-clamp-1 font-mono uppercase">
                               <span class="material-symbols-outlined text-[10px] align-middle">folder</span> {{task.category}}
                             </p>
                           }
                           @if (task.linkedGoalId) {
-                            <p class="text-[10px] text-concrete-500 mt-0.5 line-clamp-1 font-mono uppercase">
+                            <p class="text-[10px] text-concrete-500 dark:text-concrete-400 mt-0.5 line-clamp-1 font-mono uppercase">
                               <span class="material-symbols-outlined text-[10px] align-middle">flag</span> {{ getGoalTitle(task.linkedGoalId) }}
                             </p>
                           }
                           @if (task.description) {
-                            <p class="text-[10px] text-concrete-400 mt-0.5 line-clamp-1 italic">{{task.description}}</p>
+                            <p class="text-[10px] text-concrete-400 dark:text-concrete-600 mt-0.5 line-clamp-1 italic">{{task.description}}</p>
                           }
-                          <div class="flex items-center gap-3 mt-1">
-                             <span class="text-[9px] font-bold text-black flex items-center gap-1 font-mono bg-concrete-100 px-1 border border-black">
+                           <div class="flex items-center gap-3 mt-1">
+                             <span class="text-[9px] font-bold text-black dark:text-black flex items-center gap-1 font-mono bg-concrete-100 dark:bg-concrete-200 px-1 border border-black dark:border-concrete-600">
                                {{formatTime12h(task.start_time)}} – {{formatTime12h(task.end_time)}}
                              </span>
                              @if(task.reminder) {
@@ -188,7 +189,7 @@ import { Router } from '@angular/router';
                         <!-- Task Actions (visible on hover) -->
                         <div class="flex flex-col gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity pointer-events-auto">
                           <button (click)="$event.stopPropagation(); markCompleted(task)" 
-                                  class="w-7 h-7 flex items-center justify-center border border-black transition-colors"
+                                  class="w-7 h-7 flex items-center justify-center border border-black dark:border-black transition-colors"
                                   [class.bg-green-500]="task.status === 'completed'"
                                   [class.text-white]="task.status === 'completed'"
                                   [class.hover:bg-green-500]="task.status !== 'completed'"
@@ -199,7 +200,7 @@ import { Router } from '@angular/router';
                             </span>
                           </button>
                           <button (click)="$event.stopPropagation(); markSkipped(task)" 
-                                  class="w-7 h-7 flex items-center justify-center border border-black transition-colors"
+                                  class="w-7 h-7 flex items-center justify-center border border-black dark:border-black transition-colors"
                                   [class.bg-red-400]="task.status === 'skipped'"
                                   [class.text-white]="task.status === 'skipped'"
                                   [class.hover:bg-red-400]="task.status !== 'skipped'"
@@ -211,7 +212,7 @@ import { Router } from '@angular/router';
                           </button>
                           @if(task.habitId) {
                             <button (click)="$event.stopPropagation(); goToHabitNotes(task)" 
-                                    class="w-7 h-7 flex items-center justify-center border border-black transition-colors hover:bg-blue-500 hover:text-white"
+                                    class="w-7 h-7 flex items-center justify-center border border-black dark:border-black transition-colors hover:bg-blue-500 hover:text-white"
                                     title="Open Habit Notes">
                               <span class="material-symbols-outlined text-sm">note_stack</span>
                             </button>
@@ -228,12 +229,12 @@ import { Router } from '@angular/router';
 
         <!-- Add/Edit Side Panel -->
         @if (showAddForm()) {
-          <div class="w-96 bg-white rigid-border border-[4px] p-6 flex flex-col brutalist-shadow-active relative h-full">
-            <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-4">
-              <h3 class="text-lg font-black text-black uppercase font-arvo">
+          <div class="w-96 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-500 p-6 flex flex-col brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] relative h-full">
+            <div class="flex justify-between items-center mb-6 border-b-4 border-black dark:border-concrete-500 pb-4">
+              <h3 class="text-lg font-black text-black dark:text-white uppercase font-arvo">
                  {{ newTask.id ? 'Edit Task' : 'New Task' }}
               </h3>
-              <button (click)="closeForm()" class="w-8 h-8 flex items-center justify-center hover:bg-black hover:text-white transition-colors border-2 border-transparent hover:border-black">
+              <button (click)="closeForm()" class="w-8 h-8 flex items-center justify-center hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors border-2 border-transparent hover:border-black dark:hover:border-white">
                 <span class="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -241,22 +242,22 @@ import { Router } from '@angular/router';
             <div class="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
               <!-- Title -->
               <div class="space-y-1">
-                <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Task Name *</label>
+                <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Task Name *</label>
                 <input [(ngModel)]="newTask.title" (ngModelChange)="onFormChange()" placeholder="What do you need to do?" required
-                       class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all placeholder:text-concrete-300">
+                       class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all placeholder:text-concrete-300 dark:placeholder:text-concrete-500">
               </div>
 
               <!-- Description -->
               <div class="space-y-1">
-                <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Description</label>
+                <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Description</label>
                 <textarea [(ngModel)]="newTask.description" (ngModelChange)="onFormChange()" placeholder="Add details or notes..." rows="3"
-                          class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all resize-none placeholder:text-concrete-300"></textarea>
+                          class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all resize-none placeholder:text-concrete-300 dark:placeholder:text-concrete-500"></textarea>
               </div>
 
               <!-- Category -->
               <div class="space-y-1">
-                <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Category</label>
-                <select [(ngModel)]="newTask.category" (ngModelChange)="onFormChange()" class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all">
+                <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Category</label>
+                <select [(ngModel)]="newTask.category" (ngModelChange)="onFormChange()" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all">
                   @for (c of categories; track c) {
                     <option [value]="c">{{c}}</option>
                   }
@@ -265,8 +266,8 @@ import { Router } from '@angular/router';
 
               <!-- Linked Goal -->
               <div class="space-y-1">
-                <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Linked Goal</label>
-                <select [(ngModel)]="newTask.linkedGoalId" (ngModelChange)="onFormChange()" class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all">
+                <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Linked Goal</label>
+                <select [(ngModel)]="newTask.linkedGoalId" (ngModelChange)="onFormChange()" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all">
                   <option [value]="undefined">None</option>
                   @for (g of goals(); track g.id) {
                     <option [value]="g.id">{{g.title}}</option>
@@ -277,14 +278,14 @@ import { Router } from '@angular/router';
               <!-- Color Tag and Reminder -->
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Color Tag</label>
-                  <input type="color" [(ngModel)]="newTask.colorTag" (ngModelChange)="onFormChange()" class="w-full h-12 bg-white rigid-border-sm border-[2px] outline-none">
+                  <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Color Tag</label>
+                  <input type="color" [(ngModel)]="newTask.colorTag" (ngModelChange)="onFormChange()" class="w-full h-12 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 outline-none">
                 </div>
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Reminder</label>
+                  <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Reminder</label>
                   <label class="flex items-center gap-2 h-12 cursor-pointer">
-                    <input type="checkbox" [(ngModel)]="newTask.reminder" (ngModelChange)="onFormChange()" class="w-5 h-5 accent-black">
-                    <span class="text-xs font-mono text-concrete-500">{{ newTask.reminder ? 'On' : 'Off' }}</span>
+                    <input type="checkbox" [(ngModel)]="newTask.reminder" (ngModelChange)="onFormChange()" class="w-5 h-5 accent-black dark:accent-white">
+                    <span class="text-xs font-mono text-concrete-500 dark:text-concrete-400">{{ newTask.reminder ? 'On' : 'Off' }}</span>
                   </label>
                 </div>
               </div>
@@ -292,36 +293,39 @@ import { Router } from '@angular/router';
               <!-- Time Selection -->
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Start Time</label>
+                  <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Start Time</label>
                   <div class="relative">
                       <input [matTimepicker]="picker1" [ngModel]="startTimeDate()" (ngModelChange)="updateStartTime($event)"
-                             class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all cursor-pointer">
+                             class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all cursor-pointer">
                       <mat-timepicker #picker1 />
-                      <mat-timepicker-toggle [for]="picker1" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-black"/>
+                      <mat-timepicker-toggle [for]="picker1" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-black dark:text-white"/>
                   </div>
                 </div>
 
                 <div class="space-y-1">
-                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">End Time</label>
+                  <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">End Time</label>
                   <div class="relative">
                       <input [matTimepicker]="picker2" [ngModel]="endTimeDate()" (ngModelChange)="updateEndTime($event)"
-                             class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all cursor-pointer">
+                             class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all cursor-pointer">
                       <mat-timepicker #picker2 />
-                      <mat-timepicker-toggle [for]="picker2" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-black"/>
+                      <mat-timepicker-toggle [for]="picker2" matSuffix class="absolute right-2 top-1/2 -translate-y-1/2 text-black dark:text-white"/>
                   </div>
                 </div>
               </div>
 
               <!-- Priority -->
               <div>
-                <label class="block text-[10px] font-black tracking-widest text-concrete-900 uppercase mb-3">Priority</label>
+                <label class="block text-[10px] font-black tracking-widest text-concrete-900 dark:text-white uppercase mb-3">Priority</label>
                 <div class="flex gap-2">
                   @for (p of priorities; track p) {
                     <button (click)="setPriority(p)"
                             class="flex-1 py-3 rigid-border-sm border-[2px] font-black uppercase text-xs transition-all"
                             [class.bg-white]="newTask.priority !== p"
+                            [class.dark:bg-concrete-700]="newTask.priority !== p"
                             [class.border-black]="newTask.priority !== p"
+                            [class.dark:border-white]="newTask.priority !== p"
                             [class.text-concrete-400]="newTask.priority !== p"
+                            [class.dark:text-concrete-300]="newTask.priority !== p"
                             
                             [class.bg-black]="newTask.priority === p && p === 'high'"
                             [class.text-white]="newTask.priority === p && p === 'high'"
@@ -337,16 +341,16 @@ import { Router } from '@angular/router';
                 </div>
               </div>
 
-               <div class="pt-4 flex gap-3 border-t-4 border-black mt-auto">
+               <div class="pt-4 flex gap-3 border-t-4 border-black dark:border-white mt-auto">
                   @if (newTask.id) {
-                    <button (click)="deleteTask(newTask.id!)" class="mr-auto text-electric-red hover:text-black font-black text-xs uppercase tracking-widest flex items-center gap-1 border-2 border-transparent hover:border-black px-2">
+                    <button (click)="deleteTask(newTask.id!)" class="mr-auto text-electric-red hover:text-black font-black text-xs uppercase tracking-widest flex items-center gap-1 border-2 border-transparent hover:border-black dark:hover:border-white px-2">
                       <span class="material-symbols-outlined text-sm">delete</span>
                       Delete
                     </button>
                   }
                   <button (click)="saveTask()" 
                           [disabled]="!newTask.title?.trim()"
-                          class="flex-1 py-4 bg-electric-red text-white rigid-border-sm border-[2px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_black] hover:shadow-[2px_2px_0_0_black] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-xs disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-[4px_4px_0_0_black] disabled:hover:translate-x-0 disabled:hover:translate-y-0">
+                          class="flex-1 py-4 bg-electric-red text-white rigid-border-sm border-[2px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white] hover:shadow-[2px_2px_0_0_black] dark:hover:shadow-[2px_2px_0_0_white] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-xs disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-[4px_4px_0_0_black] disabled:hover:translate-x-0 disabled:hover:translate-y-0">
                     {{ newTask.id ? 'Save Changes' : 'Add Task' }}
                   </button>
                 </div>
@@ -356,19 +360,19 @@ import { Router } from '@angular/router';
 
         <!-- Notes Side Panel -->
         @if (showNotes()) {
-          <div class="w-96 bg-white rigid-border border-[4px] p-6 flex flex-col brutalist-shadow-active relative h-full">
-            <div class="flex justify-between items-center mb-6 border-b-4 border-black pb-4">
-              <h3 class="text-lg font-black text-black uppercase font-arvo">
+          <div class="w-96 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-500 p-6 flex flex-col brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] relative h-full">
+            <div class="flex justify-between items-center mb-6 border-b-4 border-black dark:border-concrete-500 pb-4">
+              <h3 class="text-lg font-black text-black dark:text-white uppercase font-arvo">
                  Notes for {{selectedDate | date:'longDate'}}
               </h3>
-              <button (click)="showNotes.set(false)" class="w-8 h-8 flex items-center justify-center hover:bg-black hover:text-white transition-colors border-2 border-transparent hover:border-black">
+              <button (click)="showNotes.set(false)" class="w-8 h-8 flex items-center justify-center hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors border-2 border-transparent hover:border-black dark:hover:border-white">
                 <span class="material-symbols-outlined">close</span>
               </button>
             </div>
             <div class="flex-1 overflow-y-auto space-y-4">
-                <p class="text-sm font-mono text-concrete-600">These notes will be collated into the monthly view.</p>
+                <p class="text-sm font-mono text-concrete-600 dark:text-concrete-400">These notes will be collated into the monthly view.</p>
                 <textarea placeholder="Type your notes for today..." rows="10"
-                          class="w-full px-4 py-3 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none transition-all resize-none placeholder:text-concrete-300"></textarea>
+                          class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all resize-none placeholder:text-concrete-300 dark:placeholder:text-concrete-500"></textarea>
             </div>
           </div>
         }
@@ -390,6 +394,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
   private plannerService = inject(PlannerService);
   private ngZone = inject(NgZone);
   private habitService = inject(HabitService);
+  private themeService = inject(ThemeService);
   private router = inject(Router);
   
   tasks = signal<PlannerTask[]>([]);
@@ -673,9 +678,10 @@ export class DailyViewComponent implements OnInit, OnDestroy {
 
   /** Give completed/skipped tasks a subtle background tint */
   getTaskBgColor(task: PlannerTask): string {
-    if (task.status === 'completed') return '#f0fdf4'; // light green
-    if (task.status === 'skipped') return '#fef2f2';   // light red
-    return '#ffffff';
+    const isDark = this.themeService.currentTheme() === 'dark';
+    if (task.status === 'completed') return isDark ? '#86efac' : '#f0fdf4'; // green-300
+    if (task.status === 'skipped') return isDark ? '#fca5a5' : '#fef2f2';   // red-300
+    return isDark ? '#d4d4d4' : '#ffffff'; // neutral-300
   }
 
   // ─── Date Navigation ────────────────────────────────────
