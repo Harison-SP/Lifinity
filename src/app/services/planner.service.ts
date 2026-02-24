@@ -18,6 +18,11 @@ export interface PlannerGoal {
   created_at?: string;
 }
 
+export interface SubTask {
+  title: string;
+  completed: boolean;
+}
+
 export interface PlannerTask {
   id?: string;
   title: string;
@@ -32,7 +37,9 @@ export interface PlannerTask {
   habitId?: string;
   colorTag?: string;
   reminder?: boolean;
+  sub_tasks?: SubTask[];
   created_at?: string;
+  _isTask?: boolean;
 }
 
 export interface DailySummary {
@@ -136,6 +143,12 @@ export class PlannerService {
       params.date = date;
     }
     return this.http.get<PlannerTask[]>(`${this.apiUrl}/tasks`, { params });
+  }
+
+  getTasksByRange(start_date: string, end_date: string): Observable<PlannerTask[]> {
+    return this.http.get<PlannerTask[]>(`${this.apiUrl}/tasks`, { 
+      params: { start_date, end_date } 
+    });
   }
 
   getTask(id: string): Observable<PlannerTask> {

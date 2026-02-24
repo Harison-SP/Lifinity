@@ -84,14 +84,10 @@ export class HabitService {
     }
 
     toggleCompletion(habitId: string, _date: string): Observable<Habit | null> {
-        // We ignore the passed date string for the payload creation as we want exact timestamp
-        // But in a more complex app we might want to toggle PAST dates.
-        // For this task, we assume "toggle" usually means "Just did it now" or "Undo what I did".
-        // The backend logic supports toggling for the "Local Day" derived from the timestamp.
-        
-        const now = new Date();
+        // Toggle for specific date by creating an ISO timestamp that stays within the desired day
+        const timestamp = _date.includes('T') ? _date : `${_date}T12:00:00`;
         const payload = {
-            completed_at: now.toISOString(),
+            completed_at: new Date(timestamp).toISOString(),
             timezone_offset: this.getTimezoneOffset()
         };
         
@@ -154,5 +150,14 @@ export class HabitService {
         const params = new HttpParams()
             .set('timezone_offset', this.getTimezoneOffset().toString());
         return this.http.get<import('../models/habit.model').AnalyticsResponse>(`${this.apiUrl}/${habitId}/analytics`, { params });
+    }
+
+    getAllHabits(): Observable<Habit[]> {
+        return this.http.get<Habit[]>(this.apiUrl);
+    }
+
+    getHabitsByTier(tier: 'yearly' | 'monthly' | 'weekly' | 'daily'): Observable<Habit[]> {
+        const params = new HttpParams().set('tier', tier);
+        return this.http.get<Habit[]>(this.apiUrl, { params });
     }
 }

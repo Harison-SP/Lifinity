@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, NgZone, computed, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnInit, NgZone, computed, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTimepickerModule } from '@angular/material/timepicker';
@@ -9,8 +9,17 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { PlannerService, PlannerTask, PlannerGoal } from '../../../services/planner.service';
 import { DurationCountersComponent } from './duration-counters/duration-counters.component';
 import { HabitService } from '../../../services/habit.service';
+import { SystemService } from '../../../services/system.service';
+import { SystemInstanceTask } from '../../../models/system.model';
 import { ThemeService } from '../../../services/theme.service';
 import { Router } from '@angular/router';
+import { FullCalendarModule, FullCalendarComponent } from '@fullcalendar/angular';
+import { CalendarOptions, EventInput, EventClickArg, DatesSetArg, EventContentArg, Calendar } from '@fullcalendar/core';
+import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import listPlugin from '@fullcalendar/list';
+import multiMonthPlugin from '@fullcalendar/multimonth';
 
 
 @Component({
@@ -25,7 +34,7 @@ import { Router } from '@angular/router';
     MatNativeDateModule,
     MatDatepickerModule,
     DurationCountersComponent,
-    
+    FullCalendarModule
   ],
   template: `
     <div class="h-full flex flex-col font-manrope text-black dark:text-white">
@@ -93,6 +102,30 @@ import { Router } from '@angular/router';
               <span class="material-symbols-outlined text-lg">add</span>
               New Task
             </button>
+            <div class="flex bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 p-1 ml-2 overflow-x-auto max-w-[400px] no-scrollbar shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white]">
+                <button (click)="changeView('timeGridDay')" 
+                        [class.active]="currentView() === 'timeGridDay'" 
+                        class="view-switcher-btn px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black whitespace-nowrap">Day</button>
+                <button (click)="changeView('timeGridWeek')" 
+                        [class.active]="currentView() === 'timeGridWeek'" 
+                        class="view-switcher-btn px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black border-l whitespace-nowrap">Week</button>
+                <button (click)="changeView('dayGridMonth')" 
+                        [class.active]="currentView() === 'dayGridMonth'" 
+                        class="view-switcher-btn px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black border-l whitespace-nowrap">Month</button>
+                <button (click)="changeView('listDay')" 
+                        [class.active]="currentView() === 'listDay'" 
+                        class="view-switcher-btn px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black border-l whitespace-nowrap">List</button>
+                <button (click)="changeView('listMonth')" 
+                        [class.active]="currentView() === 'listMonth'" 
+                        class="view-switcher-btn px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black border-l whitespace-nowrap">Full_Log</button>
+                <button (click)="changeView('listYear')" 
+                        [class.active]="currentView() === 'listYear'" 
+                        class="view-switcher-btn px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black border-l whitespace-nowrap">Year_List</button>
+                <button (click)="changeView('multiMonthYear')" 
+                        [class.bg-black]="currentView() === 'multiMonthYear'" 
+                        [class.text-white]="currentView() === 'multiMonthYear'"
+                        class="px-2 py-1 text-[9px] font-black uppercase tracking-tighter hover:bg-black hover:text-white transition-colors border-l border-black dark:border-concrete-500 whitespace-nowrap">Year_Grid</button>
+            </div>
           </div>
         </div>
         <app-duration-counters [tasks]="tasks()"></app-duration-counters>
@@ -108,122 +141,15 @@ import { Router } from '@angular/router';
       </div>
 
       <div class="flex flex-1 overflow-hidden gap-6 pb-4 relative">
-        <!-- Timeline -->
-        <div class="flex-1 overflow-y-auto bg-concrete-100 dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 p-0 custom-scrollbar relative">
-          <div class="flex justify-between items-center px-6 py-4 border-b-2 border-black dark:border-concrete-500 sticky top-0 bg-white dark:bg-concrete-800 z-30">
+        <!-- Timeline Context -->
+        <div class="flex-1 overflow-y-auto bg-concrete-100 dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 custom-scrollbar relative flex flex-col">
+          <div class="flex justify-between items-center px-6 py-4 border-b-2 border-black dark:border-concrete-500 bg-white dark:bg-concrete-800 z-30">
                <h3 class="text-xs font-black text-black dark:text-white uppercase tracking-[0.2em]">Timeline</h3>
-               <span class="text-[9px] uppercase font-bold tracking-widest text-concrete-400 border border-concrete-300 dark:border-concrete-500 px-2 py-1 bg-concrete-100 dark:bg-concrete-700">Double-click to add task</span>
+               <span class="text-[9px] uppercase font-bold tracking-widest text-concrete-400 border border-concrete-300 dark:border-concrete-500 px-2 py-1 bg-concrete-100 dark:bg-concrete-700">Click to Select | Drag to Move | Resize to Adjust</span>
           </div>
           
-          <div class="space-y-0 relative mt-0">
-            @for (hour of timeSlots; track hour) {
-              <div class="flex gap-0 items-stretch group border-b border-concrete-300 dark:border-concrete-700">
-                <!-- Hour Label -->
-                <div class="w-16 text-right text-xs text-concrete-400 font-mono font-bold pr-4 select-none relative pt-2 bg-white dark:bg-concrete-800 border-r-2 border-black dark:border-concrete-500">
-                  <span>{{formatHour(hour)}}</span>
-                </div>
-                
-                <!-- Time Slot -->
-                <div class="timeline-slot flex-1 relative hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer bg-white dark:bg-concrete-800"
-                     [style.min-height.px]="slotHeight()"
-                     (dblclick)="onSlotDoubleClick(hour)">
-                     
-                  @for (task of getTasksForHour(hour); track task.id) {
-                    <div class="task-card absolute left-2 right-2 p-3 rigid-border-sm border-[2px] dark:border-concrete-300 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0_0_white] cursor-pointer z-10 overflow-hidden group/card hover:shadow-[6px_6px_0_0_rgba(0,0,0,0.2)] dark:hover:shadow-[6px_6px_0_0_white] hover:-translate-y-[1px] transition-all"
-                         [ngStyle]="getTaskStyle(task)"
-                         [style.border-left-color]="task.colorTag"
-                         [style.background-color]="getTaskBgColor(task)"
-                         [class.border-l-[8px]]="true"
-                         [class.opacity-50]="task.status === 'completed' || task.status === 'skipped'"
-                         (mousedown)="startDrag($event, task)"
-                         (click)="$event.stopPropagation(); editTask(task)">
-                      
-                      <!-- Resize Handle Top -->
-                      <div class="resize-handle top absolute top-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-                           (mousedown)="startResize($event, task, 'top')"
-                           (click)="$event.stopPropagation()"></div>
-
-                      <!-- Resize Handle Bottom -->
-                      <div class="resize-handle bottom absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-                           (mousedown)="startResize($event, task, 'bottom')"
-                           (click)="$event.stopPropagation()"></div>
-
-                      <div class="flex justify-between items-start pointer-events-none relative z-10 h-full">
-                        <div class="flex-1 min-w-0 pr-2">
-                          <h4 class="font-black text-black dark:text-black text-xs uppercase tracking-wide truncate"
-                              [class.line-through]="task.status === 'completed'">
-                            {{task.title}}
-                          </h4>
-                          @if (task.category) {
-                            <p class="text-[10px] text-concrete-500 dark:text-concrete-400 mt-0.5 line-clamp-1 font-mono uppercase">
-                              <span class="material-symbols-outlined text-[10px] align-middle">folder</span> {{task.category}}
-                            </p>
-                          }
-                          @if (task.linkedGoalId) {
-                            <p class="text-[10px] text-concrete-500 dark:text-concrete-400 mt-0.5 line-clamp-1 font-mono uppercase">
-                              <span class="material-symbols-outlined text-[10px] align-middle">flag</span> {{ getGoalTitle(task.linkedGoalId) }}
-                            </p>
-                          }
-                          @if (task.description) {
-                            <p class="text-[10px] text-concrete-400 dark:text-concrete-600 mt-0.5 line-clamp-1 italic">{{task.description}}</p>
-                          }
-                           <div class="flex items-center gap-3 mt-1">
-                             <span class="text-[9px] font-bold text-black dark:text-black flex items-center gap-1 font-mono bg-concrete-100 dark:bg-concrete-200 px-1 border border-black dark:border-concrete-600">
-                               {{formatTime12h(task.start_time)}} – {{formatTime12h(task.end_time)}}
-                             </span>
-                             @if(task.reminder) {
-                              <span class="material-symbols-outlined text-sm text-electric-red" title="Reminder set">notifications</span>
-                             }
-                             <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase"
-                                   [class.bg-red-100]="task.priority === 'high'"
-                                   [class.text-red-700]="task.priority === 'high'"
-                                   [class.bg-amber-100]="task.priority === 'medium'"
-                                   [class.text-amber-700]="task.priority === 'medium'"
-                                   [class.bg-green-100]="task.priority === 'low'"
-                                   [class.text-green-700]="task.priority === 'low'">
-                               {{task.priority}}
-                             </span>
-                          </div>
-                        </div>
-                        
-                        <!-- Task Actions (visible on hover) -->
-                        <div class="flex flex-col gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity pointer-events-auto">
-                          <button (click)="$event.stopPropagation(); markCompleted(task)" 
-                                  class="w-7 h-7 flex items-center justify-center border border-black dark:border-black transition-colors"
-                                  [class.bg-green-500]="task.status === 'completed'"
-                                  [class.text-white]="task.status === 'completed'"
-                                  [class.hover:bg-green-500]="task.status !== 'completed'"
-                                  [class.hover:text-white]="task.status !== 'completed'"
-                                  [title]="task.status === 'completed' ? 'Mark as Pending' : 'Mark as Done'">
-                            <span class="material-symbols-outlined text-sm">
-                              {{ task.status === 'completed' ? 'undo' : 'check' }}
-                            </span>
-                          </button>
-                          <button (click)="$event.stopPropagation(); markSkipped(task)" 
-                                  class="w-7 h-7 flex items-center justify-center border border-black dark:border-black transition-colors"
-                                  [class.bg-red-400]="task.status === 'skipped'"
-                                  [class.text-white]="task.status === 'skipped'"
-                                  [class.hover:bg-red-400]="task.status !== 'skipped'"
-                                  [class.hover:text-white]="task.status !== 'skipped'"
-                                  [title]="task.status === 'skipped' ? 'Mark as Pending' : 'Skip Task'">
-                            <span class="material-symbols-outlined text-sm">
-                              {{ task.status === 'skipped' ? 'undo' : 'close' }}
-                            </span>
-                          </button>
-                          @if(task.habitId) {
-                            <button (click)="$event.stopPropagation(); goToHabitNotes(task)" 
-                                    class="w-7 h-7 flex items-center justify-center border border-black dark:border-black transition-colors hover:bg-blue-500 hover:text-white"
-                                    title="Open Habit Notes">
-                              <span class="material-symbols-outlined text-sm">note_stack</span>
-                            </button>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
+          <div class="flex-1 bg-white dark:bg-concrete-900 p-2 overflow-auto">
+            <full-calendar #calendar [options]="calendarOptions()"></full-calendar>
           </div>
         </div>
 
@@ -341,6 +267,35 @@ import { Router } from '@angular/router';
                 </div>
               </div>
 
+              <!-- Sub-tasks Section -->
+              <div class="space-y-3 pt-4 border-t-2 border-black dark:border-concrete-500">
+                <div class="flex justify-between items-center">
+                  <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Sub_Tasks</label>
+                  <button (click)="addSubTask()" class="text-[10px] font-black uppercase flex items-center gap-1 hover:text-electric-red">
+                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                    Add
+                  </button>
+                </div>
+                
+                <div class="space-y-2">
+                  @for (st of newTask.sub_tasks; track $index) {
+                    <div class="flex items-center gap-2 group">
+                      <input type="checkbox" [(ngModel)]="st.completed" (ngModelChange)="onFormChange()" 
+                             class="w-4 h-4 accent-black dark:accent-white cursor-pointer">
+                      <input [(ngModel)]="st.title" (ngModelChange)="onFormChange()"
+                             class="flex-1 bg-transparent border-b border-concrete-300 dark:border-concrete-600 focus:border-black dark:focus:border-white text-xs font-bold outline-none py-1"
+                             [class.line-through]="st.completed"
+                             [class.opacity-50]="st.completed">
+                      <button (click)="removeSubTask($index)" class="opacity-0 group-hover:opacity-100 p-1 text-concrete-400 hover:text-red-500 transition-all">
+                        <span class="material-symbols-outlined text-xs">delete</span>
+                      </button>
+                    </div>
+                  } @empty {
+                    <p class="text-[10px] text-concrete-400 uppercase font-bold text-center py-2">No sub-tasks</p>
+                  }
+                </div>
+              </div>
+
                <div class="pt-4 flex gap-3 border-t-4 border-black dark:border-white mt-auto">
                   @if (newTask.id) {
                     <button (click)="deleteTask(newTask.id!)" class="mr-auto text-electric-red hover:text-black font-black text-xs uppercase tracking-widest flex items-center gap-1 border-2 border-transparent hover:border-black dark:hover:border-white px-2">
@@ -388,12 +343,110 @@ import { Router } from '@angular/router';
     ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
     ::ng-deep .mat-mdc-text-field-wrapper { padding: 0; }
     ::ng-deep .mat-mdc-form-field-infix { border: none; padding: 0 !important; min-height: unset !important; }
+
+    /* FullCalendar Brutalist Overrides */
+    ::ng-deep .fc {
+      font-family: 'Space Mono', monospace !important;
+      --fc-border-color: black;
+    }
+
+    :host-context(.dark) ::ng-deep .fc {
+      --fc-border-color: white;
+    }
+
+    ::ng-deep .fc .fc-scrollgrid {
+      border: 3px solid var(--fc-border-color) !important;
+    }
+
+    ::ng-deep .fc-col-header-cell {
+      background-color: black !important;
+      border: 2px solid black !important;
+    }
+
+    :host-context(.dark) ::ng-deep .fc-col-header-cell {
+      background-color: white !important;
+      border: 2px solid white !important;
+    }
+
+    ::ng-deep .fc-col-header-cell-cushion {
+      color: white !important;
+      text-transform: uppercase !important;
+      font-weight: 900 !important;
+      font-size: 0.7rem !important;
+      letter-spacing: 1px;
+    }
+
+    :host-context(.dark) ::ng-deep .fc-col-header-cell-cushion {
+      color: black !important;
+    }
+
+    ::ng-deep .fc-timegrid-slot {
+      height: 60px !important;
+      border-bottom: 2px solid var(--fc-border-color) !important;
+    }
+
+    ::ng-deep .fc-timegrid-slot-label-cushion {
+      font-weight: 900 !important;
+      font-size: 10px !important;
+      text-transform: uppercase !important;
+      color: var(--fc-border-color) !important;
+    }
+
+    ::ng-deep .fc-v-event {
+      background-color: white !important;
+      border: 3px solid black !important;
+      border-radius: 0 !important;
+      box-shadow: 6px 6px 0 0 rgba(0,0,0,1) !important;
+    }
+
+    :host-context(.dark) ::ng-deep .fc-v-event {
+      background-color: #1a1a1a !important;
+      border-color: white !important;
+      box-shadow: 6px 6px 0 0 white !important;
+    }
+
+    ::ng-deep .fc-event-main {
+      padding: 0 !important;
+    }
+
+    ::ng-deep .fc-now-indicator-line {
+      border-color: #ff3e3e !important;
+      border-width: 3px !important;
+    }
+
+    ::ng-deep .fc-now-indicator-arrow {
+      border-color: #ff3e3e !important;
+    }
+
+    /* Toolbar Buttons Hack */
+    .view-switcher-btn {
+      transition: none !important;
+      border: 2px solid black;
+    }
+
+    :host-context(.dark) .view-switcher-btn {
+      border-color: white;
+    }
+
+    .view-switcher-btn.active {
+      background: black;
+      color: white;
+      box-shadow: 2px 2px 0 0 black;
+    }
+
+    :host-context(.dark) .view-switcher-btn.active {
+      background: white;
+      color: black;
+      box-shadow: 2px 2px 0 0 white;
+    }
   `]
 })
 export class DailyViewComponent implements OnInit, OnDestroy {
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
   private plannerService = inject(PlannerService);
   private ngZone = inject(NgZone);
   private habitService = inject(HabitService);
+  private systemService = inject(SystemService);
   private themeService = inject(ThemeService);
   private router = inject(Router);
   
@@ -402,6 +455,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
   showNotes = signal(false);
   hasOverlap = signal(false);
   goals = signal<PlannerGoal[]>([]);
+  systemTasks = signal<SystemInstanceTask[]>([]);
   categories: ('Study' | 'Work' | 'Health' | 'Personal')[] = ['Study', 'Work', 'Health', 'Personal'];
 
   /** Tasks to render on the timeline (includes live preview of form edits) */
@@ -427,26 +481,174 @@ export class DailyViewComponent implements OnInit, OnDestroy {
 
   selectedDate = new Date().toISOString().split('T')[0];
   selectedDateDate = signal<Date>(new Date());
-  slotHeight = signal(64);
-  
-  private resizingTask: { 
-    id: string; 
-    startY: number; 
-    originalStartStr: string;
-    originalEndStr: string;
-    direction: 'top' | 'bottom';
-  } | null = null;
-  private resizeMoveListener: ((e: MouseEvent) => void) | null = null;
-  private resizeEndListener: (() => void) | null = null;
+  visibleStart = signal<string>('');
+  visibleEnd = signal<string>('');
+  slotHeight = signal(60);
+  currentView = signal('timeGridDay');
 
-  private draggingTask: {
-    id: string;
-    startY: number;
-    originalStartStr: string;
-    originalEndStr: string;
-  } | null = null;
-  private dragMoveListener: ((e: MouseEvent) => void) | null = null;
-  private dragEndListener: (() => void) | null = null;
+  calendarEvents = computed<EventInput[]>(() => {
+    const taskEvents = this.displayTasks().map(task => ({
+      id: task.id,
+      title: task.title,
+      start: `${task.date}T${task.start_time}`,
+      end: `${task.date}T${task.end_time}`,
+      backgroundColor: this.getTaskBgColor(task),
+      borderColor: task.colorTag || '#000000',
+      textColor: 'black',
+      extendedProps: {
+        category: task.category,
+        description: task.description,
+        status: task.status,
+        habitId: task.habitId,
+        type: 'task',
+        task: task
+      }
+    }));
+
+    const habits = this.habitService.habits();
+    const habitEvents = habits
+      .filter(h => h.timeBlockStart && h.timeBlockEnd)
+      .map(h => ({
+        id: `habit-${h.id}`,
+        title: `⚡ ${h.name}`,
+        startTime: h.timeBlockStart,
+        endTime: h.timeBlockEnd,
+        display: 'background',
+        backgroundColor: h.color || '#ff3e3e',
+        extendedProps: {
+          type: 'habit',
+          habit: h
+        }
+      }));
+
+    // System instance tasks (only those with a time block appear as events)
+    const sysEvents = this.systemTasks()
+      .filter(t => t.timeBlockStart && t.timeBlockEnd)
+      .map(t => ({
+        id: `sys-${t.instanceId}-${t.date}-${t.title}`,
+        title: t.title,
+        start: `${t.date}T${t.timeBlockStart}`,
+        end: `${t.date}T${t.timeBlockEnd}`,
+        backgroundColor: t.completed ? 'rgba(16,185,129,0.15)' : 'rgba(124,58,237,0.1)',
+        borderColor: t.color || '#7c3aed',
+        textColor: t.color || '#7c3aed',
+        extendedProps: {
+          type: 'system_task',
+          systemTask: t
+        }
+      }));
+
+    return [...taskEvents, ...habitEvents, ...sysEvents];
+  });
+
+  calendarOptions = computed<CalendarOptions>(() => ({
+    plugins: [timeGridPlugin, interactionPlugin, dayGridPlugin, listPlugin, multiMonthPlugin],
+    initialView: this.currentView(),
+    headerToolbar: false,
+    initialDate: this.selectedDate,
+    slotMinTime: '05:00:00',
+    slotMaxTime: '23:00:00',
+    height: 'auto',
+    allDaySlot: false,
+    nowIndicator: true,
+    editable: true,
+    selectable: true,
+    slotDuration: '00:15:00',
+    slotLabelInterval: '01:00',
+    slotEventOverlap: false,
+    events: this.calendarEvents(),
+    datesSet: (arg: DatesSetArg) => {
+      const startStr = arg.startStr.split('T')[0];
+      const endStr = arg.endStr.split('T')[0];
+      this.visibleStart.set(startStr);
+      this.visibleEnd.set(endStr);
+      this.loadTasks();
+      this.loadSystemTasks();
+    },
+    eventContent: (arg: EventContentArg) => {
+      if (arg.event.display === 'background') return null;
+
+      // System instance task card
+      if (arg.event.extendedProps['type'] === 'system_task') {
+        const t = arg.event.extendedProps['systemTask'] as SystemInstanceTask;
+        const color = t.color || '#7c3aed';
+        return {
+          html: `
+            <div class="h-full flex flex-col justify-between p-1 overflow-hidden" style="border-left: 3px solid ${color}">
+              <div>
+                <div class="text-[9px] font-black uppercase tracking-tight mb-0.5" style="color:${color}">
+                  📖 ${t.habitName || t.systemTitle || ''}
+                </div>
+                ${t.weekFocus ? `<div class="text-[8px] opacity-60 uppercase mb-0.5">${t.weekFocus}</div>` : ''}
+                <span class="text-[10px] font-black uppercase tracking-tight truncate ${t.completed ? 'line-through opacity-50' : ''}">${t.title}</span>
+              </div>
+              <div class="text-[8px] font-mono opacity-60">${t.timeBlockStart} – ${t.timeBlockEnd}${t.durationMinutes ? ' (' + t.durationMinutes + 'min)' : ''}</div>
+            </div>
+          `
+        };
+      }
+      
+      const task = arg.event.extendedProps['task'] as PlannerTask;
+      const isCompleted = task.status === 'completed';
+      const subTasks = task.sub_tasks || [];
+      const completedSubTasks = subTasks.filter(st => st.completed).length;
+      const progressHtml = subTasks.length > 0 
+        ? `<div class="text-[7px] font-black bg-black text-white px-1 py-0.5 mt-1 inline-block uppercase">${completedSubTasks}/${subTasks.length} DONE</div>`
+        : '';
+
+      return {
+        html: `
+          <div class="h-full flex flex-col justify-between p-1 overflow-hidden">
+            <div>
+              <div class="flex items-center gap-1 mb-1">
+                ${isCompleted ? '<span class="material-symbols-outlined text-xs text-green-600">check_circle</span>' : ''}
+                <span class="text-[10px] font-black uppercase tracking-tight truncate ${isCompleted ? 'line-through opacity-50' : ''}">${arg.event.title}</span>
+              </div>
+              ${task.category ? `<span class="text-[8px] font-bold opacity-70 uppercase block truncate">${task.category}</span>` : ''}
+              ${progressHtml}
+            </div>
+            <div class="text-[8px] font-mono opacity-60">${task.start_time} - ${task.end_time}</div>
+          </div>
+        `
+      };
+    },
+    dateClick: (arg: DateClickArg) => {
+      const clickedTime = arg.date.getHours();
+      this.onSlotDoubleClick(`${clickedTime.toString().padStart(2, '0')}:00`);
+    },
+    eventClick: (arg: EventClickArg) => {
+      if (arg.event.extendedProps['type'] === 'task') {
+        const task = arg.event.extendedProps['task'];
+        this.editTask(task);
+      } else if (arg.event.extendedProps['type'] === 'system_task') {
+        const t = arg.event.extendedProps['systemTask'] as SystemInstanceTask;
+        this.toggleSystemTask(t);
+      }
+    },
+    eventDrop: (arg: any) => {
+      if (arg.event.extendedProps['type'] === 'task') {
+        this.handleEventDrop(arg);
+      } else {
+        arg.revert();
+      }
+    },
+    eventResize: (arg: any) => {
+      if (arg.event.extendedProps['type'] === 'task') {
+        this.handleEventResize(arg);
+      } else {
+        arg.revert();
+      }
+    },
+    select: (arg: any) => this.handleSelect(arg)
+  }));
+
+  changeView(viewType: string) {
+    this.currentView.set(viewType);
+    if (this.calendarComponent) {
+      const api = this.calendarComponent.getApi();
+      api.changeView(viewType);
+    }
+  }
   
   
   priorities: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
@@ -464,6 +666,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadTasks();
     this.loadGoals();
+    this.loadSystemTasks();
   }
 
   ngOnDestroy() {
@@ -473,7 +676,9 @@ export class DailyViewComponent implements OnInit, OnDestroy {
   }
 
   loadTasks() {
-    this.plannerService.getTasks(this.selectedDate).subscribe(tasks => {
+    const start = this.visibleStart() || this.selectedDate;
+    const end = this.visibleEnd() || this.selectedDate;
+    this.plannerService.getTasksByRange(start, end).subscribe(tasks => {
       const withTime = tasks.filter(t => t.start_time && t.end_time);
       const habits = this.habitService.habits();
       const habitsMap = new Map(habits.map(h => [h.name.toLowerCase(), h]));
@@ -490,35 +695,54 @@ export class DailyViewComponent implements OnInit, OnDestroy {
       });
 
       const today = new Date().toISOString().split('T')[0];
-      if (this.selectedDate === today) {
-        const habitIdToCompletion = new Map(habits.map(h => [h.id, h.completedToday]));
-        const habitIdToColor = new Map(habits.map(h => [h.id, h.color]));
+      const habitIdToCompletion = new Map(habits.map(h => [h.id, h.completedToday]));
+      const habitIdToColor = new Map(habits.map(h => [h.id, h.color]));
 
-        const syncedTasks = linkedTasks.map(task => {
-          if (task.habitId) {
-            const isCompleted = habitIdToCompletion.get(task.habitId);
-            const habitColor = habitIdToColor.get(task.habitId);
-            return {
-              ...task,
-              status: isCompleted ? 'completed' : task.status,
-              colorTag: habitColor || task.colorTag
-            };
-          }
-          return task;
-        });
-        this.tasks.set(syncedTasks);
-        this.checkOverlap(syncedTasks);
-
-      } else {
-        this.tasks.set(linkedTasks);
-        this.checkOverlap(linkedTasks);
-      }
+      const syncedTasks = linkedTasks.map(task => {
+        if (task.habitId) {
+          const habitColor = habitIdToColor.get(task.habitId);
+          const isToday = task.date === today;
+          const isCompleted = isToday ? habitIdToCompletion.get(task.habitId) : false;
+          return {
+            ...task,
+            status: (isToday && isCompleted) ? 'completed' : task.status,
+            colorTag: habitColor || task.colorTag
+          };
+        }
+        return task;
+      });
+      this.tasks.set(syncedTasks);
+      this.checkOverlap(syncedTasks);
     });
   }
 
   loadGoals() {
     this.plannerService.getGoals({ period: 'weekly' }).subscribe(goals => {
       this.goals.set(goals);
+    });
+  }
+
+  loadSystemTasks() {
+    const start = this.visibleStart() || this.selectedDate;
+    const end = this.visibleEnd() || this.selectedDate;
+    this.systemService.getInstanceTasksByWeek(start, end).subscribe({
+      next: (tasks) => this.systemTasks.set(tasks),
+      error: (err) => console.error('Failed to load system tasks for date', err)
+    });
+  }
+
+  toggleSystemTask(task: SystemInstanceTask) {
+    if (!task.instanceId || !task.phase) return;
+    this.systemService.toggleInstanceTask(
+      task.instanceId, task.phase, task.weekNumber, task.date, task.title
+    ).subscribe(() => {
+      this.systemTasks.update(tasks =>
+        tasks.map(t =>
+          t.instanceId === task.instanceId && t.date === task.date && t.title === task.title
+            ? { ...t, completed: !t.completed }
+            : t
+        )
+      );
     });
   }
 
@@ -615,9 +839,22 @@ export class DailyViewComponent implements OnInit, OnDestroy {
       priority: 'medium',
       category: 'Work',
       linkedGoalId: undefined,
-      colorTag: '#FFFFFF',
-      reminder: false,
+      sub_tasks: [],
+      created_at: undefined
     };
+  }
+
+  addSubTask() {
+    if (!this.newTask.sub_tasks) this.newTask.sub_tasks = [];
+    this.newTask.sub_tasks.push({ title: 'New Sub-task', completed: false });
+    this.onFormChange();
+  }
+
+  removeSubTask(index: number) {
+    if (this.newTask.sub_tasks) {
+      this.newTask.sub_tasks.splice(index, 1);
+      this.onFormChange();
+    }
   }
 
   syncDatesFromTask() {
@@ -708,6 +945,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     const localDate = new Date(date.getTime() - (offset * 60 * 1000));
     this.selectedDate = localDate.toISOString().split('T')[0];
     this.loadTasks();
+    this.loadSystemTasks();
   }
 
   onSlotHeightChange(val: number | string) {
@@ -730,196 +968,49 @@ export class DailyViewComponent implements OnInit, OnDestroy {
 
   // ─── Resize Logic ───────────────────────────────────────
 
-  startResize(event: MouseEvent, task: PlannerTask, direction: 'top' | 'bottom') {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    this.resizingTask = {
-      id: task.id!,
-      startY: event.clientY,
-      originalStartStr: task.start_time!,
-      originalEndStr: task.end_time!,
-      direction
+  private handleEventDrop(arg: any) {
+    const task = arg.event.extendedProps['task'] as PlannerTask;
+    const newStart = arg.event.start;
+    const newEnd = arg.event.end || new Date(newStart.getTime() + 60 * 60000);
+
+    const updatedTask: Partial<PlannerTask> = {
+      start_time: this.dateToTimeString(newStart),
+      end_time: this.dateToTimeString(newEnd)
     };
 
-    this.resizeMoveListener = this.onResizeMove.bind(this);
-    this.resizeEndListener = this.onResizeEnd.bind(this);
-    
-    this.ngZone.runOutsideAngular(() => {
-      window.addEventListener('mousemove', this.resizeMoveListener!);
-      window.addEventListener('mouseup', this.resizeEndListener!);
+    this.plannerService.updateTask(task.id!, updatedTask).subscribe({
+      next: () => this.loadTasks(),
+      error: () => arg.revert()
     });
   }
 
-  private onResizeMove(event: MouseEvent) {
-    if (!this.resizingTask) return;
-    
-    const deltaY = event.clientY - this.resizingTask.startY;
-    const pixelsPerMinute = this.slotHeight() / 60;
-    const deltaMinutes = Math.round(deltaY / (pixelsPerMinute * 15)) * 15;
-    
-    const originalStart = this.timeStringToDate(this.resizingTask.originalStartStr);
-    const originalEnd = this.timeStringToDate(this.resizingTask.originalEndStr);
-    
-    this.ngZone.run(() => {
-      const allTasks = this.tasks();
-      const taskIdx = allTasks.findIndex(t => t.id === this.resizingTask!.id);
-      if (taskIdx !== -1) {
-        const task = allTasks[taskIdx];
-        let newStart = new Date(originalStart);
-        let newEnd = new Date(originalEnd);
-        
-        if (this.resizingTask!.direction === 'bottom') {
-          newEnd = new Date(originalEnd.getTime() + deltaMinutes * 60000);
-          // Minimum 15 minutes duration
-          if (newEnd.getTime() - newStart.getTime() < 15 * 60000) {
-            newEnd = new Date(newStart.getTime() + 15 * 60000);
-          }
-        } else {
-          newStart = new Date(originalStart.getTime() + deltaMinutes * 60000);
-          // Minimum 15 minutes duration
-          if (originalEnd.getTime() - newStart.getTime() < 15 * 60000) {
-            newStart = new Date(originalEnd.getTime() - 15 * 60000);
-          }
-        }
-        
-        const newStartStr = this.dateToTimeString(newStart);
-        const newEndStr = this.dateToTimeString(newEnd);
-        
-        if (task.start_time !== newStartStr || task.end_time !== newEndStr) {
-          const updatedTask = { ...task, start_time: newStartStr, end_time: newEndStr };
-          const newTasks = [...allTasks];
-          newTasks[taskIdx] = updatedTask;
-          this.tasks.set(newTasks);
+  private handleEventResize(arg: any) {
+    const task = arg.event.extendedProps['task'] as PlannerTask;
+    const newEnd = arg.event.end;
+    const newStart = arg.event.start;
 
-          // Keep side-panel form in sync if this task is being edited
-          if (this.newTask?.id === updatedTask.id) {
-            this.newTask.start_time = updatedTask.start_time;
-            this.newTask.end_time = updatedTask.end_time;
-            this.syncDatesFromTask();
-          }
-        }
-      }
-    });
-  }
-
-  private onResizeEnd() {
-    if (this.resizingTask) {
-      const task = this.tasks().find(t => t.id === this.resizingTask!.id);
-      if (task) {
-        this.plannerService.updateTask(task.id!, { 
-          start_time: task.start_time,
-          end_time: task.end_time 
-        }).subscribe(() => this.loadTasks());
-      }
-      this.cleanupResizeListeners();
-      this.resizingTask = null;
-    }
-  }
-
-  private cleanupResizeListeners() {
-    if (this.resizeMoveListener) {
-      window.removeEventListener('mousemove', this.resizeMoveListener);
-      this.resizeMoveListener = null;
-    }
-    if (this.resizeEndListener) {
-      window.removeEventListener('mouseup', this.resizeEndListener);
-      this.resizeEndListener = null;
-    }
-  }
-
-  // ─── Drag Logic ─────────────────────────────────────────
-
-  startDrag(event: MouseEvent, task: PlannerTask) {
-    // Don't start drag if the target is a resize handle or a button
-    const target = event.target as HTMLElement;
-    if (target.classList.contains('resize-handle') || target.closest('button')) {
-      return;
-    }
-    
-    event.preventDefault();
-    event.stopPropagation();
-  
-    this.draggingTask = {
-      id: task.id!,
-      startY: event.clientY,
-      originalStartStr: task.start_time!,
-      originalEndStr: task.end_time!,
+    const updatedTask: Partial<PlannerTask> = {
+      start_time: this.dateToTimeString(newStart),
+      end_time: this.dateToTimeString(newEnd)
     };
-  
-    this.dragMoveListener = this.onDragMove.bind(this);
-    this.dragEndListener = this.onDragEnd.bind(this);
-  
-    this.ngZone.runOutsideAngular(() => {
-      window.addEventListener('mousemove', this.dragMoveListener!);
-      window.addEventListener('mouseup', this.dragEndListener!);
+
+    this.plannerService.updateTask(task.id!, updatedTask).subscribe({
+      next: () => this.loadTasks(),
+      error: () => arg.revert()
     });
   }
 
-  private onDragMove(event: MouseEvent) {
-    if (!this.draggingTask) return;
-  
-    const deltaY = event.clientY - this.draggingTask.startY;
-    const pixelsPerMinute = this.slotHeight() / 60;
-    const deltaMinutes = Math.round(deltaY / (pixelsPerMinute * 15)) * 15;
-  
-    const originalStart = this.timeStringToDate(this.draggingTask.originalStartStr);
-    const originalEnd = this.timeStringToDate(this.draggingTask.originalEndStr);
-  
-    const durationMs = originalEnd.getTime() - originalStart.getTime();
-  
-    this.ngZone.run(() => {
-      const allTasks = this.tasks();
-      const taskIdx = allTasks.findIndex(t => t.id === this.draggingTask!.id);
-      if (taskIdx !== -1) {
-        const task = allTasks[taskIdx];
-        
-        const newStart = new Date(originalStart.getTime() + deltaMinutes * 60000);
-        const newEnd = new Date(newStart.getTime() + durationMs);
-  
-        const newStartStr = this.dateToTimeString(newStart);
-        const newEndStr = this.dateToTimeString(newEnd);
-  
-        if (task.start_time !== newStartStr) {
-          const updatedTask = { ...task, start_time: newStartStr, end_time: newEndStr };
-          const newTasks = [...allTasks];
-          newTasks[taskIdx] = updatedTask;
-          this.tasks.set(newTasks);
-  
-          if (this.newTask?.id === updatedTask.id) {
-            this.newTask.start_time = updatedTask.start_time;
-            this.newTask.end_time = updatedTask.end_time;
-            this.syncDatesFromTask();
-          }
-        }
-      }
-    });
+  private handleSelect(arg: any) {
+    this.newTask = this.getDefaultTask();
+    this.newTask.start_time = this.dateToTimeString(arg.start);
+    this.newTask.end_time = this.dateToTimeString(arg.end);
+    this.syncDatesFromTask();
+    this.showNotes.set(false);
+    this.showAddForm.set(true);
   }
 
-  private onDragEnd() {
-    if (this.draggingTask) {
-      const task = this.tasks().find(t => t.id === this.draggingTask!.id);
-      if (task) {
-        this.plannerService.updateTask(task.id!, {
-          start_time: task.start_time,
-          end_time: task.end_time
-        }).subscribe(() => this.loadTasks());
-      }
-      this.cleanupDragListeners();
-      this.draggingTask = null;
-    }
-  }
-
-  private cleanupDragListeners() {
-    if (this.dragMoveListener) {
-      window.removeEventListener('mousemove', this.dragMoveListener);
-      this.dragMoveListener = null;
-    }
-    if (this.dragEndListener) {
-      window.removeEventListener('mouseup', this.dragEndListener);
-      this.dragEndListener = null;
-    }
-  }
+  private cleanupResizeListeners() {}
+  private cleanupDragListeners() {}
 
   // ─── Overlap Detection ──────────────────────────────────
 
@@ -930,6 +1021,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
         const t1 = tasks[i];
         const t2 = tasks[j];
 
+        if (t1.date !== t2.date) continue;
         if (!t1.start_time || !t1.end_time || !t2.start_time || !t2.end_time) continue;
 
         const start1 = this.timeStringToDate(t1.start_time).getTime();

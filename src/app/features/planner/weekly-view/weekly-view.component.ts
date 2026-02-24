@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop';
 import { WeeklyPlannerService } from '../../../services/weekly-planner.service';
 import { HabitService } from '../../../services/habit.service';
+import { SystemService } from '../../../services/system.service';
+import { SystemInstanceTask } from '../../../models/system.model';
 import { 
   WeeklyTask, 
   WeeklyTarget, 
@@ -160,7 +162,48 @@ interface WeekDay {
                       <div *cdkDragPlaceholder class="cdk-drag-placeholder rounded"></div>
                    </div>
                 }
-                @if(day.tasks.length === 0) {
+
+                 <!-- System Instance Tasks for this day -->
+                 @for(stask of getSystemTasksForDay(day.dateString); track stask.title) {
+                   <div class="p-3 rigid-border-sm border-[2px] flex items-start gap-3 group transition-all"
+                        [style.border-color]="stask.color || '#7c3aed'"
+                        [style.background-color]="stask.completed ? 'rgba(16,185,129,0.08)' : 'rgba(124,58,237,0.06)'">
+                     <button (click)="toggleSystemTask(stask)" class="mt-1 flex-shrink-0">
+                       <span class="material-symbols-outlined text-2xl"
+                             [style.color]="stask.completed ? '#10b981' : (stask.color || '#7c3aed')">
+                         {{ stask.completed ? 'check_circle' : 'radio_button_unchecked' }}
+                       </span>
+                     </button>
+                     <div class="flex-1 flex flex-col min-w-0 gap-0.5">
+                       <!-- Habit / System tag -->
+                       <span class="text-[10px] font-black uppercase flex items-center gap-1"
+                             [style.color]="stask.color || '#7c3aed'">
+                         <span class="material-symbols-outlined text-[12px]">auto_stories</span>
+                         {{ stask.habitName || stask.systemTitle }}
+                       </span>
+                       <!-- Week focus label -->
+                       @if(stask.weekFocus) {
+                         <span class="text-[9px] font-bold uppercase text-concrete-400 dark:text-concrete-500">{{ stask.weekFocus }}</span>
+                       }
+                       <!-- Task title -->
+                       <span class="font-mono text-sm font-bold break-words dark:text-white"
+                             [class.line-through]="stask.completed"
+                             [class.opacity-50]="stask.completed">
+                         {{ stask.title }}
+                       </span>
+                       <!-- Time block -->
+                       @if(stask.timeBlockStart) {
+                         <span class="text-[10px] font-mono font-bold flex items-center gap-1 mt-1"
+                               [style.color]="stask.color || '#7c3aed'">
+                           <span class="material-symbols-outlined text-[12px]">schedule</span>
+                           {{ stask.timeBlockStart }}{{ stask.timeBlockEnd ? ' – ' + stask.timeBlockEnd : '' }}
+                           @if(stask.durationMinutes) { <span class="text-concrete-400">({{ stask.durationMinutes }}min)</span> }
+                         </span>
+                       }
+                     </div>
+                   </div>
+                 }
+                @if(day.tasks.length === 0 && getSystemTasksForDay(day.dateString).length === 0) {
                   <div class="h-full flex flex-col items-center justify-center text-concrete-300 border-2 border-dashed border-concrete-300 rounded-lg p-8">
                     <span class="material-symbols-outlined text-4xl mb-2">assignment_add</span>
                     <span class="font-mono text-xs uppercase text-center">No tasks planned for today</span>
@@ -250,6 +293,7 @@ interface WeekDay {
 export class WeeklyViewComponent implements OnInit {
   private weeklyPlannerService = inject(WeeklyPlannerService);
   private habitService = inject(HabitService);
+  private systemService = inject(SystemService);
 
   currentDate = signal(new Date());
   weekStart = signal('');
@@ -275,6 +319,7 @@ export class WeeklyViewComponent implements OnInit {
     updated_at: ''
   });
   weeklyHabits = signal<Habit[]>([]);
+  systemTasks = signal<SystemInstanceTask[]>([]);
 
   newTargetText = '';
 
@@ -345,11 +390,36 @@ export class WeeklyViewComponent implements OnInit {
       },
       error: (error) => console.error('Failed to load habits', error)
     });
+
+    // Load system instance tasks for the week
+    this.systemService.getInstanceTasksByWeek(weekStartStr, weekEndStr).subscribe({
+      next: (tasks) => this.systemTasks.set(tasks),
+      error: (err) => console.error('Failed to load system tasks', err)
+    });
   }
 
 
   getHabitName(habitId: string): string {
     return this.weeklyHabits().find(h => h.id === habitId)?.name || 'Habit Tag';
+  }
+
+  getSystemTasksForDay(dateStr: string): SystemInstanceTask[] {
+    return this.systemTasks().filter(t => t.date === dateStr);
+  }
+
+  toggleSystemTask(task: SystemInstanceTask) {
+    if (!task.instanceId || !task.phase) return;
+    this.systemService.toggleInstanceTask(
+      task.instanceId, task.phase, task.weekNumber, task.date, task.title
+    ).subscribe(() => {
+      this.systemTasks.update(tasks =>
+        tasks.map(t =>
+          t.instanceId === task.instanceId && t.date === task.date && t.title === task.title
+            ? { ...t, completed: !t.completed }
+            : t
+        )
+      );
+    });
   }
 
   distributeTasks(tasks: WeeklyTask[]) {

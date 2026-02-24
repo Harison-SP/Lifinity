@@ -139,50 +139,6 @@ import { HabitService } from '../../services/habit.service';
             </section>
         </div>
 
-        <!-- Log Modal (Brutalist Style) -->
-        @if (selectedHabit()) {
-            <div class="fixed inset-0 z-[200] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm" (click)="closeLogModal()">
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 w-full max-w-md brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] relative" (click)="$event.stopPropagation()">
-                    <div class="bg-black dark:bg-concrete-100 text-white dark:text-black p-2 absolute -top-4 -left-4 font-black uppercase tracking-widest text-xs">
-                        Input_Required
-                    </div>
-                    
-                    <div class="flex items-start justify-between mb-8">
-                        <div>
-                            <span class="text-xs font-bold text-electric-red uppercase tracking-widest block mb-1">MEASURABLE_PROTOCOL</span>
-                            <h3 class="text-3xl font-black text-concrete-900 dark:text-white uppercase leading-none font-arvo">{{ selectedHabit()?.name }}</h3>
-                        </div>
-                        <button (click)="closeLogModal()" class="w-10 h-10 bg-concrete-100 dark:bg-concrete-700 border-2 border-black dark:border-concrete-100 flex items-center justify-center hover:bg-electric-red hover:text-white transition-colors dark:text-white">
-                            <span class="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="space-y-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900 dark:text-white">Value_Input</label>
-                            <input type="number" 
-                                   [(ngModel)]="logValue" 
-                                   placeholder="ENTER_DATA"
-                                   class="w-full h-16 rigid-border-sm border-[2px] dark:border-concrete-500 bg-concrete-100 dark:bg-concrete-900 px-4 text-2xl font-black font-mono outline-none focus:bg-white dark:focus:bg-black focus:border-electric-red transition-colors dark:text-white">
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="text-xs font-black uppercase tracking-widest text-concrete-900 dark:text-white">Mission_Notes</label>
-                            <textarea rows="3" 
-                                      [(ngModel)]="logNotes" 
-                                      placeholder="// OPTIONAL_LOG_ENTRY..."
-                                      class="w-full p-4 rigid-border-sm border-[2px] dark:border-concrete-500 bg-concrete-100 dark:bg-concrete-900 text-sm font-bold font-mono outline-none focus:bg-white dark:focus:bg-black focus:border-electric-red transition-colors resize-none dark:text-white"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 mt-8">
-                        <button (click)="saveLog()" class="flex-1 py-4 bg-electric-red text-white font-black uppercase tracking-widest hover:brightness-110 active:translate-x-1 active:translate-y-1 transition-all rigid-border-sm">
-                            COMMIT_DATA
-                        </button>
-                    </div>
-                </div>
-            </div>
-        }
     </div>
     `,
     styles: [`
@@ -294,54 +250,20 @@ export class DashboardComponent {
     }
 
     handleHabitClick(habit: any) {
-        if (habit.type === 'measurable') {
-            this.openLogModal(habit);
-        } else {
-            this.toggleCompletion(habit.id);
-        }
-    }
-
-    openLogModal(habit: any) {
-        this.selectedHabit.set(habit);
-        // Load the latest log values if available
-        if (habit.latestLog) {
-            this.logValue = habit.latestLog.value;
-            this.logNotes = habit.latestLog.notes || '';
-        } else {
-            this.logValue = undefined;
-            this.logNotes = '';
-        }
-    }
-
-    closeLogModal() {
-        this.selectedHabit.set(null);
-        this.logValue = undefined;
-        this.logNotes = '';
-    }
-
-    saveLog() {
-        const habit = this.selectedHabit();
-        if (!habit) return;
-
-        this.habitService.updateLog(habit.id, new Date().toISOString(), {
-            value: this.logValue,
-            notes: this.logNotes
-        }).subscribe(() => {
-            // Reload habits to get updated completedToday status and latestLog
-            this.habitService.loadHabits();
-            this.closeLogModal();
-        });
+        this.navigateToTrack(habit.id);
     }
 
     toggleCompletion(id: string) {
         const habit = this.habitService.habits().find(h => h.id === id);
-        if (habit?.type === 'measurable') {
-            this.openLogModal(habit!);
-        } else {
+        if (habit?.type !== 'measurable') {
             this.habitService.toggleCompletion(id, 'today').subscribe();
         }
     }
 
+    navigateToTrack(id: string) {
+        this.router.navigate(['/track', id]);
+    }
+    
     navigateToDetails(id: string) {
         this.router.navigate(['/details', id]);
     }

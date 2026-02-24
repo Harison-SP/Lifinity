@@ -20,6 +20,11 @@ export interface Habit {
   frequencyCount: number;
   frequencyPeriod: number;
 
+  // Hierarchy
+  parentId?: string;
+  tier?: 'yearly' | 'monthly' | 'weekly' | 'daily';
+  systemId?: string;
+
   startDate?: string;
   endDate?: string;
   timeBlockStart?: string;

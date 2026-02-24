@@ -55,16 +55,50 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
         </header>
 
         @if (habit()) {
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-                <!-- Date Selector (New) -->
-                <div class="bg-yellow-400 dark:bg-yellow-600 rigid-border border-[4px] dark:border-concrete-100 p-6 relative group overflow-hidden brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white] flex flex-col justify-center">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-black/60 dark:text-white/80 mb-2 border-b-2 border-black dark:border-white/20 pb-1">Observation_Point</p>
-                    <input type="date" 
-                           [ngModel]="viewDate()" 
-                           (ngModelChange)="onDateChange($event)"
-                           class="bg-transparent border-none text-xl font-black font-mono outline-none cursor-pointer uppercase w-full dark:text-white">
+            <!-- Protocol Details Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <!-- System Type -->
+                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">System_Type</p>
+                    <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.type === 'yes_no' ? 'Binary State' : 'Quantitative' }}</p>
                 </div>
+                <!-- Time Range -->
+                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">Timeline_Range</p>
+                    <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.startDate | date:'MMM d' }} - {{ habit()?.endDate | date:'MMM d, yy' }}</p>
+                </div>
+                <!-- Recurrence -->
+                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">Frequency</p>
+                    <p class="text-sm font-bold uppercase dark:text-white">
+                        {{ habit()?.frequencyType === 'daily' ? 'Daily' : 
+                           habit()?.frequencyType === 'specific_days' ? 'Specific Days' : 
+                           'Every ' + habit()?.frequencyInterval + ' Days' }}
+                    </p>
+                </div>
+                <!-- Time Block -->
+                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">Time_Block</p>
+                    <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.timeBlockStart || 'ANY' }} - {{ habit()?.timeBlockEnd || 'ANY' }}</p>
+                </div>
+                <!-- Target (If Measurable) -->
+                @if (habit()?.type === 'measurable') {
+                    <div class="col-span-2 md:col-span-4 bg-concrete-100 dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-100 p-4">
+                        <p class="text-[9px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400 mb-1">Metric_Target</p>
+                        <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.targetComparator }} {{ habit()?.targetValue }} {{ habit()?.targetUnit }}</p>
+                    </div>
+                }
+            </div>
+
+            @if (inconsistentDaysCount() >= 2) {
+                <div class="bg-electric-red text-white p-4 font-black uppercase tracking-widest mb-8 border-4 border-black dark:border-white flex items-center gap-3">
+                    <span class="material-symbols-outlined text-2xl">warning</span>
+                    WARNING: {{ inconsistentDaysCount() }} inconsistent days detected recently. Protocol adherence compromised!
+                </div>
+            }
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
 
                 <!-- Streak -->
                 <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative group overflow-hidden brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
@@ -93,18 +127,9 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                     </div>
                 </div>
 
-                <!-- Efficiency -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative group overflow-hidden brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                     <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-2 border-b-2 border-black dark:border-concrete-100 pb-1">Global_Efficiency</p>
-                     <div class="flex items-baseline gap-2 relative z-10">
-                        <span class="text-6xl font-black font-arvo leading-none dark:text-white">{{ stats()?.completion_rate || 0 }}</span>
-                        <span class="text-2xl font-black dark:text-concrete-200">%</span>
-                     </div>
-                     <div class="absolute bottom-0 left-0 h-2 bg-concrete-200 dark:bg-concrete-600 w-full">
-                        <div class="h-full bg-electric-red transition-all" [style.width.%]="stats()?.completion_rate || 0"></div>
-                     </div>
-                </div>
             </div>
+
+            <!-- Removed Tracker Modules (now in Daily Track feature) -->
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <!-- Activity Heatmap -->
@@ -112,12 +137,6 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                     <div class="flex items-center justify-between mb-6 border-b-4 border-black dark:border-concrete-100 pb-4">
                         <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo">Activity_Matrix</h3>
                         <div class="flex items-center gap-4">
-                            <!-- Year Selector -->
-                            <select [ngModel]="heatmapYear()" (ngModelChange)="heatmapYear.set($event)" class="bg-white dark:bg-concrete-900 rigid-border-sm border-2 border-black dark:border-concrete-500 p-2 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black dark:text-white dark:focus:ring-white">
-                                @for (year of availableYears(); track year) {
-                                    <option [value]="year">{{ year }}</option>
-                                }
-                            </select>
                             <!-- Legend -->
                             <div class="hidden md:flex items-center gap-1 text-[9px] font-bold uppercase">
                                 <span>Less</span>
@@ -129,10 +148,12 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-8">
-                        @for (monthData of yearHeatmap(); track monthData.month) {
-                            <div>
-                                <h4 class="text-sm font-bold font-mono uppercase mb-3 text-center dark:text-concrete-200">{{ getMonthName(monthData.month) }}</h4>
+                    <div class="space-y-8">
+                        @for (monthData of timelineMonths(); track monthData.monthYear) {
+                            <div class="max-w-xs mx-auto">
+                                <h4 class="text-sm font-bold font-mono uppercase mb-3 text-center dark:text-concrete-200">
+                                    {{ monthData.monthName }} {{ monthData.year }}
+                                </h4>
                                 <div class="grid grid-cols-7 gap-1 mb-1">
                                     @for (d of ['S','M','T','W','T','F','S']; track d) {
                                         <div class="text-center text-[9px] font-black text-concrete-400 dark:text-concrete-500">{{ d }}</div>
@@ -165,10 +186,10 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                     <div class="flex items-center justify-between mb-6 border-b-4 border-black dark:border-concrete-100 pb-2">
                         <h3 class="text-lg font-black uppercase font-arvo dark:text-white">{{ calendarMonthName() }} {{ calendarYear() }}</h3>
                         <div class="flex gap-1">
-                            <button (click)="previousMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 dark:bg-concrete-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center">
+                            <button (click)="previousMonth()" [disabled]="!canPrevMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 dark:bg-concrete-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none">
                                 <span class="material-symbols-outlined text-sm dark:text-white dark:group-hover:text-black">chevron_left</span>
                             </button>
-                            <button (click)="nextMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 dark:bg-concrete-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center">
+                            <button (click)="nextMonth()" [disabled]="!canNextMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 dark:bg-concrete-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none">
                                 <span class="material-symbols-outlined text-sm dark:text-white dark:group-hover:text-black">chevron_right</span>
                             </button>
                         </div>
@@ -222,19 +243,16 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                     </h3>
                     @if (stats()?.weekly_frequency) {
                         <div class="h-48 w-full">
-                            <ngx-charts-bubble-chart
-                                [results]="weeklyBubbleData()"
+                            <ngx-charts-bar-vertical
+                                [results]="weeklyBarData()"
                                 [xAxis]="true"
                                 [yAxis]="false"
                                 [showXAxisLabel]="false"
                                 [showYAxisLabel]="false"
                                 [legend]="false"
                                 [scheme]="colorScheme"
-                                [roundDomains]="true"
-                                [minRadius]="5"
-                                [maxRadius]="30"
-                                [autoScale]="true">
-                            </ngx-charts-bubble-chart>
+                                [roundDomains]="true">
+                            </ngx-charts-bar-vertical>
                         </div>
                     }
                 </div>
@@ -315,31 +333,6 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                 </div>
             </div>
         }
-
-        <!-- Log Modal -->
-        @if (selectedDate() && habit()?.type === 'measurable') {
-             <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 w-full max-w-md brutalist-shadow-active dark:shadow-[8px_8px_0_0_white]">
-                    <div class="flex justify-between items-center mb-6 border-b-4 border-black dark:border-concrete-100 pb-2">
-                        <h4 class="font-black uppercase font-arvo text-xl dark:text-white">Log: {{ selectedDate() }}</h4>
-                        <button (click)="closeLogForm()" class="hover:text-electric-red dark:text-white">
-                            <span class="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-                    <div class="space-y-4 font-manrope">
-                        <div>
-                             <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Value</label>
-                             <input type="number" [(ngModel)]="logValue" class="w-full p-3 font-mono text-lg font-bold border-2 border-black dark:border-concrete-100 outline-none focus:bg-concrete-100 dark:bg-concrete-900 dark:text-white dark:focus:bg-black">
-                        </div>
-                        <div>
-                             <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Notes</label>
-                             <textarea [(ngModel)]="logNotes" rows="3" class="w-full p-3 font-mono text-sm border-2 border-black dark:border-concrete-100 outline-none focus:bg-concrete-100 dark:bg-concrete-900 dark:text-white dark:focus:bg-black resize-none"></textarea>
-                        </div>
-                        <button (click)="saveLog()" class="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-black uppercase hover:bg-electric-red dark:hover:bg-concrete-200 transition-colors mt-4">Commit_Data</button>
-                    </div>
-                </div>
-             </div>
-        }
     </div>
     `,
     styles: [`
@@ -360,6 +353,8 @@ export class HabitDetailsComponent implements OnInit {
     habit = computed(() => this.habitService.habits().find(h => h.id === this.habitId()));
 
     viewDate = signal(new Date().toISOString().split('T')[0]);
+    fullHeatmapData = signal<{date: string, level: number}[]>([]); 
+
     isCompletedOnSelectedDate = computed(() => {
         const date = this.viewDate();
         return this.fullHeatmapData().some(d => d.date === date && d.level > 0);
@@ -381,55 +376,65 @@ export class HabitDetailsComponent implements OnInit {
         domain: ['#3b82f6', '#16a34a', '#ef4444', '#f97316', '#8b5cf6', '#d946ef', '#f43f5e']
     };
 
-    weeklyBubbleData = computed(() => {
+    weeklyBarData = computed(() => {
         const freq = this.stats()?.weekly_frequency;
         if (!freq) return [];
 
         const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         
-        const series = freq.map((day: any) => ({
+        return freq.map((day: any) => ({
             name: day.day_name,
-            x: day.day_name,
-            y: 50, 
-            r: day.count + 1 
-        }));
-
-        series.sort((a: any, b: any) => dayOrder.indexOf(a.name) - dayOrder.indexOf(b.name));
-
-        return [{
-            name: this.habit()?.name || 'Frequency',
-            series: series
-        }];
-    });
-    
-    // Heatmap state
-    heatmapYear = signal(new Date().getFullYear());
-    fullHeatmapData = signal<{date: string, level: number}[]>([]); 
-    availableYears = computed(() => {
-        const allDates = this.fullHeatmapData().map(d => new Date(d.date));
-        if (allDates.length === 0) return [new Date().getFullYear()];
-        const years = [...new Set(allDates.map(d => d.getFullYear()))];
-        return years.sort((a, b) => b - a);
+            value: day.count
+        })).sort((a: any, b: any) => dayOrder.indexOf(a.name) - dayOrder.indexOf(b.name));
     });
 
-    yearHeatmap = computed(() => {
-        const year = this.heatmapYear();
+    inconsistentDaysCount = computed(() => {
+        const data = this.fullHeatmapData();
+        if (!data.length) return 0;
+        
+        let missed = 0;
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        for (let i = 0; i < 7; i++) { // check last 7 days
+            const checkDate = new Date(today);
+            checkDate.setDate(today.getDate() - i);
+            const dateStr = checkDate.toISOString().split('T')[0];
+            const dayData = data.find(d => d.date === dateStr);
+            if (!dayData || dayData.level === 0) {
+                missed++;
+            } else {
+                break; // stop at first completion going backwards
+            }
+        }
+        return missed;
+    });
+
+    timelineMonths = computed(() => {
+        const h = this.habit();
+        if (!h || !h.startDate || !h.endDate) return [];
+        
+        const start = new Date(h.startDate);
+        const end = new Date(h.endDate);
         const dataMap = new Map(this.fullHeatmapData().map(item => [item.date, item.level]));
-        const months = [];
+        const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 
-        for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
-            const firstDay = new Date(year, monthIndex, 1);
-            const lastDay = new Date(year, monthIndex + 1, 0);
-            const daysInMonth = lastDay.getDate();
-            const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
+        const months = [];
+        const current = new Date(start.getFullYear(), start.getMonth(), 1);
+        const target = new Date(end.getFullYear(), end.getMonth(), 1);
+
+        while (current <= target) {
+            const year = current.getFullYear();
+            const month = current.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const startingDayOfWeek = firstDay.getDay();
 
             const days: any[] = [];
             for (let i = 0; i < startingDayOfWeek; i++) {
                 days.push({ isEmpty: true });
             }
-
-            for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
-                const date = new Date(year, monthIndex, dayNum);
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(year, month, d);
                 const dateStr = date.toISOString().split('T')[0];
                 days.push({
                     isEmpty: false,
@@ -437,9 +442,60 @@ export class HabitDetailsComponent implements OnInit {
                     level: dataMap.get(dateStr) || 0
                 });
             }
-            months.push({ month: monthIndex, days });
+
+            months.push({
+                monthName: monthNames[month],
+                year,
+                monthYear: `${year}-${month}`,
+                days
+            });
+
+            current.setMonth(current.getMonth() + 1);
         }
         return months;
+    });
+
+    monthHeatmap = computed(() => {
+        const year = this.calendarYear();
+        const monthIndex = this.calendarMonth();
+        const dataMap = new Map(this.fullHeatmapData().map(item => [item.date, item.level]));
+        
+        const firstDay = new Date(year, monthIndex, 1);
+        const lastDay = new Date(year, monthIndex + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay(); 
+
+        const days: any[] = [];
+        for (let i = 0; i < startingDayOfWeek; i++) {
+            days.push({ isEmpty: true });
+        }
+
+        for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+            const date = new Date(year, monthIndex, dayNum);
+            const dateStr = date.toISOString().split('T')[0];
+            days.push({
+                isEmpty: false,
+                date: dateStr,
+                level: dataMap.get(dateStr) || 0
+            });
+        }
+        return { month: monthIndex, days };
+    });
+
+    canPrevMonth = computed(() => {
+        const h = this.habit();
+        if (!h || !h.startDate) return true;
+        const start = new Date(h.startDate);
+        const currentMonthFirst = new Date(this.calendarYear(), this.calendarMonth(), 1);
+        return currentMonthFirst > new Date(start.getFullYear(), start.getMonth(), 1);
+    });
+
+    canNextMonth = computed(() => {
+        const h = this.habit();
+        if (!h || !h.endDate) return true;
+        const end = new Date(h.endDate);
+        const currentMonthFirst = new Date(this.calendarYear(), this.calendarMonth(), 1);
+        return currentMonthFirst < new Date(end.getFullYear(), end.getMonth(), 1);
     });
 
     // Calendar state
@@ -562,14 +618,12 @@ export class HabitDetailsComponent implements OnInit {
         });
     }
 
-    getMonthName(monthIndex: number): string {
-        return new Date(this.heatmapYear(), monthIndex).toLocaleString('default', { month: 'short' }).toUpperCase();
-    }
-
     toggleDone() {
         const id = this.habitId();
         const habit = this.habit();
         const date = this.viewDate();
+        const isCompletedNow = this.isCompletedOnSelectedDate();
+        
         if (id && habit) {
             if (habit.type === 'measurable') {
                 this.selectDate(date);
@@ -592,29 +646,10 @@ export class HabitDetailsComponent implements OnInit {
         if (!habit) return;
 
         if (habit.type === 'yes_no') {
-            const currentData = this.fullHeatmapData();
-            const dayIndex = currentData.findIndex(d => d.date === date);
-            
-            let newLevel = 1;
-            if (dayIndex > -1) {
-                const currentLevel = currentData[dayIndex].level;
-                newLevel = currentLevel > 0 ? 0 : 1;
-                const newData = [...currentData];
-                newData[dayIndex] = { ...newData[dayIndex], level: newLevel };
-                this.fullHeatmapData.set(newData);
-            } else {
-                this.fullHeatmapData.set([...currentData, { date, level: newLevel }]);
-            }
-
-            this.habitService.updateLog(habit.id, date, { value: newLevel }).subscribe({
-                next: () => {
-                    this.loadStats(habit.id!);
-                    this.loadHistory(habit.id!);
-                },
-                error: (err) => {
-                    console.error("Failed to update log, reverting UI", err);
-                    this.fullHeatmapData.set(currentData);
-                }
+            this.habitService.toggleCompletion(habit.id, date).subscribe(() => {
+                 this.loadStats(habit.id!);
+                 this.loadHistory(habit.id!);
+                 this.loadAnalytics(habit.id!);
             });
             return;
         }
@@ -639,6 +674,7 @@ export class HabitDetailsComponent implements OnInit {
         const id = this.habitId();
         if (!date || !id) return;
 
+        const isCompletedNow = this.isCompletedOnSelectedDate();
         this.habitService.updateLog(id, date, {
             value: this.logValue,
             notes: this.logNotes
@@ -701,4 +737,6 @@ export class HabitDetailsComponent implements OnInit {
             this.calendarMonth.update(m => m + 1);
         }
     }
+
+
 }

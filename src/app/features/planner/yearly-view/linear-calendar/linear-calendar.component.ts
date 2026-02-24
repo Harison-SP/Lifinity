@@ -193,7 +193,7 @@ export class LinearCalendarComponent implements OnInit, OnChanges {
      }));
 
      if (eventList) {
-       eventList.forEach(event => {
+       eventList.forEach((event: CalendarEvent) => {
           if (!event.startDate || !event.endDate) return;
           
           const start = new Date(event.startDate);
@@ -357,7 +357,7 @@ export class LinearCalendarComponent implements OnInit, OnChanges {
          newEnd = state.initialEndDay + deltaDays;
     }
     
-    this.dragState.update(s => ({
+    this.dragState.update((s: DragState) => ({
         ...s,
         currentStartDay: newStart,
         currentEndDay: newEnd
