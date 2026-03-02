@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { SystemService } from '../../services/system.service';
@@ -9,7 +9,7 @@ import { SystemInstanceTask } from '../../models/system.model';
 @Component({
   selector: 'app-daily-habit-tracker',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope pb-24 relative transition-colors duration-300">
         <!-- Header -->
@@ -75,14 +75,39 @@ import { SystemInstanceTask } from '../../models/system.model';
                         </div>
                         <div class="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
                             @if (!timerRunning()) {
-                                <button (click)="startTimer(120)" class="px-4 py-3 bg-white text-black font-black uppercase text-xs hover:bg-electric-red hover:text-white transition-colors border-2 border-transparent">2 Min</button>
-                                <button (click)="startTimer(1500)" class="px-4 py-3 bg-white text-black font-black uppercase text-xs hover:bg-electric-red hover:text-white transition-colors border-2 border-transparent">25 Min</button>
+                                <div class="flex items-center bg-white border-2 border-transparent focus-within:border-black transition-colors">
+                                    <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="w-16 px-3 py-3 text-black font-black font-mono text-xs outline-none bg-transparent text-center" min="1">
+                                    <button (click)="startCustomTimer()" class="px-3 py-3 bg-black text-white font-black uppercase text-xs hover:bg-electric-red transition-colors border-l-2 border-black">START</button>
+                                </div>
                             } @else {
                                 <button (click)="pauseTimer()" class="px-4 py-3 bg-electric-red text-white font-black uppercase text-xs hover:bg-white hover:text-black transition-colors border-2 border-transparent">Pause</button>
                                 <button (click)="resetTimer()" class="px-4 py-3 bg-concrete-800 text-white font-black uppercase text-xs hover:bg-white hover:text-black transition-colors border-2 border-transparent">Reset</button>
                             }
                         </div>
                     </div>
+                    
+                    <!-- Gamification: Focus Garden -->
+                    <div class="mt-6 pt-4 border-t-2 border-concrete-800 relative z-10 flex flex-col items-center justify-center">
+                        <span class="text-[10px] uppercase font-black tracking-widest text-concrete-400 mb-2">Focus Garden</span>
+                        <div class="flex items-end justify-center gap-4 h-16 w-full">
+                            <div class="flex flex-col items-center justify-end h-full transition-all duration-700 ease-in-out">
+                                <span class="material-symbols-outlined transition-all duration-700" 
+                                      [ngClass]="getTreeStyle()">
+                                    {{ getTreeIcon() }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-xs font-black uppercase text-concrete-300">
+                            {{ totalFocusedMinutes() }} Mins FOCUSED TODAY
+                        </div>
+                        <!-- Progress to next stage -->
+                        @if (totalFocusedMinutes() < 120) {
+                            <div class="w-full max-w-xs h-1 bg-concrete-800 mt-2 relative overflow-hidden">
+                                <div class="absolute top-0 left-0 h-full bg-electric-red transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
+                            </div>
+                        }
+                    </div>
+
                     <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #fff 10px, #fff 12px);"></div>
                 </div>
             </div>
@@ -99,13 +124,18 @@ import { SystemInstanceTask } from '../../models/system.model';
                     @if (todaySystemTask()?.description) {
                         <p class="font-mono text-xs italic opacity-90 mb-4 bg-black/20 p-2">{{ todaySystemTask()?.description }}</p>
                     }
-                    <div class="flex items-center gap-4 mt-2">
-                        @if (todaySystemTask()?.timeBlockStart) {
-                            <span class="text-xs font-black bg-black px-2 py-1 text-white uppercase">{{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}</span>
-                        }
-                        @if (todaySystemTask()?.resourceLink) {
-                            <a [href]="todaySystemTask()?.resourceLink" target="_blank" class="text-xs font-black underline hover:text-black transition-colors uppercase">View_Resource</a>
-                        }
+                    <div class="flex items-center justify-between mt-4">
+                        <div class="flex items-center gap-4">
+                            @if (todaySystemTask()?.timeBlockStart) {
+                                <span class="text-xs font-black bg-black px-2 py-1 text-white uppercase">{{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}</span>
+                            }
+                            @if (todaySystemTask()?.resourceLink) {
+                                <a [href]="todaySystemTask()?.resourceLink" target="_blank" class="text-xs font-black underline hover:text-black transition-colors uppercase">View_Resource</a>
+                            }
+                        </div>
+                        <button (click)="toggleMission(todaySystemTask()!)" class="px-4 py-2 text-xs font-black bg-white text-black border-2 border-transparent hover:bg-black hover:text-white transition-colors uppercase">
+                            {{ todaySystemTask()?.completed ? 'MARK_INCOMPLETE' : 'MARK_COMPLETE' }}
+                        </button>
                     </div>
                 </div>
             }
@@ -119,6 +149,13 @@ import { SystemInstanceTask } from '../../models/system.model';
                         <div>
                              <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Value</label>
                              <input type="number" [(ngModel)]="logValue" class="w-full p-4 font-mono text-xl font-black border-[3px] border-black dark:border-concrete-100 outline-none focus:bg-concrete-100 dark:bg-concrete-900 dark:text-white dark:focus:bg-black transition-colors">
+                        </div>
+                        <div>
+                             <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Focus Minutes</label>
+                             <div class="flex items-center gap-2">
+                                 <input type="number" [ngModel]="totalFocusedMinutes()" (ngModelChange)="updateFocusTime($event)" class="w-24 p-4 font-mono text-xl font-black border-[3px] border-black dark:border-concrete-100 outline-none focus:bg-concrete-100 dark:bg-concrete-900 dark:text-white dark:focus:bg-black transition-colors text-center">
+                                 <span class="text-sm font-bold dark:text-concrete-300">MINS</span>
+                             </div>
                         </div>
                         <div>
                              <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Notes (Optional)</label>
@@ -147,52 +184,27 @@ import { SystemInstanceTask } from '../../models/system.model';
                 }
             </div>
 
-            <!-- Systems & Pending -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <!-- System Linkage -->
-                <div class="bg-concrete-200 dark:bg-concrete-900 border-[4px] border-black dark:border-concrete-100 p-6 brutalist-shadow-lg">
-                    <h3 class="font-black uppercase text-lg border-b-4 border-black dark:border-concrete-100 pb-2 mb-4 flex items-center gap-2 dark:text-white">
-                        <span class="material-symbols-outlined">account_tree</span> System_Details
-                    </h3>
-                    
-                    <ul class="space-y-3 font-mono text-sm dark:text-concrete-200">
-                        <li class="flex justify-between items-center border-b border-black/20 dark:border-white/20 pb-2">
-                            <span class="font-bold text-concrete-500">Tier:</span>
-                            <span class="uppercase font-black bg-black text-white dark:bg-white dark:text-black px-2 py-0.5">{{ habit()?.tier || 'Uncategorized' }}</span>
-                        </li>
-                        @if (parentHabit()) {
-                            <li class="flex justify-between items-center border-b border-black/20 dark:border-white/20 pb-2">
-                                <span class="font-bold text-concrete-500">Parent Protocol:</span>
-                                <a [routerLink]="['/details', parentHabit()!.id]" class="uppercase font-black hover:text-electric-red underline decoration-2 underline-offset-4">{{ parentHabit()!.name }}</a>
-                            </li>
-                        }
-                        <li class="flex justify-between items-center mt-4 text-electric-red">
-                            <span class="font-bold">Pending Compensation:</span>
-                            <span class="uppercase font-black border border-electric-red px-2 py-0.5" *ngIf="inconsistentDaysCount() > 0; else noComp">
-                                {{ (inconsistentDaysCount() * 1.5) }}x {{ habit()?.targetUnit || 'Efforts' }}
-                            </span>
-                            <ng-template #noComp>
-                                <span class="uppercase font-black text-black dark:text-white">None (Optimized)</span>
-                            </ng-template>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Pending -->
+            <!-- Pending -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 <div class="bg-white dark:bg-concrete-800 border-[4px] border-black dark:border-concrete-100 p-6 brutalist-shadow-lg flex flex-col">
                     <h3 class="font-black uppercase text-lg border-b-4 border-black dark:border-concrete-100 pb-2 mb-4 flex items-center gap-2 text-electric-red dark:text-electric-red">
-                        <span class="material-symbols-outlined">warning</span> Pending_{{ habit()?.tier || 'Daily' }}_Missions
+                        <span class="material-symbols-outlined">warning</span> Pending_Past_Tasks
                     </h3>
-                    @if (pendingToday().length === 0) {
+                    @if (pendingPastTasks().length === 0) {
                         <div class="flex-1 flex items-center justify-center p-4">
-                            <p class="font-mono text-sm text-concrete-500 dark:text-concrete-400 uppercase font-bold text-center border-2 border-dashed border-concrete-300 dark:border-concrete-600 p-4 w-full">ALL VISIBLE MISSIONS EXECUTED.</p>
+                            <p class="font-mono text-sm text-concrete-500 dark:text-concrete-400 uppercase font-bold text-center border-2 border-dashed border-concrete-300 dark:border-concrete-600 p-4 w-full">NO PENDING PAST TASKS.</p>
                         </div>
                     } @else {
                         <ul class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2 flex-1">
-                            @for (pending of pendingToday(); track pending.id) {
+                            @for (task of pendingPastTasks(); track task.date + task.title) {
                                 <li class="flex items-center justify-between border-2 border-black dark:border-white p-2 hover:bg-concrete-100 dark:hover:bg-concrete-700 transition-colors group">
-                                    <a [routerLink]="['/track', pending.id]" class="font-black uppercase text-sm font-sans group-hover:text-electric-red dark:text-white truncate max-w-[80%] hover:underline">{{ pending.name }}</a>
-                                    <span class="text-[10px] font-black underline decoration-wavy text-concrete-500">{{ pending.tier || 'Daily' }}</span>
+                                    <div class="flex flex-col flex-1 truncate mr-2">
+                                        <span class="font-black uppercase text-sm font-sans dark:text-white truncate" [title]="task.title">{{ task.title }}</span>
+                                        <span class="text-[10px] font-bold text-electric-red truncate">{{ task.date }} | {{ task.phase }} | W{{ task.weekNumber }}</span>
+                                    </div>
+                                    <button (click)="toggleMission(task)" [title]="task.completed ? 'Mark Incomplete' : 'Mark Complete'" class="p-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex shrink-0 border-2 border-transparent">
+                                        <span class="material-symbols-outlined text-sm">check</span>
+                                    </button>
                                 </li>
                             }
                         </ul>
@@ -228,17 +240,10 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     habit = computed(() => this.habitService.habits().find(h => h.id === this.habitId()));
 
     todaySystemTask = signal<SystemInstanceTask | null>(null);
+    pendingPastTasks = signal<SystemInstanceTask[]>([]);
     
     // Derived states
     allHabits = computed(() => this.habitService.habits());
-
-    pendingToday = computed(() => {
-        return this.allHabits().filter(h => 
-            h.id !== this.habitId() && 
-            !h.completedToday && 
-            h.tier === (this.habit()?.tier || 'daily')
-        );
-    });
 
     parentHabit = computed(() => {
         const parentId = this.habit()?.parentId;
@@ -279,12 +284,18 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     });
 
     timerValue = signal(120);
+    initialTimerValue = signal(120); // Keep track of how much was started
     timerRunning = signal(false);
     timerInterval: any;
     celebrationMessage = signal('');
 
+    customTimerMinutes: number | undefined;
+
     logValue: number | undefined;
     logNotes = '';
+    
+    // Track total focus time for the gamification
+    totalFocusedMinutes = signal(0);
 
     formattedTimer = computed(() => {
         const t = this.timerValue();
@@ -299,6 +310,8 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         if (h && h.latestLog && this.isCompletedToday()) {
             this.logValue = h.latestLog.value;
             this.logNotes = h.latestLog.notes || '';
+            // Make sure we type-cast or assume it has focused_minutes since we just added it to backend
+            this.totalFocusedMinutes.set((h.latestLog as any).focused_minutes || 0);
         }
 
         // Fetch deep stats and today's system task
@@ -316,6 +329,12 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
                  const relatedTask = tasks.find(t => t.habitId === id);
                  this.todaySystemTask.set(relatedTask || null);
              });
+
+             this.systemService.getPendingPastTasks(id, todayStr).subscribe(tasks => {
+                 // Sort older first
+                 tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                 this.pendingPastTasks.set(tasks);
+             });
         }
     }
 
@@ -327,9 +346,17 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         this.location.back();
     }
 
+    startCustomTimer() {
+        if (this.customTimerMinutes && this.customTimerMinutes > 0) {
+            this.startTimer(this.customTimerMinutes * 60);
+            this.customTimerMinutes = undefined;
+        }
+    }
+
     startTimer(seconds: number) {
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.timerValue.set(seconds);
+        this.initialTimerValue.set(seconds);
         this.timerRunning.set(true);
         this.timerInterval = setInterval(() => {
             if (this.timerValue() > 0) {
@@ -337,7 +364,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
             } else {
                 clearInterval(this.timerInterval);
                 this.timerRunning.set(false);
-                this.showCelebration('SESSION_COMPLETE!');
+                this.completeSession();
             }
         }, 1000);
     }
@@ -352,18 +379,6 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         this.timerValue.set(0);
     }
 
-    toggleDone() {
-        const id = this.habitId();
-        const isCompletedNow = this.isCompletedToday();
-        
-        if (id) {
-            this.habitService.toggleCompletion(id, 'today').subscribe(() => {
-                 this.habitService.loadHabits(); // Update list everywhere
-                 if (!isCompletedNow) this.showCelebration();
-            });
-        }
-    }
-
     saveLog() {
         const id = this.habitId();
         if (!id) return;
@@ -373,13 +388,131 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
 
         this.habitService.updateLog(id, today, {
             value: this.logValue,
-            notes: this.logNotes
-        }).subscribe(() => {
+            notes: this.logNotes,
+            focused_minutes: this.totalFocusedMinutes()
+        } as any).subscribe(() => {
             this.habitService.loadHabits();
             if (!isCompletedNow && this.logValue !== undefined && this.logValue > 0) {
                  this.showCelebration();
             }
         });
+    }
+
+    toggleDone() {
+        // Toggle the entire habit as executed
+        const id = this.habitId();
+        const isCompletedNow = this.isCompletedToday();
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        if (id) {
+            this.habitService.toggleCompletion(id, todayStr).subscribe(() => {
+                 this.habitService.loadHabits(); // Update list everywhere
+                 // We don't fetch stats here on simple toggle, list will auto-update state
+                 if (!isCompletedNow) {
+                     this.showCelebration('PROTOCOL EXECUTED!');
+                 }
+            });
+        }
+    }
+
+    updateFocusTime(mins: number) {
+        this.totalFocusedMinutes.set(mins);
+        this.saveFocusTime(0); // auto save without celebration
+    }
+
+    saveFocusTime(addedMins: number) {
+        const id = this.habitId();
+        if (id) {
+            const today = new Date().toISOString().split('T')[0];
+            const payload: any = {
+                focused_minutes: this.totalFocusedMinutes()
+            };
+            if (this.logValue !== undefined && this.logValue !== null) payload.value = this.logValue;
+            if (this.logNotes) payload.notes = this.logNotes;
+            
+            // This endpoint creates/updates the log automatically 
+            this.habitService.updateLog(id, today, payload).subscribe(() => {
+                this.habitService.loadHabits();
+                if (addedMins > 0) {
+                    this.showCelebration(`+${addedMins} MINUTE FOCUS GROW!`);
+                }
+            });
+        }
+    }
+
+    completeSession() {
+        // Calculate minutes from the initial timer value
+        const minsCompleted = Math.round(this.initialTimerValue() / 60);
+        this.totalFocusedMinutes.update(m => m + minsCompleted);
+        
+        // Auto-save the focused minutes into the log
+        const id = this.habitId();
+        if (id) {
+            const today = new Date().toISOString().split('T')[0];
+            this.habitService.updateLog(id, today, {
+                value: this.logValue !== undefined ? this.logValue : 1, // Fallback value if measurable vs bool config is tricky
+                notes: this.logNotes,
+                focused_minutes: this.totalFocusedMinutes()
+            } as any).subscribe(() => {
+                this.habitService.loadHabits();
+                this.showCelebration(`+${minsCompleted} MINUTE FOCUS GROW!`);
+            });
+        }
+    }
+
+    toggleMission(task: SystemInstanceTask) {
+        if (!task.instanceId) return;
+        this.systemService.toggleInstanceTask(
+            task.instanceId,
+            task.phase || '',
+            task.weekNumber,
+            task.date || '',
+            task.title
+        ).subscribe(() => {
+            const id = this.habitId();
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (id) {
+                // Refresh to get updated completed status
+                this.systemService.getInstanceTasksByDate(todayStr).subscribe(tasks => {
+                    const relatedTask = tasks.find(t => t.habitId === id);
+                    this.todaySystemTask.set(relatedTask || null);
+                });
+                this.systemService.getPendingPastTasks(id, todayStr).subscribe(tasks => {
+                    tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                    this.pendingPastTasks.set(tasks);
+                });
+                this.showCelebration(task.completed ? 'MISSION UNMARKED' : 'MISSION COMPLETED!');
+            }
+        });
+    }
+
+    // Gamification Helpers
+    getTreeIcon(): string {
+        const mins = this.totalFocusedMinutes();
+        if (mins === 0) return 'eco'; // Seed/leaf
+        if (mins < 25) return 'park'; // Small tree
+        if (mins < 60) return 'forest'; // Few trees
+        return 'forest'; // Maximum stage, handled by styling
+    }
+
+    getTreeStyle(): string {
+        const mins = this.totalFocusedMinutes();
+        if (mins === 0) return 'text-concrete-500 text-2xl';
+        if (mins < 25) return 'text-green-500 text-4xl';
+        if (mins < 60) return 'text-green-400 text-5xl';
+        if (mins < 120) return 'text-green-300 text-6xl drop-shadow-[0_0_15px_rgba(7ade80,0.5)]';
+        return 'text-green-400 text-7xl drop-shadow-[0_0_25px_rgba(7ade80,0.8)] animate-pulse';
+    }
+    
+    getProgressPer(): number {
+        const mins = this.totalFocusedMinutes();
+        let target = 25;
+        if (mins >= 25) target = 60;
+        if (mins >= 60) target = 120;
+        if (mins >= 120) return 100;
+        
+        const prevMilestone = mins < 25 ? 0 : (mins < 60 ? 25 : 60);
+        return ((mins - prevMilestone) / (target - prevMilestone)) * 100;
     }
 
     showCelebration(msg?: string) {

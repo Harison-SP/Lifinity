@@ -8,12 +8,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { HabitService } from '../../../services/habit.service';
 import { Habit } from '../../../models/habit.model';
+import { MatTimepickerModule } from '@angular/material/timepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 
 interface WeekNode {
   weekNum: number;
   focus: string;
   items: SystemItem[];
   isExpanded: boolean;
+  time_block_start: string | null;
+  time_block_end: string | null;
 }
 
 interface PhaseNode {
@@ -25,7 +31,7 @@ interface PhaseNode {
 @Component({
   selector: 'app-system-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatTabsModule],
+  imports: [CommonModule, FormsModule, MatIconModule, MatTabsModule, MatTimepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule],
   template: `
     <div class="h-full flex flex-col font-manrope p-6 gap-6 overflow-y-auto">
       <div class="flex justify-between items-center">
@@ -38,6 +44,12 @@ interface PhaseNode {
         </div>
         
         <div class="flex gap-4">
+          <button (click)="showHelp.set(!showHelp())" 
+                  class="px-4 py-2 bg-concrete-200 dark:bg-concrete-700 text-black dark:text-white rigid-border-sm border-[2px] font-black hover:bg-concrete-300 transition-all shadow-[4px_4px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs">
+            <span class="material-symbols-outlined text-sm">help</span>
+            Help
+          </button>
+          
           <label class="px-4 py-2 bg-yellow-400 text-black rigid-border-sm border-[2px] font-black hover:bg-black hover:text-white transition-all shadow-[4px_4px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs cursor-pointer active:translate-y-1 active:shadow-none">
             <span class="material-symbols-outlined text-sm">upload_file</span>
             Import Excel
@@ -83,8 +95,61 @@ interface PhaseNode {
                 <div class="py-8 text-center text-concrete-400">
                   <p class="text-xs uppercase font-black">No systems found</p>
                 </div>
-              }
+    }
+
+    @if (showHelp()) {
+      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+        <div class="bg-white dark:bg-concrete-900 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto custom-scrollbar">
+          <div class="flex justify-between items-center border-b-4 border-black dark:border-white pb-2 mb-4">
+            <h3 class="text-xl font-black uppercase flex items-center gap-2">
+              <span class="material-symbols-outlined">help</span>
+              How to Create a System
+            </h3>
+            <button (click)="showHelp.set(false)" class="text-black dark:text-white hover:text-red-500">
+               <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          
+          <div class="space-y-4 font-mono text-xs">
+            <div class="bg-concrete-100 dark:bg-concrete-800 p-4 border-2 border-black dark:border-concrete-500">
+              <h4 class="font-black uppercase text-sm mb-2">1. Create New System</h4>
+              <ul class="list-disc list-inside space-y-1 opacity-80">
+                <li>Click <span class="bg-black text-white px-1">New Protocol</span> button</li>
+                <li>Enter a title for your system</li>
+                <li>Select or type a category</li>
+              </ul>
             </div>
+
+            <div class="bg-concrete-100 dark:bg-concrete-800 p-4 border-2 border-black dark:border-concrete-500">
+              <h4 class="font-black uppercase text-sm mb-2">2. Build Structure</h4>
+              <ul class="list-disc list-inside space-y-1 opacity-80">
+                <li>Click <span class="bg-black text-white px-1">+ Phase</span> to add major sections</li>
+                <li>Click <span class="bg-black text-white px-1">+ Week</span> inside each phase</li>
+                <li>Set <span class="bg-black text-white px-1">Start</span> and <span class="bg-black text-white px-1">End</span> time for the entire week (applies to all tasks)</li>
+                <li>Click <span class="bg-black text-white px-1">+ Task</span> inside each week</li>
+                <li>Configure: day number and title</li>
+              </ul>
+            </div>
+
+            <div class="bg-concrete-100 dark:bg-concrete-800 p-4 border-2 border-black dark:border-concrete-500">
+              <h4 class="font-black uppercase text-sm mb-2">3. Save & Run</h4>
+              <ul class="list-disc list-inside space-y-1 opacity-80">
+                <li>Click <span class="bg-green-500 text-white px-1">Save</span> to persist</li>
+                <li>Select a date and click <span class="bg-black text-white px-1">Run</span> to apply to calendar</li>
+                <li>Optionally link to a parent habit</li>
+              </ul>
+            </div>
+
+            <div class="bg-yellow-100 dark:bg-yellow-900 p-4 border-2 border-yellow-500">
+              <h4 class="font-black uppercase text-sm mb-2">Import Options</h4>
+              <p class="opacity-80 mb-2">Expected Excel/CSV columns:</p>
+              <code class="bg-white dark:bg-black px-2 py-1 text-[10px] block">Phase, Week, WeekFocus, Day, Title, Description, StartTime, EndTime</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
           </div>
         </div>
 
@@ -186,44 +251,47 @@ interface PhaseNode {
                                  <div class="p-4 space-y-4">
                                      @for (week of phase.weeks; track $index) {
                                          <div class="border border-concrete-300 dark:border-concrete-600 bg-white dark:bg-concrete-900 p-3 shadow-sm">
-                                             <!-- Week Header -->
-                                            <div class="flex justify-between items-start mb-3">
-                                                <div class="flex gap-2 items-center flex-1">
-                                                    <span class="font-black text-xs uppercase bg-black text-white px-1">WK {{week.weekNum}}</span>
-                                                    <input type="number" [(ngModel)]="week.weekNum" class="w-12 text-xs font-bold border border-concrete-300 text-center" title="Week Number" />
-                                                    <input [(ngModel)]="week.focus" placeholder="Week Focus / Topic" class="flex-1 text-xs font-bold border-b border-concrete-300 outline-none bg-transparent" />
-                                                </div>
-                                                <div class="flex gap-2 pl-2">
-                                                    <button (click)="addTask(week)" class="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800">
-                                                        + Task
-                                                    </button>
-                                                    <button (click)="removeWeek(phase, $index)" class="text-concrete-400 hover:text-red-500">
-                                                        <span class="material-symbols-outlined text-sm">remove_circle_outline</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <!-- Tasks List -->
-                                            <div class="space-y-2 pl-4 border-l-2 border-concrete-200 dark:border-concrete-700">
-                                                @for (item of week.items; track $index) {
-                                                     <div class="flex gap-2 items-center group">
-                                                         <span class="text-[10px] font-mono text-concrete-400 w-4">D{{item.day_number}}</span>
-                                                         <input type="number" [(ngModel)]="item.day_number" class="w-8 text-[10px] border border-concrete-200 text-center" />
-                                                         
-                                                         <input [(ngModel)]="item.title" placeholder="Task Title" class="flex-1 text-xs font-bold bg-transparent border-b border-transparent focus:border-concrete-300 outline-none" />
-                                                         
-                                                         <input [(ngModel)]="item.time_block_start" type="time" title="Start" class="w-16 text-[10px] bg-transparent border border-concrete-200" />
+                                              <!-- Week Header -->
+                                             <div class="flex justify-between items-start mb-3">
+                                                 <div class="flex gap-2 items-center flex-1">
+                                                     <span class="font-black text-xs uppercase bg-black text-white px-1">WK {{week.weekNum}}</span>
+                                                     <input type="number" [(ngModel)]="week.weekNum" class="w-12 text-xs font-bold border border-concrete-300 text-center" title="Week Number" />
+                                                     <input [(ngModel)]="week.focus" placeholder="Week Focus / Topic" class="flex-1 text-xs font-bold border-b border-concrete-300 outline-none bg-transparent" />
+                                                 </div>
+                                                 <div class="flex gap-2 pl-2">
+                                                     <div class="flex items-center gap-1">
+                                                         <input [matTimepicker]="weekStartPicker" [(ngModel)]="week.time_block_start" class="w-20 text-[10px] bg-transparent border border-concrete-200" placeholder="Start">
+                                                         <mat-timepicker #weekStartPicker />
                                                          <span class="text-[10px] text-concrete-300">-</span>
-                                                         <input [(ngModel)]="item.time_block_end" type="time" title="End" class="w-16 text-[10px] bg-transparent border border-concrete-200" />
-                                                         
-                                                         <button (click)="removeTask(week, $index)" class="opacity-0 group-hover:opacity-100 text-concrete-300 hover:text-red-500">
-                                                             <span class="material-symbols-outlined text-[14px]">close</span>
-                                                         </button>
+                                                         <input [matTimepicker]="weekEndPicker" [(ngModel)]="week.time_block_end" class="w-20 text-[10px] bg-transparent border border-concrete-200" placeholder="End">
+                                                         <mat-timepicker #weekEndPicker />
                                                      </div>
-                                                } @empty {
-                                                    <p class="text-[10px] text-concrete-400 italic pl-2">No tasks defined for this week.</p>
-                                                }
-                                            </div>
+                                                     <button (click)="addTask(week)" class="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800">
+                                                         + Task
+                                                     </button>
+                                                     <button (click)="removeWeek(phase, $index)" class="text-concrete-400 hover:text-red-500">
+                                                         <span class="material-symbols-outlined text-sm">remove_circle_outline</span>
+                                                     </button>
+                                                 </div>
+                                             </div>
+
+                                             <!-- Tasks List -->
+                                             <div class="space-y-2 pl-4 border-l-2 border-concrete-200 dark:border-concrete-700">
+                                                 @for (item of week.items; track $index) {
+                                                      <div class="flex gap-2 items-center group">
+                                                          <span class="text-[10px] font-mono text-concrete-400 w-4">D{{item.day_number}}</span>
+                                                          <input type="number" [(ngModel)]="item.day_number" class="w-8 text-[10px] border border-concrete-200 text-center" />
+                                                          
+                                                          <input [(ngModel)]="item.title" placeholder="Task Title" class="flex-1 text-xs font-bold bg-transparent border-b border-transparent focus:border-concrete-300 outline-none" />
+                                                          
+                                                          <button (click)="removeTask(week, $index)" class="opacity-0 group-hover:opacity-100 text-concrete-300 hover:text-red-500">
+                                                              <span class="material-symbols-outlined text-[14px]">close</span>
+                                                          </button>
+                                                      </div>
+                                                 } @empty {
+                                                     <p class="text-[10px] text-concrete-400 italic pl-2">No tasks defined for this week.</p>
+                                                 }
+                                             </div>
                                          </div>
                                      }
                                  </div>
@@ -303,6 +371,7 @@ export class SystemManagerComponent implements OnInit {
   lastResult = signal<InstantiateResult | null>(null);
   isPasting = signal(false);
   pastedCsv = '';
+  showHelp = signal(false);
 
   editForm: LearningSystem = {
     title: '',
@@ -327,6 +396,27 @@ export class SystemManagerComponent implements OnInit {
       this.habits.set(habits);
     });
   }
+
+  // HOW TO CREATE A SYSTEM:
+  // 1. Click "New Protocol" button to create a new empty system
+  // 2. Enter a title for your system in the input field
+  // 3. Select a category from the dropdown (or type a custom one)
+  // 4. Add Phases using the "Phase" button - phases represent major sections of your curriculum
+  // 5. Add Weeks within each phase using the "+ Week" button - each week has a week number and focus topic
+  // 6. Add Tasks within each week using the "+ Task" button - tasks represent daily items with time blocks
+  // 7. Configure each task: day number, title, start/end time
+  // 8. Click the save button to persist your system
+  // 9. Optionally, select a date and click "Run" to apply/instantiate the system to your calendar
+  //
+  // IMPORT OPTIONS:
+  // - Import Excel: Upload an .xlsx/.xls/.csv file with columns: Phase, Week, WeekFocus, Day, Title, Description, StartTime, EndTime
+  // - Paste CSV: Copy CSV data and paste it into the modal dialog
+  //
+  // SYSTEM STRUCTURE:
+  // - System (top level) contains multiple Phases
+  // - Phase contains multiple Weeks
+  // - Week contains multiple Tasks (SystemItems)
+  // - Each Task has: day_number, title, description, time_block_start, time_block_end, week_focus
 
   selectSystem(system: LearningSystem) {
     this.selectedSystem.set(system);
@@ -376,14 +466,16 @@ export class SystemManagerComponent implements OnInit {
         
         sortedWeeks.forEach(wNum => {
             const wItems = weekMap.get(wNum)!;
-            // Infer Focus from first item (or any item that has it)
             const focus = wItems.find(i => i.week_focus)?.week_focus || `Week ${wNum}`;
+            const firstItem = wItems[0];
             
             weeks.push({
                 weekNum: wNum,
                 focus: focus,
                 items: wItems.sort((a,b) => a.day_number - b.day_number),
-                isExpanded: true
+                isExpanded: true,
+                time_block_start: firstItem?.time_block_start || null,
+                time_block_end: firstItem?.time_block_end || null
             });
         });
 
@@ -402,7 +494,9 @@ export class SystemManagerComponent implements OnInit {
                 weekNum: 1,
                 focus: 'Getting Started',
                 items: [],
-                isExpanded: true
+                isExpanded: true,
+                time_block_start: null,
+                time_block_end: null
             }],
             isExpanded: true
         });
@@ -416,10 +510,11 @@ export class SystemManagerComponent implements OnInit {
       this.hierarchy().forEach(phase => {
           phase.weeks.forEach(week => {
               week.items.forEach(item => {
-                  // Ensure sync
                   item.phase = phase.name;
                   item.week_number = week.weekNum;
                   item.week_focus = week.focus;
+                  item.time_block_start = week.time_block_start || undefined;
+                  item.time_block_end = week.time_block_end || undefined;
                   items.push(item);
               });
           });
@@ -433,7 +528,7 @@ export class SystemManagerComponent implements OnInit {
       const nextNum = nodes.length + 1;
       this.hierarchy.update(h => [...h, {
           name: `Phase ${nextNum}`,
-          weeks: [{ weekNum: 1, focus: 'General', items: [], isExpanded: true }],
+          weeks: [{ weekNum: 1, focus: 'General', items: [], isExpanded: true, time_block_start: null, time_block_end: null }],
           isExpanded: true
       }]);
   }
@@ -453,7 +548,9 @@ export class SystemManagerComponent implements OnInit {
           weekNum: nextWeek,
           focus: 'New Topic',
           items: [],
-          isExpanded: true
+          isExpanded: true,
+          time_block_start: null,
+          time_block_end: null
       });
   }
 

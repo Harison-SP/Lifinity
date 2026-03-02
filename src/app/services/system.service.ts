@@ -59,6 +59,14 @@ export class SystemService {
     return this.http.get<SystemInstanceTask[]>(`${this.apiUrl}/instances/by-date`, { params });
   }
 
+  /** Returns uncompleted tasks for a specific habit_id before a certain date */
+  getPendingPastTasks(habitId: string, beforeDate: string): Observable<SystemInstanceTask[]> {
+    const params = new HttpParams()
+      .set('habit_id', habitId)
+      .set('before_date', beforeDate);
+    return this.http.get<SystemInstanceTask[]>(`${this.apiUrl}/instances/pending-past`, { params });
+  }
+
   /** Toggle a task's completion state */
   toggleInstanceTask(instanceId: string, phaseName: string, weekNumber: number,
                       taskDate: string, taskTitle: string): Observable<any> {
