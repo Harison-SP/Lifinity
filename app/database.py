@@ -15,3 +15,15 @@ habit_log_collection = db["habit_logs"]
 note_collection = db["notes"]
 monthly_reflection_collection = db["monthly_reflections"]
 habit_note_collection = db["habit_notes"]
+
+# Weekly Planner Collections
+weekly_task_collection = db["weekly_tasks"]
+weekly_target_collection = db["weekly_targets"]
+weekly_review_collection = db["weekly_reviews"]
+weekly_metrics_collection = db["weekly_metrics"]
+
+# Learning System Collection
+learning_system_collection = db["learning_systems"]
+
+# System Instance Collection (stores instantiated hierarchy, linked to a parent habit)
+system_instance_collection = db["system_instances"]

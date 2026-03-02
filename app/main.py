@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import habit, planner, habit_maintenance
+from app.routes import habit, planner, habit_maintenance, weekly_planner, system
 
 app = FastAPI()
 
@@ -23,6 +23,9 @@ app.add_middleware(
 app.include_router(habit.router, prefix="/habits", tags=["habits"])
 app.include_router(planner.router)
 app.include_router(habit_maintenance.router)
+app.include_router(weekly_planner.router, prefix="/weekly-planner", tags=["weekly-planner"])
+app.include_router(system.router)
+
 
 
 @app.get("/")

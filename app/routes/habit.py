@@ -502,7 +502,7 @@ async def delete_habit(id: str):
 
 @router.post("/{id}/toggle", response_model=Habit)
 async def toggle_habit_completion(id: str, payload: dict):
-    # Payload expected: {"completed_at": "ISO_STRING", "timezone_offset": int_minutes, "value": float, "notes": str}
+    # Payload expected: {"completed_at": "ISO_STRING", "timezone_offset": int_minutes, "value": float, "notes": str, "focused_minutes": int}
     completed_at_str = payload.get("completed_at")
     timezone_offset = payload.get("timezone_offset", 0)
     
@@ -540,17 +540,19 @@ async def toggle_habit_completion(id: str, payload: dict):
     # Check for update payload
     req_value = payload.get("value")
     req_notes = payload.get("notes")
+    req_focused = payload.get("focused_minutes")
 
     if existing_log:
-        # Check if this is an update (providing value/notes) or a toggle-off
-        # Heuristic: If value or notes are provided in payload, treat as UPDATE.
-        # If both are missing/null, treat as TOGGLE OFF.
+        # Check if this is an update (providing value/notes/focus) or a toggle-off
+        # Heuristic: If value, notes, or focused_minutes are provided in payload, treat as UPDATE.
+        # If all are missing/null, treat as TOGGLE OFF.
         
-        if req_value is not None or req_notes is not None:
+        if req_value is not None or req_notes is not None or req_focused is not None:
              # UPDATE
              update_fields = {}
              if req_value is not None: update_fields["value"] = req_value
              if req_notes is not None: update_fields["notes"] = req_notes
+             if req_focused is not None: update_fields["focused_minutes"] = req_focused
              
              # Also ensure habit_name is present if it was missing
              if not existing_log.get("habit_name"):
@@ -578,7 +580,8 @@ async def toggle_habit_completion(id: str, payload: dict):
             "habit_name": habit_name,
             "completed_at": completed_at,
             "value": req_value,
-            "notes": req_notes
+            "notes": req_notes,
+            "focused_minutes": req_focused or 0
         }
         habit_log_collection.insert_one(new_log)
         update_data["completedToday"] = True
@@ -600,28 +603,38 @@ async def toggle_habit_completion(id: str, payload: dict):
     sorted_days = sorted(list(unique_days))
     
     streak = 0
+    best_streak = 0
+    
     if sorted_days:
-        latest_day = datetime.strptime(sorted_days[-1], "%Y-%m-%d")
-        current_streak = 1
-        for i in range(len(sorted_days) - 2, -1, -1):
-            prev_day = datetime.strptime(sorted_days[i], "%Y-%m-%d")
-            diff = (latest_day - prev_day).days
-            if diff == 1:
-                current_streak += 1
-                latest_day = prev_day
+        current_streak_len = 1
+        max_len = 1
+        for i in range(1, len(sorted_days)):
+            d1 = datetime.strptime(sorted_days[i-1], "%Y-%m-%d")
+            d2 = datetime.strptime(sorted_days[i], "%Y-%m-%d")
+            if (d2 - d1).days == 1:
+                current_streak_len += 1
             else:
-                break
-        streak = current_streak
+                max_len = max(max_len, current_streak_len)
+                current_streak_len = 1
+        max_len = max(max_len, current_streak_len)
+        best_streak = max_len
         
-        streak = current_streak
+        latest_day = datetime.strptime(sorted_days[-1], "%Y-%m-%d")
+        today = datetime.now(timezone.utc) - timedelta(minutes=timezone_offset)
+        today_str = today.strftime("%Y-%m-%d")
+        today_dt = datetime.strptime(today_str, "%Y-%m-%d")
         
+        diff_from_today = (today_dt - latest_day).days
+        if diff_from_today <= 1:
+            streak = current_streak_len
+        else:
+            streak = 0
+            
     # Recalculate Best Streak
     current_habit = habit_collection.find_one({"_id": ObjectId(id)})
     current_best = current_habit.get("bestStreak", 0)
-    best_streak = current_best
-    
-    if streak > current_best:
-        best_streak = streak
+    if best_streak < current_best:
+        best_streak = current_best
         
     habit_collection.update_one({"_id": ObjectId(id)}, {
         "$set": {
