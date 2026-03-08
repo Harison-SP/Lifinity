@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
+﻿import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
 import { Location, CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -23,14 +23,14 @@ import { MatNativeDateModule } from '@angular/material/core';
         MatNativeDateModule
     ],
     template: `
-    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope pb-24 transition-colors duration-300">
-        <header class="mb-12 flex justify-between items-end border-b-4 border-black dark:border-concrete-100 pb-4">
+    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope pb-24 transition-colors duration-300 overflow-x-hidden">
+        <header class="mb-10 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b-4 border-black dark:border-concrete-100 pb-4">
             <div>
                 <button (click)="goBack()" class="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest hover:text-electric-red dark:text-concrete-400 dark:hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-sm">arrow_back</span>
                     Return_To_Base
                 </button>
-                <h1 class="text-4xl md:text-6xl font-black text-black dark:text-white uppercase leading-none font-arvo">
+                <h1 class="text-3xl sm:text-4xl md:text-6xl font-black text-black dark:text-white uppercase leading-none font-arvo">
                     {{ isEditMode() ? 'System_Override' : 'Initialize_Protocol' }}
                 </h1>
             </div>
@@ -41,16 +41,16 @@ import { MatNativeDateModule } from '@angular/material/core';
             </div>
         </header>
 
-        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-4xl mx-auto bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] p-8 md:p-12 relative">
+        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-4xl mx-auto bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] p-4 sm:p-6 md:p-10 relative">
             
             <!-- Section 1: Identification -->
             <div class="mb-12">
                 <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Protocol_Identity</label>
-                <input formControlName="name" class="w-full text-3xl font-black font-arvo uppercase border-b-4 border-black dark:border-concrete-100 focus:border-electric-red outline-none py-2 placeholder:text-concrete-300 dark:placeholder:text-concrete-600 transition-colors bg-transparent text-black dark:text-white" placeholder="ENTER_DESIGNATION" type="text"/>
+                <input formControlName="name" class="w-full text-2xl md:text-3xl font-black font-arvo uppercase border-b-4 border-black dark:border-concrete-100 focus:border-electric-red outline-none py-2 placeholder:text-concrete-300 dark:placeholder:text-concrete-600 transition-colors bg-transparent text-black dark:text-white" placeholder="ENTER_DESIGNATION" type="text"/>
             </div>
 
             <!-- Section 2: Parameters -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12">
                 <!-- Type Selection -->
                 <div>
                      <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">System_Type</label>
@@ -163,7 +163,7 @@ import { MatNativeDateModule } from '@angular/material/core';
                 }
 
                 @if (frequencyType() === 'interval') {
-                    <div class="flex items-center gap-4 rigid-border-sm border-[2px] dark:border-concrete-500 p-4 inline-flex bg-concrete-100 dark:bg-concrete-900">
+                    <div class="flex flex-wrap items-center gap-3 sm:gap-4 rigid-border-sm border-[2px] dark:border-concrete-500 p-4 sm:inline-flex bg-concrete-100 dark:bg-concrete-900">
                         <span class="font-black text-xs uppercase dark:text-concrete-200">REPEAT_EVERY</span>
                         <input formControlName="frequencyInterval" type="number" min="1" class="w-16 p-1 text-center font-black border-b-2 border-black dark:border-concrete-500 bg-transparent outline-none dark:text-white"/>
                         <span class="font-black text-xs uppercase dark:text-concrete-200">DAYS</span>
@@ -481,3 +481,10 @@ export class AddHabitComponent implements OnInit {
         return d;
     }
 }
+
+
+
+
+
+
+

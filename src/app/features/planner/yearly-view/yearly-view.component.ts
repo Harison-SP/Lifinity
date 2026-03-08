@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+﻿import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatChipsModule } from '@angular/material/chips';
@@ -14,7 +14,7 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
   imports: [CommonModule, FormsModule, LinearCalendarComponent, MatChipsModule, MatIconModule, RouterLink],
   template: `
     <div class="h-full flex flex-col gap-4 relative font-manrope">
-      <div class="flex flex-col gap-4 px-4 pt-2">
+      <div class="flex flex-col gap-4 px-0 sm:px-4 pt-2">
          <div class="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
             <h2 class="text-2xl font-black text-black dark:text-white flex items-center gap-2 uppercase font-arvo">
               <span class="text-black dark:text-white material-symbols-outlined text-3xl">calendar_view_week</span>
@@ -48,7 +48,7 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
                               [class.dark:ring-white]="selectedColors().has(color)"
                               [class.opacity-40]="selectedColors().size > 0 && !selectedColors().has(color)">
                           @if(selectedColors().has(color)) {
-                              <span class="absolute text-[10px] text-white font-black inset-0 flex items-center justify-center bg-black/20">✓</span>
+                              <span class="absolute text-[10px] text-white font-black inset-0 flex items-center justify-center bg-black/20">âœ“</span>
                           }
                       </button>
                     }
@@ -56,14 +56,14 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
              </div>
 
             <a routerLink="/add" 
-                    class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs ml-auto md:ml-0 whitespace-nowrap active:translate-y-1 active:shadow-none cursor-pointer decoration-0 dark:border-concrete-100">
+                    class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs ml-0 md:ml-auto whitespace-nowrap active:translate-y-1 active:shadow-none cursor-pointer decoration-0 dark:border-concrete-100">
               <span class="material-symbols-outlined text-lg">add</span>
               INIT_EVENT
             </a>
          </div>
       </div>
 
-      <div class="flex-1 flex overflow-hidden gap-4 px-4 pb-4">
+      <div class="flex-1 flex flex-col xl:flex-row overflow-hidden gap-4 px-0 sm:px-4 pb-4">
         <!-- Linear Calendar -->
         <div class="flex-1 bg-white dark:bg-concrete-900 rigid-border border-[4px] dark:border-concrete-100 p-0 overflow-hidden h-full flex flex-col relative group/calendar brutalist-shadow-active dark:shadow-[8px_8px_0_0_white]">
           <div class="absolute inset-x-0 top-0 h-1 bg-electric-red z-20"></div>
@@ -77,7 +77,7 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
 
         <!-- Details Panel -->
         @if (selectedGoal()) {
-          <div class="w-80 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 overflow-y-auto h-full flex flex-col transition-all relative animate-in slide-in-from-right duration-300 shadow-[0_0_50px_rgba(0,0,0,0.2)] dark:shadow-[0_0_50px_rgba(255,255,255,0.1)] z-30 brutalist-shadow-active dark:shadow-[8px_8px_0_0_white]">
+          <div class="w-full xl:w-80 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-4 sm:p-6 overflow-y-auto h-auto xl:h-full max-h-[70vh] xl:max-h-none flex flex-col transition-all relative animate-in slide-in-from-right duration-300 shadow-[0_0_50px_rgba(0,0,0,0.2)] dark:shadow-[0_0_50px_rgba(255,255,255,0.1)] z-30 brutalist-shadow-active dark:shadow-[8px_8px_0_0_white]">
             <div class="flex justify-between items-center mb-6 border-b-4 border-black dark:border-concrete-100 pb-2">
                 <h3 class="text-lg font-black text-black dark:text-white uppercase tracking-wider font-arvo">
                     PROTOCOL_DETAILS
@@ -287,3 +287,7 @@ export class YearlyViewComponent implements OnInit {
       });
   }
 }
+
+
+
+

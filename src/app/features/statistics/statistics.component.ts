@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+﻿import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HabitService } from '../../services/habit.service';
 import { CommonModule } from '@angular/common';
@@ -8,20 +8,20 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     imports: [CommonModule, RouterLink],
     template: `
-    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope pb-24 transition-colors duration-300">
+    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope pb-24 transition-colors duration-300 overflow-x-hidden">
         <!-- Header -->
-        <header class="mb-12 border-b-4 border-black dark:border-concrete-100 pb-6 flex flex-col md:flex-row items-end justify-between gap-6">
+        <header class="mb-10 md:mb-12 border-b-4 border-black dark:border-concrete-100 pb-6 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 md:gap-6">
             <div>
                 <div class="bg-black dark:bg-concrete-100 text-white dark:text-black px-2 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
                     System_Analytica // V.2.0
                 </div>
-                <h1 class="text-5xl md:text-7xl font-black text-black dark:text-white uppercase leading-none font-arvo">
+                <h1 class="text-3xl sm:text-4xl md:text-7xl font-black text-black dark:text-white uppercase leading-none font-arvo">
                     Global_Metrics
                 </h1>
             </div>
             
-            <div class="flex flex-col items-end gap-4">
-                <a routerLink="/add" class="group relative flex items-center gap-3 px-8 py-4 bg-electric-red text-white font-black uppercase tracking-[0.2em] text-sm rigid-border border-[4px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+            <div class="flex w-full md:w-auto flex-col items-start md:items-end gap-4">
+                <a routerLink="/add" class="group relative flex w-full sm:w-auto items-center justify-center gap-3 px-5 sm:px-8 py-3 sm:py-4 bg-electric-red text-white font-black uppercase tracking-[0.16em] sm:tracking-[0.2em] text-xs sm:text-sm rigid-border border-[4px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
                     <span class="material-symbols-outlined text-2xl">add_box</span>
                     <span>Initialize_Protocol</span>
                 </a>
@@ -41,7 +41,7 @@ import { CommonModule } from '@angular/common';
                 </div>
                 <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 mb-4 border-b-2 border-black dark:border-concrete-100 pb-1">System_Efficiency</p>
                 <div class="flex items-baseline gap-2 mb-4 relative z-10">
-                    <span class="text-7xl font-black font-arvo leading-none dark:text-white">{{ globalEfficiency() }}%</span>
+                    <span class="text-5xl sm:text-6xl md:text-7xl font-black font-arvo leading-none dark:text-white">{{ globalEfficiency() }}%</span>
                     <span class="text-xs font-bold text-electric-red uppercase">NOMINAL</span>
                 </div>
                 <div class="w-full h-4 bg-concrete-100 dark:bg-concrete-600 border-2 border-black dark:border-concrete-100">
@@ -56,7 +56,7 @@ import { CommonModule } from '@angular/common';
                 </div>
                 <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-4 border-b border-concrete-400 dark:border-concrete-500 pb-1">Total_Completions</p>
                 <div class="flex items-baseline gap-2 mb-4 relative z-10">
-                    <span class="text-7xl font-black font-arvo leading-none text-yellow-400 dark:text-white">{{ totalCompletions() }}</span>
+                    <span class="text-5xl sm:text-6xl md:text-7xl font-black font-arvo leading-none text-yellow-400 dark:text-white">{{ totalCompletions() }}</span>
                     <span class="text-xs font-bold uppercase">Ops</span>
                 </div>
                  <p class="text-xs font-mono text-concrete-300 relative z-10">
@@ -192,4 +192,11 @@ export class StatisticsComponent {
         return habits.reduce((prev, current) => ((prev.streak || 0) > (current.streak || 0)) ? prev : current);
     });
 }
+
+
+
+
+
+
+
 

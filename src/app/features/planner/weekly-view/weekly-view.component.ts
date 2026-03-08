@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+﻿import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop';
@@ -28,15 +28,15 @@ interface WeekDay {
   standalone: true,
   imports: [CommonModule, FormsModule, DragDropModule],
   template: `
-    <div class="h-full flex flex-col font-manrope p-4 gap-6 bg-concrete-50 dark:bg-concrete-900 transition-colors duration-300">
+    <div class="h-full flex flex-col font-manrope p-3 sm:p-4 gap-5 sm:gap-6 bg-concrete-50 dark:bg-concrete-900 transition-colors duration-300 overflow-x-hidden">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="flex items-center gap-4">
+        <div class="flex w-full md:w-auto items-center gap-2 sm:gap-4">
           <div class="flex items-center gap-2">
             <button (click)="changeWeek(-1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-concrete-100 dark:hover:text-black transition-all rigid-border-sm border-[2px] bg-white dark:bg-black dark:text-white dark:border-concrete-100">
               <span class="material-symbols-outlined">chevron_left</span>
             </button>
-            <h2 class="text-2xl font-black text-black dark:text-white uppercase font-arvo min-w-[250px] text-center">
+            <h2 class="text-base sm:text-xl md:text-2xl font-black text-black dark:text-white uppercase font-arvo text-center">
               {{ weekDateRange() }}
             </h2>
             <button (click)="changeWeek(1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-concrete-100 dark:hover:text-black transition-all rigid-border-sm border-[2px] bg-white dark:bg-black dark:text-white dark:border-concrete-100">
@@ -46,13 +46,13 @@ interface WeekDay {
         </div>
         
         <div class="flex items-center gap-3">
-          <button (click)="carryForwardTasks()" class="px-6 py-3 bg-blue-600 text-white rigid-border-sm border-[2px] font-black uppercase text-xs hover:bg-blue-700 hover:-translate-y-1 transition-all brutalist-shadow-sm">
+          <button (click)="carryForwardTasks()" class="w-full md:w-auto px-4 sm:px-6 py-3 bg-blue-600 text-white rigid-border-sm border-[2px] font-black uppercase text-[10px] sm:text-xs hover:bg-blue-700 hover:-translate-y-1 transition-all brutalist-shadow-sm">
             Carry Forward Incomplete Tasks
           </button>
         </div>
       </div>
 
-      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-8 overflow-hidden">
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-5 sm:gap-8 overflow-hidden">
         <!-- Left Panel: Targets & Metrics -->
         <div class="lg:col-span-1 flex flex-col gap-8 overflow-y-auto custom-scrollbar pr-2">
           <!-- Weekly Targets -->
@@ -196,7 +196,7 @@ interface WeekDay {
                          <span class="text-[10px] font-mono font-bold flex items-center gap-1 mt-1"
                                [style.color]="stask.color || '#7c3aed'">
                            <span class="material-symbols-outlined text-[12px]">schedule</span>
-                           {{ stask.timeBlockStart }}{{ stask.timeBlockEnd ? ' – ' + stask.timeBlockEnd : '' }}
+                           {{ stask.timeBlockStart }}{{ stask.timeBlockEnd ? ' â€“ ' + stask.timeBlockEnd : '' }}
                            @if(stask.durationMinutes) { <span class="text-concrete-400">({{ stask.durationMinutes }}min)</span> }
                          </span>
                        }
@@ -642,3 +642,8 @@ export class WeeklyViewComponent implements OnInit {
     return total === 0 ? 0 : (this.tasksCompleted() / total) * 100;
   });
 }
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, NgZone, computed, OnDestroy, ViewChild } from '@angular/core';
+﻿import { Component, signal, inject, OnInit, NgZone, computed, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTimepickerModule } from '@angular/material/timepicker';
@@ -37,7 +37,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
     FullCalendarModule
   ],
   template: `
-    <div class="h-full flex flex-col font-manrope text-black dark:text-white">
+    <div class="h-full min-h-0 flex flex-col font-manrope text-black dark:text-white overflow-x-hidden">
       <!-- Header Section -->
       <div class="flex flex-col gap-4 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -92,11 +92,11 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
              </div>
 
             <button (click)="openNewTaskForm()" 
-                    class="ml-auto md:ml-0 px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
+                    class="w-full sm:w-auto ml-0 md:ml-0 px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center justify-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
               <span class="material-symbols-outlined text-lg">add</span>
               New Task
             </button>
-            <div class="flex bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 p-1 ml-2 overflow-x-auto max-w-[400px] no-scrollbar shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white]">
+            <div class="flex w-full sm:w-auto bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 p-1 ml-0 sm:ml-2 overflow-x-auto max-w-full sm:max-w-[400px] no-scrollbar shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white]">
                 <button (click)="changeView('timeGridDay')" 
                         [class.active]="currentView() === 'timeGridDay'" 
                         class="view-switcher-btn px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black whitespace-nowrap">Day</button>
@@ -134,12 +134,12 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
         }
       </div>
 
-      <div class="flex flex-1 overflow-hidden gap-6 pb-4 relative">
+      <div class="flex flex-1 flex-col lg:flex-row overflow-hidden gap-4 lg:gap-6 pb-4 relative">
         <!-- Timeline Context -->
         <div class="flex-1 overflow-y-auto bg-concrete-100 dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 custom-scrollbar relative flex flex-col">
           <div class="flex justify-between items-center px-6 py-4 border-b-2 border-black dark:border-concrete-500 bg-white dark:bg-concrete-800 z-30">
                <h3 class="text-xs font-black text-black dark:text-white uppercase tracking-[0.2em]">Timeline</h3>
-               <span class="text-[9px] uppercase font-bold tracking-widest text-concrete-400 border border-concrete-300 dark:border-concrete-500 px-2 py-1 bg-concrete-100 dark:bg-concrete-700">Click to Select | Drag to Move | Resize to Adjust</span>
+               <span class="hidden sm:inline-flex text-[9px] uppercase font-bold tracking-widest text-concrete-400 border border-concrete-300 dark:border-concrete-500 px-2 py-1 bg-concrete-100 dark:bg-concrete-700">Click to Select | Drag to Move | Resize to Adjust</span>
           </div>
           
           <div class="flex-1 bg-white dark:bg-concrete-900 p-2 overflow-auto">
@@ -149,7 +149,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
 
         <!-- Add/Edit Side Panel -->
         @if (showAddForm()) {
-          <div class="w-96 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-500 p-6 flex flex-col brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] relative h-full">
+          <div class="w-full lg:w-96 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-500 p-4 sm:p-6 flex flex-col brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] relative h-auto lg:h-full max-h-[75vh] lg:max-h-none">
             <div class="flex justify-between items-center mb-6 border-b-4 border-black dark:border-concrete-500 pb-4">
               <h3 class="text-lg font-black text-black dark:text-white uppercase font-arvo">
                  {{ newTask.id ? 'Edit Task' : 'New Task' }}
@@ -196,7 +196,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
               </div>
 
               <!-- Color Tag and Reminder -->
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Color Tag</label>
                   <input type="color" [(ngModel)]="newTask.colorTag" (ngModelChange)="onFormChange()" class="w-full h-12 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 outline-none">
@@ -211,7 +211,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
               </div>
 
               <!-- Time Selection -->
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                   <label class="text-[10px] font-black text-concrete-900 dark:text-white uppercase tracking-widest">Start Time</label>
                   <div class="relative">
@@ -485,7 +485,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
       .filter(h => h.timeBlockStart && h.timeBlockEnd)
       .map(h => ({
         id: `habit-${h.id}`,
-        title: `⚡ ${h.name}`,
+        title: `âš¡ ${h.name}`,
         startTime: h.timeBlockStart,
         endTime: h.timeBlockEnd,
         display: 'background',
@@ -552,12 +552,12 @@ export class DailyViewComponent implements OnInit, OnDestroy {
             <div class="h-full flex flex-col justify-between p-1 overflow-hidden" style="border-left: 3px solid ${color}">
               <div>
                 <div class="text-[9px] font-black uppercase tracking-tight mb-0.5" style="color:${color}">
-                  📖 ${t.habitName || t.systemTitle || ''}
+                  ðŸ“– ${t.habitName || t.systemTitle || ''}
                 </div>
                 ${t.weekFocus ? `<div class="text-[8px] opacity-60 uppercase mb-0.5">${t.weekFocus}</div>` : ''}
                 <span class="text-[10px] font-black uppercase tracking-tight truncate ${t.completed ? 'line-through opacity-50' : ''}">${t.title}</span>
               </div>
-              <div class="text-[8px] font-mono opacity-60">${t.timeBlockStart} – ${t.timeBlockEnd}${t.durationMinutes ? ' (' + t.durationMinutes + 'min)' : ''}</div>
+              <div class="text-[8px] font-mono opacity-60">${t.timeBlockStart} â€“ ${t.timeBlockEnd}${t.durationMinutes ? ' (' + t.durationMinutes + 'min)' : ''}</div>
             </div>
           `
         };
@@ -721,7 +721,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ─── Task CRUD ───────────────────────────────────────────
+  // â”€â”€â”€ Task CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   saveTask() {
     if (!this.newTask.title?.trim()) return;
@@ -773,7 +773,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ─── Form Management ────────────────────────────────────
+  // â”€â”€â”€ Form Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   openNewTaskForm() {
     this.newTask = this.getDefaultTask();
@@ -847,7 +847,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     this.newTask.end_time = this.dateToTimeString(date);
   }
 
-  // ─── Timeline Helpers ───────────────────────────────────
+  // â”€â”€â”€ Timeline Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   getGoalTitle(goalId: string): string {
     const goal = this.goals().find(g => g.id === goalId);
@@ -894,7 +894,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     return isDark ? '#d4d4d4' : '#ffffff'; // neutral-300
   }
 
-  // ─── Date Navigation ────────────────────────────────────
+  // â”€â”€â”€ Date Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   changeDate(days: number) {
     const date = new Date(this.selectedDate);
@@ -938,7 +938,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     this.showAddForm.set(true);
   }
 
-  // ─── Resize Logic ───────────────────────────────────────
+  // â”€â”€â”€ Resize Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private handleEventDrop(arg: any) {
     const task = arg.event.extendedProps['task'] as PlannerTask;
@@ -983,7 +983,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
   private cleanupResizeListeners() {}
   private cleanupDragListeners() {}
 
-  // ─── Overlap Detection ──────────────────────────────────
+  // â”€â”€â”€ Overlap Detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private checkOverlap(tasks: PlannerTask[]) {
     let overlapFound = false;
@@ -1009,7 +1009,7 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     this.hasOverlap.set(overlapFound);
   }
 
-  // ─── Time Utilities ─────────────────────────────────────
+  // â”€â”€â”€ Time Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private timeStringToDate(timeStr: string): Date {
     const [h, m] = timeStr.split(':').map(Number);
@@ -1039,3 +1039,10 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     return `${hour12}:${m} ${ampm}`;
   }
 }
+
+
+
+
+
+
+

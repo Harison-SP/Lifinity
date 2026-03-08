@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+﻿import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { YearlyViewComponent } from './yearly-view/yearly-view.component';
@@ -10,9 +10,9 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
   selector: 'app-planner',
   imports: [CommonModule, YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent],
   template: `
-    <div class="h-full overflow-y-auto relative z-10 bg-concrete-200 dark:bg-concrete-900 min-h-screen font-manrope footer-pb transition-colors duration-300">
+    <div class="h-full overflow-y-auto overflow-x-hidden relative z-10 bg-concrete-200 dark:bg-concrete-900 min-h-screen font-manrope footer-pb transition-colors duration-300">
         
-        <div class="p-6 lg:p-10 max-w-[1600px] mx-auto relative z-10">
+        <div class="px-3 py-4 sm:p-6 lg:p-10 max-w-[1600px] mx-auto relative z-10">
           <!-- Header -->
           <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b-4 border-black dark:border-white pb-6">
             <div class="flex items-center gap-4">
@@ -30,11 +30,11 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
             </div>
 
             <!-- Period Tabs -->
-            <div class="flex p-1 gap-2">
+            <div class="flex w-full md:w-auto overflow-x-auto p-1 gap-2 no-scrollbar">
               @for (period of periods; track period.value) {
                 <button 
                   (click)="activePeriod.set(period.value)"
-                  class="px-4 py-2 text-xs font-black uppercase tracking-widest transition-all rigid-border-sm border-[2px] flex items-center gap-2"
+                  class="shrink-0 px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all rigid-border-sm border-[2px] flex items-center gap-2"
                   [class.bg-black]="activePeriod() === period.value"
                   [class.dark:bg-white]="activePeriod() === period.value"
                   [class.text-white]="activePeriod() === period.value"
@@ -55,7 +55,7 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
           </header>
 
           <!-- Content Area -->
-          <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-white p-6 min-h-[600px] relative brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
+          <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-white p-3 sm:p-4 md:p-6 min-h-[520px] md:min-h-[600px] relative brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] overflow-hidden">
             @if (activePeriod() === 'yearly') {
               <app-yearly-view></app-yearly-view>
             } @else if (activePeriod() === 'monthly') {
@@ -99,3 +99,8 @@ export class PlannerComponent implements OnInit {
     this.location.back();
   }
 }
+
+
+
+
+

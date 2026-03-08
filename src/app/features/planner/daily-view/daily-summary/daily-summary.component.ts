@@ -1,4 +1,4 @@
-import { Component, Input, computed, signal } from '@angular/core';
+﻿import { Component, Input, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlannerTask, DailySummary, PlannerService } from '../../../../services/planner.service';
@@ -11,7 +11,7 @@ import { PlannerTask, DailySummary, PlannerService } from '../../../../services/
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h2 class="text-xl font-bold mb-4">Daily Summary</h2>
       
-      <div class="grid grid-cols-3 gap-4 mb-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <div>
           <h3 class="text-sm font-bold text-gray-500">Planned Hours</h3>
           <p class="text-2xl font-bold">{{ plannedHours() | number:'1.0-1' }}h</p>
@@ -126,3 +126,4 @@ export class DailySummaryComponent {
     this.plannerService.saveSummary(this.summary).subscribe();
   }
 }
+

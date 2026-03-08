@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,10 +11,10 @@ import { SystemInstanceTask } from '../../models/system.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-   <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope pb-24 relative transition-colors duration-300">
+   <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope pb-24 relative transition-colors duration-300 overflow-x-hidden">
         <!-- Header -->
-        <header class="mb-12 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-black dark:border-concrete-100 pb-6 bg-white dark:bg-concrete-800 p-6 rigid-border-sm brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-            <div class="flex items-center gap-6 w-full md:w-auto">
+        <header class="mb-10 md:mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 border-b-4 border-black dark:border-concrete-100 pb-6 bg-white dark:bg-concrete-800 p-4 sm:p-6 rigid-border-sm brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
+            <div class="flex items-start sm:items-center gap-3 sm:gap-6 w-full md:w-auto">
                 <button (click)="goBack()" class="w-12 h-12 rigid-border-sm bg-white dark:bg-concrete-900 flex items-center justify-center hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors group shrink-0 border-2 border-transparent dark:border-concrete-500">
                     <span class="material-symbols-outlined text-2xl dark:text-white dark:group-hover:text-black">arrow_back</span>
                 </button>
@@ -70,7 +70,7 @@ import { SystemInstanceTask } from '../../models/system.model';
                         <span class="text-[10px] font-black text-electric-red uppercase border border-electric-red px-1" title="If you struggle to start, just do it for 2 minutes.">2-Min_Rule</span>
                     </div>
                     <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10 justify-between">
-                        <div class="text-6xl font-black font-mono tracking-tighter" [class.text-electric-red]="timerRunning()">
+                        <div class="text-5xl sm:text-6xl font-black font-mono tracking-tighter" [class.text-electric-red]="timerRunning()">
                             {{ formattedTimer() }}
                         </div>
                         <div class="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
@@ -124,8 +124,8 @@ import { SystemInstanceTask } from '../../models/system.model';
                     @if (todaySystemTask()?.description) {
                         <p class="font-mono text-xs italic opacity-90 mb-4 bg-black/20 p-2">{{ todaySystemTask()?.description }}</p>
                     }
-                    <div class="flex items-center justify-between mt-4">
-                        <div class="flex items-center gap-4">
+                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
                             @if (todaySystemTask()?.timeBlockStart) {
                                 <span class="text-xs font-black bg-black px-2 py-1 text-white uppercase">{{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}</span>
                             }
@@ -133,7 +133,7 @@ import { SystemInstanceTask } from '../../models/system.model';
                                 <a [href]="todaySystemTask()?.resourceLink" target="_blank" class="text-xs font-black underline hover:text-black transition-colors uppercase">View_Resource</a>
                             }
                         </div>
-                        <button (click)="toggleMission(todaySystemTask()!)" class="px-4 py-2 text-xs font-black bg-white text-black border-2 border-transparent hover:bg-black hover:text-white transition-colors uppercase">
+                        <button (click)="toggleMission(todaySystemTask()!)" class="w-full sm:w-auto px-4 py-2 text-xs font-black bg-white text-black border-2 border-transparent hover:bg-black hover:text-white transition-colors uppercase">
                             {{ todaySystemTask()?.completed ? 'MARK_INCOMPLETE' : 'MARK_COMPLETE' }}
                         </button>
                     </div>
@@ -543,3 +543,10 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         }
     }
 }
+
+
+
+
+
+
+

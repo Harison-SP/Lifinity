@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed, signal, effect } from '@angular/core';
+﻿import { Component, ChangeDetectionStrategy, inject, computed, signal, effect } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { SystemService } from '../../services/system.service';
     selector: 'app-dashboard',
     imports: [RouterLink, CommonModule, FormsModule],
     template: `
-    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope transition-colors duration-300">
+    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope transition-colors duration-300 overflow-x-hidden">
         <!-- Dashboard Header -->
         <header class="flex flex-col md:flex-row items-start justify-between gap-4 mb-8">
             <div class="space-y-1">
@@ -64,9 +64,9 @@ import { SystemService } from '../../services/system.service';
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Active Protocols List -->
             <section class="lg:col-span-8">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div class="flex items-baseline gap-3">
-                        <h2 class="text-3xl font-black text-concrete-900 dark:text-white uppercase font-arvo">Active_Protocols</h2>
+                        <h2 class="text-2xl md:text-3xl font-black text-concrete-900 dark:text-white uppercase font-arvo">Active_Protocols</h2>
                         <span class="text-lg font-bold text-concrete-400">[{{ remainingHabits() }}]</span>
                     </div>
                     <a routerLink="/planner" class="text-xs font-black uppercase tracking-widest border-2 border-concrete-900 dark:border-concrete-100 px-3 py-1 hover:bg-concrete-900 dark:hover:bg-concrete-100 hover:text-white dark:hover:text-black transition-colors cursor-pointer dark:text-white">
@@ -309,3 +309,6 @@ export class DashboardComponent {
         this.router.navigate(['/details', id]);
     }
 }
+
+
+

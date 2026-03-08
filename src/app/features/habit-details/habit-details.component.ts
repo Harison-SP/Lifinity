@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
+﻿import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,10 +12,10 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
     standalone: true,
     imports: [CommonModule, FormsModule, HabitAnalyticsComponent, NgxChartsModule, RouterLink],
     template: `
-    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 p-6 md:p-8 lg:p-12 font-manrope pb-24 relative transition-colors duration-300">
+    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope pb-24 relative transition-colors duration-300 overflow-x-hidden">
         <!-- Header -->
-        <header class="mb-12 flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-black dark:border-concrete-100 pb-6 bg-white dark:bg-concrete-800 p-6 rigid-border-sm brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-            <div class="flex items-center gap-6 w-full md:w-auto">
+        <header class="mb-10 md:mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 border-b-4 border-black dark:border-concrete-100 pb-6 bg-white dark:bg-concrete-800 p-4 sm:p-6 rigid-border-sm brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
+            <div class="flex items-start sm:items-center gap-3 sm:gap-6 w-full md:w-auto">
                 <button (click)="goBack()" class="w-12 h-12 rigid-border-sm bg-white dark:bg-concrete-900 flex items-center justify-center hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors group shrink-0 border-2 border-transparent dark:border-concrete-500">
                     <span class="material-symbols-outlined text-2xl dark:text-white dark:group-hover:text-black">arrow_back</span>
                 </button>
@@ -29,7 +29,7 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-start md:justify-end">
                 <a routerLink="/add" class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] dark:border-concrete-100 text-xs font-black uppercase tracking-widest hover:bg-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-base">add_box</span>
                     Initialize_Protocol
@@ -56,7 +56,7 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 
         @if (habit()) {
             <!-- Protocol Details Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <!-- System Type -->
                 <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
                     <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">System_Type</p>
@@ -740,3 +740,8 @@ export class HabitDetailsComponent implements OnInit {
 
 
 }
+
+
+
+
+

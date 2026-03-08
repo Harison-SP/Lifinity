@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy, computed, Injector, effect } from '@angular/core';
+﻿import { Component, signal, inject, OnInit, OnDestroy, computed, Injector, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,10 +21,10 @@ interface MonthlyHabit {
   standalone: true,
   imports: [CommonModule, FormsModule, MultiSelectChipsComponent, AngularTiptapEditorComponent],
   template: `
-    <div class="h-full flex flex-col font-manrope p-4 gap-6">
+    <div class="h-full flex flex-col font-manrope p-3 sm:p-4 gap-5 sm:gap-6 overflow-x-hidden">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button (click)="changeMonth(-1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors rigid-border-sm border-[2px] dark:border-concrete-100 dark:text-white">
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
@@ -65,12 +65,12 @@ interface MonthlyHabit {
                         class="w-full h-full text-lg hover:bg-concrete-200 dark:hover:bg-concrete-700 transition-colors py-1"
                         [class.cursor-not-allowed]="isFutureDay(day)"
                         [disabled]="isFutureDay(day)">
-                  @if(habit.completions[day] === true) { <span class="text-green-500">✔</span> }
-                  @else if(habit.completions[day] === false) { <span class="text-red-500">✘</span> }
+                  @if(habit.completions[day] === true) { <span class="text-green-500">âœ”</span> }
+                  @else if(habit.completions[day] === false) { <span class="text-red-500">âœ˜</span> }
                   @else if(habit.type === 'measurable' && isNumber(habit.completions[day])) { 
                     <span class="text-blue-500 text-[10px] font-bold">{{ habit.completions[day] }}</span> 
                   }
-                  @else { <span class="text-concrete-300">·</span> }
+                  @else { <span class="text-concrete-300">Â·</span> }
                 </button>
               </div>
             }
@@ -92,17 +92,17 @@ interface MonthlyHabit {
              [class.w-full]="isFullScreen()"
              [class.rounded-none]="isFullScreen()">
           <!-- Note Panel Header -->
-          <div class="flex items-center justify-between bg-black text-white px-6 py-3">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-black text-white px-4 sm:px-6 py-3">
             <div class="flex items-center gap-3">
               <span class="material-symbols-outlined text-xl">edit_note</span>
               <h3 class="text-lg font-black uppercase font-arvo tracking-wider">
-                {{ selectedHabitName() }} — Notes
+                {{ selectedHabitName() }} â€” Notes
               </h3>
               <span class="text-xs bg-white text-black px-2 py-0.5 font-bold">
                 {{ habitNotes().length }} {{ habitNotes().length === 1 ? 'NOTE' : 'NOTES' }}
               </span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <button (click)="createNewNote()" 
                       class="flex items-center gap-1 px-3 py-1 bg-white text-black font-bold text-xs uppercase hover:bg-concrete-100 transition-colors rigid-border-sm border-white">
                 <span class="material-symbols-outlined text-sm">add</span>
@@ -140,9 +140,9 @@ interface MonthlyHabit {
             </div>
           </div>
 
-          <div class="flex min-h-[500px] max-h-[700px]">
+          <div class="flex flex-col md:flex-row min-h-[420px] md:min-h-[500px] max-h-[80vh] md:max-h-[700px]">
             <!-- Notes Sidebar -->
-            <div class="w-[260px] border-r-4 border-black bg-concrete-100 overflow-y-auto custom-scrollbar flex-shrink-0">
+            <div class="w-full md:w-[260px] max-h-[220px] md:max-h-none border-b-4 md:border-b-0 md:border-r-4 border-black bg-concrete-100 overflow-y-auto custom-scrollbar flex-shrink-0">
               @if(habitNotes().length === 0) {
                 <div class="p-6 text-center">
                   <span class="material-symbols-outlined text-4xl text-concrete-300 mb-2 block">note_add</span>
@@ -190,7 +190,7 @@ interface MonthlyHabit {
             <div class="flex-1 flex flex-col overflow-hidden">
               @if(activeNoteId()) {
                 <!-- Note Title -->
-                <div class="flex items-center gap-2 px-6 py-3 border-b-2 border-black/10 bg-white">
+                <div class="flex flex-wrap items-center gap-2 px-4 sm:px-6 py-3 border-b-2 border-black/10 bg-white">
                   <input type="text"
                          [ngModel]="activeNoteTitle()"
                          (ngModelChange)="updateNoteTitle($event)"
@@ -212,7 +212,7 @@ interface MonthlyHabit {
                 </div>
 
                 <!-- Tags -->
-                <div class="flex items-center gap-2 px-6 py-2 border-b border-black/5 bg-concrete-100/50">
+                <div class="flex flex-wrap items-center gap-2 px-4 sm:px-6 py-2 border-b border-black/5 bg-concrete-100/50">
                   <span class="material-symbols-outlined text-sm text-concrete-400">sell</span>
                   <input type="text"
                          [ngModel]="tagInput()"
@@ -223,7 +223,7 @@ interface MonthlyHabit {
                   @for(tag of activeNote()?.tags || []; track tag) {
                     <span class="inline-flex items-center gap-0.5 text-[10px] px-2 py-0.5 bg-black text-white font-bold uppercase group">
                       {{ tag }}
-                      <button (click)="removeTag(tag)" class="opacity-50 hover:opacity-100 ml-0.5">×</button>
+                      <button (click)="removeTag(tag)" class="opacity-50 hover:opacity-100 ml-0.5">Ã—</button>
                     </span>
                   }
                 </div>
@@ -239,7 +239,7 @@ interface MonthlyHabit {
                 </div>
 
                 <!-- Status Bar -->
-                <div class="flex items-center justify-between px-6 py-1.5 border-t-2 border-black/10 bg-concrete-100 text-[10px] font-mono text-concrete-400 uppercase">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 px-4 sm:px-6 py-1.5 border-t-2 border-black/10 bg-concrete-100 text-[10px] font-mono text-concrete-400 uppercase">
                   <span>{{ savingStatus() }}</span>
                   <span>Last saved: {{ formatDate(activeNote()?.updated_at) }}</span>
                 </div>
@@ -249,7 +249,7 @@ interface MonthlyHabit {
                     <span class="material-symbols-outlined text-6xl text-concrete-200 mb-3 block">description</span>
                     <p class="text-sm font-bold text-concrete-400 uppercase">Select a note or create a new one</p>
                     <p class="text-xs text-concrete-300 mt-1 max-w-[300px]">
-                      Use the rich editor to write detailed notes about your habits — track progress, insights, and ideas.
+                      Use the rich editor to write detailed notes about your habits â€” track progress, insights, and ideas.
                     </p>
                   </div>
                 </div>
@@ -652,7 +652,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
           this.habitNotes.update(notes =>
             notes.map(n => n.id === id ? { ...n, updated_at: updated.updated_at, title: currentTitle, content: currentContent } : n)
           );
-          this.savingStatus.set('SAVED ✓');
+          this.savingStatus.set('SAVED âœ“');
           setTimeout(() => this.savingStatus.set('READY'), 2000);
         },
         error: (err) => console.error('Failed to save note immediately', err)
@@ -745,7 +745,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
     return this.habitNotes().find(n => n.id === id) || null;
   });
 
-  // Editor config — Obsidian-like setup
+  // Editor config â€” Obsidian-like setup
   editorConfig = {
     placeholder: 'Start writing your note... Type / for slash commands',
     showFooter: true,
@@ -1239,7 +1239,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
       content: this.activeNoteContent()
     }).subscribe({
       next: (updated) => {
-        this.savingStatus.set('SAVED ✓');
+        this.savingStatus.set('SAVED âœ“');
         this.habitNotes.update(notes =>
           notes.map(n => n.id === noteId ? { ...n, updated_at: updated.updated_at } : n)
         );
@@ -1247,7 +1247,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to save note', err);
-        this.savingStatus.set('SAVE FAILED ✘');
+        this.savingStatus.set('SAVE FAILED âœ˜');
         setTimeout(() => this.savingStatus.set('READY'), 3000);
       }
     });
@@ -1352,3 +1352,11 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
     return tmp.textContent || tmp.innerText || '';
   }
 }
+
+
+
+
+
+
+
+

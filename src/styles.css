@@ -1,4 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+﻿/* You can add global styles to this file, and also import other style files */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 @import 'tailwindcss';
@@ -59,12 +59,27 @@
         pointer-events: none;
     }
     
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
     @keyframes scan {
         0% { top: 0; } 100% { top: 100%; }
     }
 }
 
 @layer base {
+  html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+  }
+
   body { 
       font-family: 'Manrope', sans-serif; 
       @apply bg-concrete-100 text-black dark:bg-concrete-900 dark:text-concrete-100;
@@ -92,3 +107,5 @@
 .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
     background-color: #e5e5e5 !important;
 }
+
+
