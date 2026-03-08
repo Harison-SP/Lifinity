@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime, timedelta
 from bson import ObjectId
+from pydantic import ValidationError
 from app.models import (
     LearningSystem, LearningSystemCreate, LearningSystemUpdate,
     SystemInstantiate
@@ -115,6 +116,7 @@ async def get_system(system_id: str):
     if not system:
         raise HTTPException(status_code=404, detail="System not found")
     return system_helper(system)
+
 
 
 @router.post("", response_model=LearningSystem)

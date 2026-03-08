@@ -397,6 +397,12 @@ class LearningSystem(LearningSystemCreate):
     class Config:
         from_attributes = True
 
+class SystemGenerateRequest(BaseModel):
+    """Payload to request AI generation of a learning system."""
+    topic: str
+    description: Optional[str] = None
+    duration_weeks: int = Field(default=4, ge=1, le=12)
+
 class SystemInstantiate(BaseModel):
     """Payload to apply / instantiate a learning system into the habit planner."""
     system_id: str

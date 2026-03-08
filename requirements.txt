@@ -4,3 +4,5 @@ pymongo
 pydantic
 python-dotenv
 python-multipart
+groq
+google-genai
