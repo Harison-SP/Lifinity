@@ -3,6 +3,7 @@ import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
+import { SystemService } from '../../services/system.service';
 
 @Component({
     selector: 'app-dashboard',
@@ -98,17 +99,32 @@ import { HabitService } from '../../services/habit.service';
                             
                             <div class="flex-1">
                                 <h3 class="text-xl font-black text-concrete-900 dark:text-white uppercase transition-all"
-                                    [class.line-through]="habit.completedToday">{{ habit.name }}</h3>
-                                <span class="text-[9px] font-bold px-2 py-0.5 uppercase border border-concrete-900 dark:border-concrete-100"
-                                      [class.bg-concrete-200]="habit.completedToday"
-                                      [class.dark:bg-concrete-800]="habit.completedToday"
-                                      [class.bg-concrete-900]="!habit.completedToday"
-                                      [class.dark:bg-concrete-100]="!habit.completedToday"
-                                      [class.text-white]="!habit.completedToday"
-                                      [class.dark:text-black]="!habit.completedToday"
-                                      [class.dark:text-concrete-300]="habit.completedToday">
-                                    {{ habit.category || 'GEN' }} // {{ habit.frequencyType || 'DAILY' }}
-                                </span>
+                                    [class.line-through]="habit.completedToday">
+                                    {{ habit.systemTaskTitle ? habit.systemTaskTitle + ' (' + habit.name + ')' : habit.name }}
+                                </h3>
+                                @if (habit.systemTitle) {
+                                    <p class="text-xs font-bold text-electric-red uppercase mb-0.5">{{ habit.systemTitle }}</p>
+                                }
+                                @if (habit.systemTaskDescription || habit.systemDescription) {
+                                    <p class="text-[10px] text-concrete-400 dark:text-concrete-300 mb-1 line-clamp-1">{{ habit.systemTaskDescription || habit.systemDescription }}</p>
+                                }
+                                @if (habit.systemTaskResourceLink) {
+                                    <a [href]="habit.systemTaskResourceLink" target="_blank" (click)="$event.stopPropagation()" class="text-[10px] text-blue-500 hover:text-blue-400 hover:underline mb-2 flex items-center gap-1 w-max">
+                                        <span class="material-symbols-outlined text-[12px]">link</span> Resource Link
+                                    </a>
+                                }
+                                <div class="mt-1">
+                                    <span class="text-[9px] font-bold px-2 py-0.5 uppercase border border-concrete-900 dark:border-concrete-100"
+                                          [class.bg-concrete-200]="habit.completedToday"
+                                          [class.dark:bg-concrete-800]="habit.completedToday"
+                                          [class.bg-concrete-900]="!habit.completedToday"
+                                          [class.dark:bg-concrete-100]="!habit.completedToday"
+                                          [class.text-white]="!habit.completedToday"
+                                          [class.dark:text-black]="!habit.completedToday"
+                                          [class.dark:text-concrete-300]="habit.completedToday">
+                                        {{ habit.category || 'GEN' }} // {{ habit.frequencyType || 'DAILY' }}
+                                    </span>
+                                </div>
                             </div>
                             
                             <div class="flex items-center gap-2">
@@ -148,7 +164,10 @@ import { HabitService } from '../../services/habit.service';
 })
 export class DashboardComponent {
     habitService = inject(HabitService);
+    systemService = inject(SystemService);
     router = inject(Router);
+
+    todaySystemTasks = signal<any[]>([]);
 
     // Motivational quotes array
     private motivationalQuotes = [
@@ -172,16 +191,21 @@ export class DashboardComponent {
     // Random quote signal
     currentQuote = signal<string>(this.getRandomQuote());
 
+    private getLocalDateString(): string {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     // Filter habits for today
     todaysHabits = computed(() => {
         const today = new Date();
         const currentDay = today.getDay(); // 0 = Sun, 1 = Mon...
         
-        // Use YYYY-MM-DD string comparison to avoid timezone issues
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        const todayStr = `${year}-${month}-${day}`;
+        const todayStr = this.getLocalDateString();
+        const systemTasks = this.todaySystemTasks();
 
         return this.habitService.habits().filter(h => {
             // Priority 1: If completed today, ALWAY show it (so users can see what they've done)
@@ -215,6 +239,18 @@ export class DashboardComponent {
             // For 'daily' or others with empty weekdays, we allow passing (default to show)
             
             return true;
+        }).map(h => {
+             // Find matching system task for today (if any)
+             const task = systemTasks.find(t => t.habitId === h.id);
+             if (task) {
+                 return {
+                     ...h,
+                     systemTaskTitle: task.title,
+                     systemTaskDescription: task.description,
+                     systemTaskResourceLink: task.resourceLink
+                 };
+             }
+             return h;
         });
     });
 
@@ -242,6 +278,11 @@ export class DashboardComponent {
         setInterval(() => {
             this.currentQuote.set(this.getRandomQuote());
         }, 30000);
+
+        // Fetch today's protocol tasks
+        this.systemService.getInstanceTasksByDate(this.getLocalDateString()).subscribe(tasks => {
+            this.todaySystemTasks.set(tasks);
+        });
     }
 
     private getRandomQuote(): string {

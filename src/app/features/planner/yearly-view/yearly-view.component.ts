@@ -24,6 +24,17 @@ import { CalendarEvent } from '../../../models/calendar-event.model';
               <span class="text-sm text-concrete-500 ml-2 tracking-widest font-mono font-bold">_CYCLE_OVERVIEW</span>
             </h2>
 
+             <!-- Year Progress -->
+             <div class="flex-1 w-full max-w-md mx-4 hidden md:flex flex-col gap-1">
+                 <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-concrete-600 dark:text-concrete-400 font-mono">
+                     <span>YEAR_PROGRESS</span>
+                     <span>{{ yearProgress() | number:'1.0-0' }}%</span>
+                 </div>
+                 <div class="w-full h-2 bg-concrete-200 dark:bg-concrete-800 rigid-border-sm border-[1px] overflow-hidden">
+                     <div class="h-full bg-electric-red border-r border-black dark:border-white transition-all duration-1000" [style.width.%]="yearProgress()"></div>
+                 </div>
+             </div>
+
              <!-- Filter Chips -->
              <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar-x w-full md:w-auto">
                  <span class="text-[10px] uppercase font-black text-concrete-900 dark:text-concrete-200 tracking-widest mr-2 whitespace-nowrap">Filter_Spectra:</span>
@@ -152,6 +163,18 @@ export class YearlyViewComponent implements OnInit {
   selectedColors = signal<Set<string>>(new Set());
   selectedGoal = signal<PlannerGoal | null>(null);
   isConfirmingDelete = signal(false);
+  
+  yearProgress = computed(() => {
+    const year = this.currentYear();
+    const now = new Date();
+    if (now.getFullYear() > year) return 100;
+    if (now.getFullYear() < year) return 0;
+
+    const start = new Date(year, 0, 1);
+    const end = new Date(year + 1, 0, 1);
+    const progress = ((now.getTime() - start.getTime()) / (end.getTime() - start.getTime())) * 100;
+    return Math.min(Math.max(progress, 0), 100);
+  });
   
   presetColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'];
 

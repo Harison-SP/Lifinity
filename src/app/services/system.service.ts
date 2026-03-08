@@ -27,6 +27,10 @@ export class SystemService {
     return this.http.post<LearningSystem>(this.apiUrl, system);
   }
 
+  generateSystem(topic: string, duration_weeks: number, description: string = ''): Observable<LearningSystem> {
+    return this.http.post<LearningSystem>(`${this.apiUrl}/generate`, { topic, duration_weeks, description });
+  }
+
   updateSystem(id: string, system: Partial<LearningSystem>): Observable<LearningSystem> {
     return this.http.put<LearningSystem>(`${this.apiUrl}/${id}`, system);
   }

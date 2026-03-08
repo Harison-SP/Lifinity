@@ -91,12 +91,6 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
                <span class="text-orange-500">{{ pendingCount() }} pending</span>
              </div>
 
-            <button (click)="showNotes.set(true)"
-                    class="ml-auto md:ml-0 px-4 py-2 bg-white text-black dark:text-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-500 font-black hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
-              <span class="material-symbols-outlined text-lg">description</span>
-              Notes
-            </button>
-
             <button (click)="openNewTaskForm()" 
                     class="ml-auto md:ml-0 px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
               <span class="material-symbols-outlined text-lg">add</span>
@@ -313,24 +307,6 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
           </div>
         }
 
-        <!-- Notes Side Panel -->
-        @if (showNotes()) {
-          <div class="w-96 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-500 p-6 flex flex-col brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] relative h-full">
-            <div class="flex justify-between items-center mb-6 border-b-4 border-black dark:border-concrete-500 pb-4">
-              <h3 class="text-lg font-black text-black dark:text-white uppercase font-arvo">
-                 Notes for {{selectedDate | date:'longDate'}}
-              </h3>
-              <button (click)="showNotes.set(false)" class="w-8 h-8 flex items-center justify-center hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors border-2 border-transparent hover:border-black dark:hover:border-white">
-                <span class="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div class="flex-1 overflow-y-auto space-y-4">
-                <p class="text-sm font-mono text-concrete-600 dark:text-concrete-400">These notes will be collated into the monthly view.</p>
-                <textarea placeholder="Type your notes for today..." rows="10"
-                          class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none transition-all resize-none placeholder:text-concrete-300 dark:placeholder:text-concrete-500"></textarea>
-            </div>
-          </div>
-        }
       </div>
     </div>
   `,
@@ -452,7 +428,6 @@ export class DailyViewComponent implements OnInit, OnDestroy {
   
   tasks = signal<PlannerTask[]>([]);
   showAddForm = signal(false);
-  showNotes = signal(false);
   hasOverlap = signal(false);
   goals = signal<PlannerGoal[]>([]);
   systemTasks = signal<SystemInstanceTask[]>([]);
@@ -803,14 +778,12 @@ export class DailyViewComponent implements OnInit, OnDestroy {
   openNewTaskForm() {
     this.newTask = this.getDefaultTask();
     this.syncDatesFromTask();
-    this.showNotes.set(false);
     this.showAddForm.set(true);
   }
 
   editTask(task: PlannerTask | Partial<PlannerTask>) {
     this.newTask = { ...task };
     this.syncDatesFromTask();
-    this.showNotes.set(false);
     this.showAddForm.set(true);
   }
 
@@ -962,7 +935,6 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     this.newTask.end_time = `${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     
     this.syncDatesFromTask();
-    this.showNotes.set(false);
     this.showAddForm.set(true);
   }
 
@@ -1005,7 +977,6 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     this.newTask.start_time = this.dateToTimeString(arg.start);
     this.newTask.end_time = this.dateToTimeString(arg.end);
     this.syncDatesFromTask();
-    this.showNotes.set(false);
     this.showAddForm.set(true);
   }
 

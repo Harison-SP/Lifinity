@@ -24,6 +24,11 @@ export interface Habit {
   parentId?: string;
   tier?: 'yearly' | 'monthly' | 'weekly' | 'daily';
   systemId?: string;
+  systemTitle?: string;
+  systemDescription?: string;
+  systemTaskTitle?: string;
+  systemTaskDescription?: string;
+  systemTaskResourceLink?: string;
 
   startDate?: string;
   endDate?: string;

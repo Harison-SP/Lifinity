@@ -1,14 +1,16 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Habit, HabitLog } from '../models/habit.model';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { tap, map, switchMap } from 'rxjs/operators';
+import { SystemService } from './system.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class HabitService {
     private http = inject(HttpClient);
+    private systemService = inject(SystemService);
     private apiUrl = 'http://127.0.0.1:8000/habits';
 
     private readonly _habits = signal<Habit[]>([]);
@@ -39,13 +41,31 @@ export class HabitService {
     }
 
     loadHabits() {
-        // Pass current date and timezone to get correct 'completedToday' status
         const params = new HttpParams()
             .set('date', this.getLocalDateString())
             .set('timezone_offset', this.getTimezoneOffset().toString());
 
-        this.http.get<Habit[]>(this.apiUrl, { params }).subscribe({
-            next: (habits) => this._habits.set(habits),
+        forkJoin({
+            habits: this.http.get<Habit[]>(this.apiUrl, { params }),
+            systems: this.systemService.getSystems()
+        }).subscribe({
+            next: ({ habits, systems }) => {
+                const systemMap = new Map(systems.map(s => [s.id, s]));
+                const enrichedHabits = habits.map(h => {
+                    if (h.systemId) {
+                        const system = systemMap.get(h.systemId);
+                        if (system) {
+                            return {
+                                ...h,
+                                systemTitle: system.title,
+                                systemDescription: system.description
+                            };
+                        }
+                    }
+                    return h;
+                });
+                this._habits.set(enrichedHabits);
+            },
             error: (error) => console.error('Failed to load habits', error)
         });
     }
@@ -112,7 +132,7 @@ export class HabitService {
         );
     }
 
-    updateLog(habitId: string, _date: string, data: { notes?: string; value?: number }): Observable<Habit | null> {
+    updateLog(habitId: string, _date: string, data: { notes?: string; value?: number; focused_minutes?: number }): Observable<Habit | null> {
          // Using the toggle endpoint for updates as it now supports idempotent updates with notes/value
          // Local day neutral timestamp: YYYY-MM-DDT12:00:00
          // This ensures that when subtracting/adding timezone_offset, we stay in the same local day.
@@ -121,7 +141,8 @@ export class HabitService {
              completed_at: new Date(timestamp).toISOString(), 
              timezone_offset: this.getTimezoneOffset(),
              value: data.value,
-             notes: data.notes
+             notes: data.notes,
+             focused_minutes: data.focused_minutes
          };
          
          return this.http.post<Habit>(`${this.apiUrl}/${habitId}/toggle`, payload).pipe(

@@ -307,17 +307,6 @@ interface MonthlyHabit {
           </div>
         </div>
 
-        <!-- Month Reflection -->
-        <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg">
-          <h3 class="text-lg font-black text-black uppercase font-arvo border-b-4 border-black pb-2 mb-4">Month Reflection</h3>
-          <div class="space-y-3">
-             <textarea [ngModel]="reflection().targeted_goals" (ngModelChange)="onReflectionFieldChange('targeted_goals', $event)" placeholder="Targeted Goals (Start of Month)" rows="2" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
-             <textarea [ngModel]="reflection().achieved_goals" (ngModelChange)="onReflectionFieldChange('achieved_goals', $event)" placeholder="Actually Achieved Goals" rows="2" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
-             <textarea [ngModel]="reflection().worked" (ngModelChange)="onReflectionFieldChange('worked', $event)" placeholder="What worked?" rows="2" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
-             <textarea [ngModel]="reflection().failed" (ngModelChange)="onReflectionFieldChange('failed', $event)" placeholder="What failed?" rows="2" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
-             <textarea [ngModel]="reflection().improve" (ngModelChange)="onReflectionFieldChange('improve', $event)" placeholder="What to improve next month?" rows="2" class="w-full px-3 py-2 bg-white rigid-border-sm border-[2px] focus:bg-concrete-100 text-black font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
-          </div>
-        </div>
       </div>
     </div>
   `,

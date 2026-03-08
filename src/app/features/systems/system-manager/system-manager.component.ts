@@ -62,6 +62,12 @@ interface PhaseNode {
             Paste CSV
           </button>
           
+          <button (click)="isGeneratingAI.set(true)" 
+                  class="px-4 py-2 bg-green-500 text-white rigid-border-sm border-[2px] font-black hover:bg-black transition-all shadow-[4px_4px_0_0_black] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
+            <span class="material-symbols-outlined text-sm">auto_awesome</span>
+            AI Generate
+          </button>
+          
           <button (click)="createNewSystem()" 
                   class="px-4 py-2 bg-black text-white dark:bg-white dark:text-black rigid-border-sm border-[2px] dark:border-concrete-100 font-black hover:bg-electric-red hover:text-white transition-all shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white] flex items-center gap-2 uppercase tracking-wider text-xs active:translate-y-1 active:shadow-none">
             <span class="material-symbols-outlined text-sm">add</span>
@@ -276,17 +282,31 @@ interface PhaseNode {
                                              </div>
 
                                              <!-- Tasks List -->
-                                             <div class="space-y-2 pl-4 border-l-2 border-concrete-200 dark:border-concrete-700">
+                                             <div class="space-y-3 pl-4 border-l-2 border-concrete-200 dark:border-concrete-700">
                                                  @for (item of week.items; track $index) {
-                                                      <div class="flex gap-2 items-center group">
-                                                          <span class="text-[10px] font-mono text-concrete-400 w-4">D{{item.day_number}}</span>
-                                                          <input type="number" [(ngModel)]="item.day_number" class="w-8 text-[10px] border border-concrete-200 text-center" />
-                                                          
-                                                          <input [(ngModel)]="item.title" placeholder="Task Title" class="flex-1 text-xs font-bold bg-transparent border-b border-transparent focus:border-concrete-300 outline-none" />
-                                                          
-                                                          <button (click)="removeTask(week, $index)" class="opacity-0 group-hover:opacity-100 text-concrete-300 hover:text-red-500">
-                                                              <span class="material-symbols-outlined text-[14px]">close</span>
-                                                          </button>
+                                                      <div class="flex flex-col gap-1 group border border-transparent hover:border-concrete-200 dark:hover:border-concrete-700 p-2 transition-colors">
+                                                          <div class="flex gap-2 items-center">
+                                                              <span class="text-[10px] font-mono text-concrete-400 w-4">D{{item.day_number}}</span>
+                                                              <input type="number" [(ngModel)]="item.day_number" class="w-8 text-[10px] border border-concrete-200 text-center" />
+                                                              <input [(ngModel)]="item.title" placeholder="Task Title" class="flex-1 text-xs font-bold bg-transparent border-b border-transparent focus:border-concrete-300 outline-none" />
+                                                              <button (click)="removeTask(week, $index)" class="opacity-0 group-hover:opacity-100 text-concrete-300 hover:text-red-500">
+                                                                  <span class="material-symbols-outlined text-[14px]">close</span>
+                                                              </button>
+                                                          </div>
+                                                          <!-- Details row -->
+                                                          <div class="flex flex-wrap gap-2 pl-6 pt-1 items-center">
+                                                              <input [(ngModel)]="item.description" placeholder="Description" class="flex-1 min-w-[200px] text-[10px] italic text-concrete-500 bg-transparent border-b border-transparent focus:border-concrete-200 outline-none text-ellipsis" />
+                                                              <div class="flex gap-1 items-center bg-blue-50 dark:bg-blue-900/30 px-1 rounded">
+                                                                <span class="material-symbols-outlined text-[12px] text-blue-500">link</span>
+                                                                <input [(ngModel)]="item.resource_link" placeholder="Resource URL" class="w-32 text-[10px] text-blue-500 bg-transparent border-b border-transparent focus:border-blue-300 outline-none" />
+                                                              </div>
+                                                              <div class="flex gap-1 items-center">
+                                                                 <span class="material-symbols-outlined text-[12px] text-concrete-400">schedule</span>
+                                                                 <input type="time" [(ngModel)]="item.time_block_start" class="text-[10px] bg-transparent border-b border-transparent focus:border-concrete-200 outline-none w-16 text-center" />
+                                                                 <span class="text-[10px] text-concrete-400">-</span>
+                                                                 <input type="time" [(ngModel)]="item.time_block_end" class="text-[10px] bg-transparent border-b border-transparent focus:border-concrete-200 outline-none w-16 text-center" />
+                                                              </div>
+                                                          </div>
                                                       </div>
                                                  } @empty {
                                                      <p class="text-[10px] text-concrete-400 italic pl-2">No tasks defined for this week.</p>
@@ -347,6 +367,56 @@ Phase 1,1,Basics,1,Task 1,Desc,08:00,09:00..."></textarea>
         </div>
       </div>
     }
+
+    @if (isGeneratingAI()) {
+      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+        <div class="bg-white dark:bg-concrete-900 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg w-full max-w-lg flex flex-col gap-4">
+          <div class="flex justify-between items-center border-b-4 border-black dark:border-white pb-2">
+            <h3 class="text-xl font-black uppercase flex items-center gap-2">
+              <span class="material-symbols-outlined text-green-500">auto_awesome</span>
+              AI Protocol Generator
+            </h3>
+            <button (click)="isGeneratingAI.set(false)" class="text-black dark:text-white hover:text-red-500" [disabled]="isGeneratingAILoading()">
+               <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          
+          <p class="text-xs font-mono opacity-80 uppercase">Let AI create a fully structured learning system for you.</p>
+          
+          <div>
+            <label class="text-[10px] font-black uppercase text-concrete-500 block mb-1">Topic / Goal</label>
+            <input [(ngModel)]="aiTopic" placeholder="e.g. Learn Python for Data Science" class="w-full text-sm font-bold border-2 border-black dark:border-concrete-500 p-2 bg-concrete-50 dark:bg-concrete-800 outline-none focus:border-green-500" [disabled]="isGeneratingAILoading()" />
+          </div>
+
+          <div>
+             <label class="text-[10px] font-black uppercase text-concrete-500 block mb-1">Duration (Weeks)</label>
+             <input type="number" [(ngModel)]="aiWeeks" min="1" max="12" class="w-full text-sm font-bold border-2 border-black dark:border-concrete-500 p-2 bg-concrete-50 dark:bg-concrete-800 outline-none focus:border-green-500" [disabled]="isGeneratingAILoading()" />
+          </div>
+
+          <div>
+             <label class="text-[10px] font-black uppercase text-concrete-500 block mb-1">Description / Syllabus</label>
+             <textarea [(ngModel)]="aiDescription" placeholder="e.g. Include topics on arrays, linked lists, graph traversal. For code refer to leetcode/gfg." class="w-full h-24 text-sm font-bold border-2 border-black dark:border-concrete-500 p-2 bg-concrete-50 dark:bg-concrete-800 outline-none focus:border-green-500 resize-none custom-scrollbar" [disabled]="isGeneratingAILoading()"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-4 mt-2">
+            <button (click)="isGeneratingAI.set(false)" [disabled]="isGeneratingAILoading()"
+                    class="px-6 py-2 bg-concrete-200 text-black font-black uppercase text-xs border-2 border-black hover:bg-black hover:text-white transition-all active:translate-y-1 disabled:opacity-50">
+               Cancel
+            </button>
+            <button (click)="generateWithAI()" [disabled]="isGeneratingAILoading() || !aiTopic.trim()"
+                    class="px-6 py-2 bg-green-500 text-white font-black uppercase text-xs border-2 border-black hover:bg-black transition-all shadow-[4px_4px_0_0_black] active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:active:translate-y-0 disabled:shadow-none flex items-center gap-2">
+               @if (isGeneratingAILoading()) {
+                  <span class="material-symbols-outlined animate-spin text-sm">cycle</span>
+                  Generating...
+               } @else {
+                  <span class="material-symbols-outlined text-sm">auto_awesome</span>
+                  Generate
+               }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   `,
   styles: [`
     :host { display: block; height: 100%; }
@@ -372,6 +442,12 @@ export class SystemManagerComponent implements OnInit {
   isPasting = signal(false);
   pastedCsv = '';
   showHelp = signal(false);
+
+  isGeneratingAI = signal(false);
+  isGeneratingAILoading = signal(false);
+  aiTopic = '';
+  aiDescription = '';
+  aiWeeks = 4;
 
   editForm: LearningSystem = {
     title: '',
@@ -513,8 +589,11 @@ export class SystemManagerComponent implements OnInit {
                   item.phase = phase.name;
                   item.week_number = week.weekNum;
                   item.week_focus = week.focus;
-                  item.time_block_start = week.time_block_start || undefined;
-                  item.time_block_end = week.time_block_end || undefined;
+                  
+                  // Keep item-level time blocks if present, fallback to week-level only if missing on item
+                  item.time_block_start = item.time_block_start || week.time_block_start || undefined;
+                  item.time_block_end = item.time_block_end || week.time_block_end || undefined;
+                  
                   items.push(item);
               });
           });
@@ -635,6 +714,29 @@ export class SystemManagerComponent implements OnInit {
       this.processExcelData(data);
     };
     reader.readAsBinaryString(target.files[0]);
+  }
+
+  generateWithAI() {
+    if (!this.aiTopic.trim() || this.aiWeeks < 1 || this.aiWeeks > 12) return;
+    this.isGeneratingAILoading.set(true);
+    
+    this.systemService.generateSystem(this.aiTopic, this.aiWeeks, this.aiDescription).subscribe({
+      next: (system) => {
+        this.editForm = system;
+        this.isCreating.set(true);
+        this.selectedSystem.set(null);
+        this.buildHierarchy();
+        this.isGeneratingAI.set(false);
+        this.isGeneratingAILoading.set(false);
+        this.aiTopic = '';
+      },
+      error: (err) => {
+        console.error('Failed to generate AI system:', err);
+        const msg = err.error?.detail || err.message || 'Please check server logs.';
+        alert(`Failed to generate system with AI:\n\n${msg}`);
+        this.isGeneratingAILoading.set(false);
+      }
+    });
   }
 
   processPastedCsv() {

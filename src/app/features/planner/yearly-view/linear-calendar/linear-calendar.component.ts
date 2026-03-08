@@ -42,21 +42,20 @@ interface DragState {
     <div class="yearly-grid-container w-full h-full flex flex-col bg-white dark:bg-concrete-900 text-black dark:text-white overflow-auto custom-scrollbar select-none font-manrope relative transition-colors duration-300" #container>
       
       <!-- Header Row (Days) -->
-      <div class="grid grid-cols-[60px_repeat(31,1fr)_60px] gap-0 border-b-4 border-black dark:border-concrete-100 mb-2 sticky top-0 bg-white dark:bg-concrete-800 z-20 pb-2 shadow-sm">
+      <div class="grid grid-cols-[60px_repeat(31,1fr)] gap-0 border-b-4 border-black dark:border-concrete-100 mb-2 sticky top-0 bg-white dark:bg-concrete-800 z-20 pb-2 shadow-sm">
         <div class="text-[10px] text-black dark:text-white font-black uppercase tracking-wider text-center self-end pb-1 border-r-2 border-black dark:border-concrete-100 font-arvo">MON</div>
         @for (day of daysHeader; track day) {
           <div class="text-[10px] text-center text-black dark:text-white font-bold border-l border-black/30 dark:border-white/20 flex items-center justify-center h-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors cursor-default relative group">
               <span class="group-hover:scale-110 transition-transform">{{ day }}</span>
           </div>
         }
-        <div class="text-xs text-black dark:text-white font-black uppercase tracking-wider text-center self-end pl-2"></div>
       </div>
 
       <!-- Month Rows -->
       <div class="flex flex-col gap-0 relative z-10">
         @for (row of monthRows(); track row.name) {
           <!-- Row container -->
-          <div class="grid grid-cols-[60px_repeat(31,1fr)_60px] gap-0 transition-colors relative group border-b-2 border-black dark:border-concrete-100 hover:bg-concrete-100 dark:hover:bg-concrete-800"
+          <div class="grid grid-cols-[60px_repeat(31,1fr)] gap-0 transition-colors relative group border-b-2 border-black dark:border-concrete-100 hover:bg-concrete-100 dark:hover:bg-concrete-800"
                [style.height.px]="math.max(row.maxLanes * 32 + 10, 48)">
             
             <!-- Month Label -->
@@ -68,11 +67,14 @@ interface DragState {
             <!-- Days Grid Cells background -->
             @for (day of daysHeader; track day) {
                <div class="border-r border-black/10 dark:border-white/10 h-full relative"
-                    [class.bg-concrete-200]="isWeekend(row.index, day)"
-                    [class.dark:bg-concrete-800]="isWeekend(row.index, day)"
+                    [class.bg-concrete-200]="!isToday(row.index, day) && isWeekend(row.index, day)"
+                    [class.dark:bg-concrete-800]="!isToday(row.index, day) && isWeekend(row.index, day)"
                     [class.bg-concrete-300]="!isWeekend(row.index, day) && day > row.days"
                     [class.dark:bg-concrete-700]="!isWeekend(row.index, day) && day > row.days"
                     [class.diagonal-stripe]="!isWeekend(row.index, day) && day > row.days"
+                    [class.bg-electric-red]="isToday(row.index, day)"
+                    [class.dark:bg-electric-red]="isToday(row.index, day)"
+                    [class.!bg-opacity-20]="isToday(row.index, day)"
                     (click)="onCellClick(row.index, day)"
                     (dblclick)="onCellDoubleClick(row.index, day)">
                     @if (day <= row.days) {
@@ -84,7 +86,7 @@ interface DragState {
             }
             
             <!-- Events Overlay for this Row -->
-            <div class="absolute inset-0 left-[60px] right-[60px] pointer-events-none grid grid-cols-[repeat(31,1fr)]">
+            <div class="absolute inset-0 left-[60px] right-0 pointer-events-none grid grid-cols-[repeat(31,1fr)]">
                @for (seg of row.segments; track seg.id + '-' + seg.startDay) {
                  <!-- Event Segment -->
                  <div class="absolute rigid-border-sm border-[2px] pointer-events-auto flex items-center px-1 overflow-hidden transition-all shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] dark:shadow-[2px_2px_0_0_rgba(255,255,255,0.4)]"
@@ -113,11 +115,6 @@ interface DragState {
                  </div>
                }
             </div>
-
-             <!-- End Label (Year) -->
-             <div class="text-[10px] font-black text-black dark:text-white flex items-center justify-center border-l-2 border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 sticky right-0 z-10 writing-vertical-lr text-center font-mono">
-               //{{ currentYear() }}
-             </div>
 
           </div>
         }
@@ -287,6 +284,11 @@ export class LinearCalendarComponent implements OnInit, OnChanges {
     return dayOfWeek === 0 || dayOfWeek === 6; 
   }
 
+  isToday(monthIndex: number, day: number): boolean {
+    const today = new Date();
+    return today.getFullYear() === this.currentYear() && today.getMonth() === monthIndex && today.getDate() === day;
+  }
+
   getWeekdayLabel(monthIndex: number, day: number): string {
     const date = new Date(this.currentYear(), monthIndex, day);
     const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -342,7 +344,7 @@ export class LinearCalendarComponent implements OnInit, OnChanges {
     mouseEvent.preventDefault();
 
     const containerWidth = this.containerRef.nativeElement.clientWidth || 1000;
-    const dayWidth = (containerWidth - 120) / 31;
+    const dayWidth = (containerWidth - 60) / 31;
     const deltaX = mouseEvent.clientX - state.startX;
     let deltaDays = Math.round(deltaX / dayWidth);
 
@@ -373,7 +375,7 @@ export class LinearCalendarComponent implements OnInit, OnChanges {
     const targetRow = this.dragState().currentRow || state.row;
     
     const containerWidth = this.containerRef.nativeElement.clientWidth || 1000;
-    const dayWidth = (containerWidth - 120) / 31;
+    const dayWidth = (containerWidth - 60) / 31;
     const deltaX = mouseEvent.clientX - state.startX;
     const deltaDays = Math.round(deltaX / dayWidth);
 
