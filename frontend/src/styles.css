@@ -1,0 +1,111 @@
+﻿/* You can add global styles to this file, and also import other style files */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #2b8cee;
+  --color-electric-red: #ff0000;
+  --color-accent-red: #ff3e3e;
+  
+  --color-concrete-100: #e5e5e5;
+  --color-concrete-200: #ccc;
+  --color-concrete-300: #b3b3b3;
+  --color-concrete-400: #808080;
+  --color-concrete-800: #333;
+  --color-concrete-900: #1a1a1a;
+  
+  --font-manrope: 'Manrope', sans-serif;
+  --font-arvo: 'Arvo', serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-jetbrains: 'JetBrains Mono', monospace;
+  --font-inter: 'Inter', sans-serif;
+  --font-public: 'Public Sans', sans-serif;
+}
+
+@layer utilities {
+    .brutalist-shadow { box-shadow: 16px 16px 0px 0px #000000; }
+    .brutalist-shadow-sm { box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 1); }
+    .brutalist-shadow-md { box-shadow: 8px 8px 0 0 rgba(0, 0, 0, 1); }
+    
+    .rigid-border { border: 4px solid #000000; }
+    .rigid-border-sm { border: 2px solid #000000; }
+    
+    .industrial-bg {
+        background: repeating-linear-gradient(
+            45deg,
+            #e5e5e5,
+            #e5e5e5 10px,
+            #dbdbdb 10px,
+            #dbdbdb 20px
+        );
+    }
+    
+    .active-scan {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .active-scan::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: #ff3e3e;
+        animation: scan 3s linear infinite;
+        pointer-events: none;
+    }
+    
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    @keyframes scan {
+        0% { top: 0; } 100% { top: 100%; }
+    }
+}
+
+@layer base {
+  html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+  }
+
+  body { 
+      font-family: 'Manrope', sans-serif; 
+      @apply bg-concrete-100 text-black dark:bg-concrete-900 dark:text-concrete-100;
+  }
+}
+
+/* Global Scrollbar */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: #aaa; border-left: 3px solid black; }
+::-webkit-scrollbar-thumb { background: black; }
+::-webkit-scrollbar-thumb:hover { background: #333; }
+
+/* Material Overrides for Brutalist Theme */
+.mat-datepicker-content {
+    border: 4px solid black !important;
+    box-shadow: 8px 8px 0 0 rgba(0, 0, 0, 1) !important;
+    border-radius: 0 !important;
+}
+
+.mat-calendar-body-selected {
+    background-color: #ff3e3e !important;
+    color: white !important;
+}
+
+.mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
+    background-color: #e5e5e5 !important;
+}
+
+
