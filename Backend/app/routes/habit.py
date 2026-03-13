@@ -45,22 +45,31 @@ def get_day_range_utc(date_str: str, timezone_offset_minutes: int):
     
     return utc_start, utc_end
 
+def parse_object_id(id_value: str, field_name: str = "id") -> ObjectId:
+    if not ObjectId.is_valid(id_value):
+        raise HTTPException(status_code=400, detail=f"Invalid {field_name}")
+    return ObjectId(id_value)
+
+
 @router.get("", response_model=list[Habit])
-async def get_habits(date: Optional[str] = None, timezone_offset: Optional[int] = 0):
-    habits = list(habit_collection.find())
-    
+async def get_habits(
+    date: Optional[str] = None,
+    timezone_offset: Optional[int] = 0,
+    tier: Optional[str] = None
+):
+    query = {} if tier is None else {"tier": tier}
+    habits = list(habit_collection.find(query))
+
     if date:
-        # If date is provided, we need to check "completedToday" based on that date
-        # "completedToday" becomes "completedOnRequestedDate"
         utc_start, utc_end = get_day_range_utc(date, timezone_offset)
-        
+
         for habit in habits:
             habit_id = str(habit["_id"])
             log = habit_log_collection.find_one({
                 "habit_id": habit_id,
                 "completed_at": {"$gte": utc_start, "$lte": utc_end}
             })
-            habit["completedToday"] = True if log else False
+            habit["completedToday"] = bool(log)
             if log:
                 habit["latestLog"] = {
                     "id": str(log["_id"]),
@@ -69,9 +78,8 @@ async def get_habits(date: Optional[str] = None, timezone_offset: Optional[int] 
                     "notes": log.get("notes"),
                     "completed_at": log.get("completed_at")
                 }
-            
-    return habits_serializer(habits)
 
+    return habits_serializer(habits)
 @router.get("/{id}/history")
 async def get_habit_history(
     id: str, 
@@ -109,6 +117,8 @@ async def get_habit_history(
 
 @router.get("/{id}/stats", response_model=HabitStats)
 async def get_habit_stats(id: str, timezone_offset: Optional[int] = 0):
+    habit_oid = parse_object_id(id)
+
     # 1. Total Completions
     total_completions = habit_log_collection.count_documents({"habit_id": id})
     
@@ -119,7 +129,7 @@ async def get_habit_stats(id: str, timezone_offset: Optional[int] = 0):
     # Let's use the one from the document for consistency, or simple logic:
     # Rate = Total Completions / (Days since creation)
     
-    habit = habit_collection.find_one({"_id": ObjectId(id)})
+    habit = habit_collection.find_one({"_id": habit_oid})
     if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
         
@@ -257,7 +267,8 @@ async def get_habit_stats(id: str, timezone_offset: Optional[int] = 0):
 
 @router.get("/{id}/analytics", response_model=AnalyticsResponse)
 async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
-    habit = habit_collection.find_one({"_id": ObjectId(id)})
+    habit_oid = parse_object_id(id)
+    habit = habit_collection.find_one({"_id": habit_oid})
     if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
 
@@ -271,6 +282,12 @@ async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
         "habit_id": id,
         "completed_at": {"$gte": start_date}
     }).sort("completed_at", 1))
+
+    def normalize_dt(dt: datetime) -> datetime:
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
 
     # --- Common Stats Calculation ---
     total_completions = habit_log_collection.count_documents({"habit_id": id})
@@ -298,7 +315,7 @@ async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
         # Let's use Last 30 Days.
         
         last_30_days_start = end_date - timedelta(days=30)
-        logs_30 = [l for l in logs if l["completed_at"] >= last_30_days_start]
+        logs_30 = [l for l in logs if normalize_dt(l["completed_at"]) >= last_30_days_start]
         yes_count = len(logs_30)
         no_count = 30 - yes_count
         success_ratio = (yes_count / 30) * 100
@@ -311,7 +328,7 @@ async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
         # Create a set of completed dates (local)
         completed_dates = set()
         for l in logs:
-            completed_dates.add(get_local_date_str(l["completed_at"]))
+            completed_dates.add(get_local_date_str(normalize_dt(l["completed_at"])))
             
         current = start_date
         while current <= end_date:
@@ -358,11 +375,11 @@ async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
         
         # 4. Consistency Score (Last 7 days / 7 * 100)
         last_7_start = end_date - timedelta(days=7)
-        logs_7 = [l for l in logs if l["completed_at"] >= last_7_start]
+        logs_7 = [l for l in logs if normalize_dt(l["completed_at"]) >= last_7_start]
         # unique days in logs_7
         unique_days_7 = set()
         for l in logs_7:
-            unique_days_7.add(get_local_date_str(l["completed_at"]))
+            unique_days_7.add(get_local_date_str(normalize_dt(l["completed_at"])))
         consistency = (len(unique_days_7) / 7) * 100
 
         binary_stats = BinaryHabitAnalytics(
@@ -377,8 +394,8 @@ async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
         
         # 1. Average Value (Last 30 days)
         last_30_start = end_date - timedelta(days=30)
-        logs_30 = [l for l in logs if l["completed_at"] >= last_30_start]
-        values = [l.get("value", 0) for l in logs_30]
+        logs_30 = [l for l in logs if normalize_dt(l["completed_at"]) >= last_30_start]
+        values = [0 if l.get("value") is None else l.get("value") for l in logs_30]
         avg_val = sum(values) / len(values) if values else 0
         
         # 2. Target Achievement Rate
@@ -401,8 +418,8 @@ async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
         last_7_start = end_date - timedelta(days=7)
         prev_7_start = last_7_start - timedelta(days=7)
         
-        curr_vals = [l.get("value", 0) for l in logs if l["completed_at"] >= last_7_start]
-        prev_vals = [l.get("value", 0) for l in logs if prev_7_start <= l["completed_at"] < last_7_start]
+        curr_vals = [0 if l.get("value") is None else l.get("value") for l in logs if normalize_dt(l["completed_at"]) >= last_7_start]
+        prev_vals = [0 if l.get("value") is None else l.get("value") for l in logs if prev_7_start <= normalize_dt(l["completed_at"]) < last_7_start]
         
         curr_avg = sum(curr_vals) / 7 # Over 7 days or over logged days? Usually over time period.
         prev_avg = sum(prev_vals) / 7
@@ -433,13 +450,15 @@ async def get_habit_analytics(id: str, timezone_offset: Optional[int] = 0):
         type=habit_type,
         binary_stats=binary_stats,
         measurable_stats=measurable_stats,
-        common_stats=common_stats
+        common_stats=common_stats,
+        period_days=90
     )
 
 
 @router.get("/{id}", response_model=Habit)
 async def get_habit(id: str, date: Optional[str] = None, timezone_offset: Optional[int] = 0):
-    habit = habit_collection.find_one({"_id": ObjectId(id)})
+    habit_oid = parse_object_id(id)
+    habit = habit_collection.find_one({"_id": habit_oid})
     if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
     
@@ -471,6 +490,7 @@ async def create_habit(habit: HabitCreate):
 
 @router.put("/{id}", response_model=Habit)
 async def update_habit(id: str, habit: HabitUpdate):
+    habit_oid = parse_object_id(id)
     update_data = {k: v for k, v in habit.dict().items() if v is not None}
     
     if not update_data:
@@ -482,16 +502,17 @@ async def update_habit(id: str, habit: HabitUpdate):
     # unless it's a migration/admin action. But for now we keep it open.
     
     if update_data:
-        result = habit_collection.update_one({"_id": ObjectId(id)}, {"$set": update_data})
+        result = habit_collection.update_one({"_id": habit_oid}, {"$set": update_data})
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Habit not found")
         
-    updated_habit = habit_collection.find_one({"_id": ObjectId(id)})
+    updated_habit = habit_collection.find_one({"_id": habit_oid})
     return habit_serializer(updated_habit)
 
 @router.delete("/{id}")
 async def delete_habit(id: str):
-    result = habit_collection.delete_one({"_id": ObjectId(id)})
+    habit_oid = parse_object_id(id)
+    result = habit_collection.delete_one({"_id": habit_oid})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Habit not found")
     
@@ -502,6 +523,7 @@ async def delete_habit(id: str):
 
 @router.post("/{id}/toggle", response_model=Habit)
 async def toggle_habit_completion(id: str, payload: dict):
+    habit_oid = parse_object_id(id)
     # Payload expected: {"completed_at": "ISO_STRING", "timezone_offset": int_minutes, "value": float, "notes": str, "focused_minutes": int}
     completed_at_str = payload.get("completed_at")
     timezone_offset = payload.get("timezone_offset", 0)
@@ -556,7 +578,7 @@ async def toggle_habit_completion(id: str, payload: dict):
              
              # Also ensure habit_name is present if it was missing
              if not existing_log.get("habit_name"):
-                 habit_doc = habit_collection.find_one({"_id": ObjectId(id)})
+                 habit_doc = habit_collection.find_one({"_id": habit_oid})
                  if habit_doc:
                      update_fields["habit_name"] = habit_doc.get("name")
              
@@ -572,7 +594,7 @@ async def toggle_habit_completion(id: str, payload: dict):
     else:
         # Toggle ON: Insert log
         # Fetch habit name to store it with the log
-        habit_doc = habit_collection.find_one({"_id": ObjectId(id)})
+        habit_doc = habit_collection.find_one({"_id": habit_oid})
         habit_name = habit_doc.get("name") if habit_doc else "Unknown Habit"
         
         new_log = {
@@ -631,12 +653,12 @@ async def toggle_habit_completion(id: str, payload: dict):
             streak = 0
             
     # Recalculate Best Streak
-    current_habit = habit_collection.find_one({"_id": ObjectId(id)})
+    current_habit = habit_collection.find_one({"_id": habit_oid})
     current_best = current_habit.get("bestStreak", 0)
     if best_streak < current_best:
         best_streak = current_best
         
-    habit_collection.update_one({"_id": ObjectId(id)}, {
+    habit_collection.update_one({"_id": habit_oid}, {
         "$set": {
             "streak": streak,
             "bestStreak": best_streak
@@ -645,9 +667,21 @@ async def toggle_habit_completion(id: str, payload: dict):
     })
     
     # Fetch updated habit
-    updated_habit = habit_collection.find_one({"_id": ObjectId(id)})
+    updated_habit = habit_collection.find_one({"_id": habit_oid})
     
     # Force the completedToday logic for the return value
     updated_habit["completedToday"] = update_data["completedToday"]
     
     return habit_serializer(updated_habit)
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-﻿import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -155,7 +155,7 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                                     {{ monthData.monthName }} {{ monthData.year }}
                                 </h4>
                                 <div class="grid grid-cols-7 gap-1 mb-1">
-                                    @for (d of ['S','M','T','W','T','F','S']; track d) {
+                                    @for (d of ['S','M','T','W','T','F','S']; track $index) {
                                         <div class="text-center text-[9px] font-black text-concrete-400 dark:text-concrete-500">{{ d }}</div>
                                     }
                                 </div>
@@ -196,7 +196,7 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                     </div>
                     
                     <div class="grid grid-cols-7 gap-1 mb-2">
-                        @for (d of ['S','M','T','W','T','F','S']; track d) {
+                        @for (d of ['S','M','T','W','T','F','S']; track $index) {
                             <div class="text-center text-[10px] font-black uppercase dark:text-concrete-400">{{d}}</div>
                         }
                     </div>
@@ -740,6 +740,8 @@ export class HabitDetailsComponent implements OnInit {
 
 
 }
+
+
 
 
 

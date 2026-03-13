@@ -15,6 +15,7 @@ habit_log_collection = db["habit_logs"]
 note_collection = db["notes"]
 monthly_reflection_collection = db["monthly_reflections"]
 habit_note_collection = db["habit_notes"]
+daily_summary_collection = db["daily_summaries"]
 
 # Weekly Planner Collections
 weekly_task_collection = db["weekly_tasks"]

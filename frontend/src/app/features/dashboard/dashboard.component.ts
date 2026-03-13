@@ -1,4 +1,4 @@
-﻿import { Component, ChangeDetectionStrategy, inject, computed, signal, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, signal, effect, OnDestroy } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -162,7 +162,7 @@ import { SystemService } from '../../services/system.service';
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnDestroy {
     habitService = inject(HabitService);
     systemService = inject(SystemService);
     router = inject(Router);
@@ -272,10 +272,11 @@ export class DashboardComponent {
     selectedHabit = signal<any | null>(null);
     logValue: number | undefined;
     logNotes: string = '';
+    private quoteIntervalId?: ReturnType<typeof setInterval>;
 
     constructor() {
         // Rotate quotes every 30 seconds
-        setInterval(() => {
+        this.quoteIntervalId = setInterval(() => {
             this.currentQuote.set(this.getRandomQuote());
         }, 30000);
 
@@ -283,6 +284,12 @@ export class DashboardComponent {
         this.systemService.getInstanceTasksByDate(this.getLocalDateString()).subscribe(tasks => {
             this.todaySystemTasks.set(tasks);
         });
+    }
+
+    ngOnDestroy() {
+        if (this.quoteIntervalId) {
+            clearInterval(this.quoteIntervalId);
+        }
     }
 
     private getRandomQuote(): string {
@@ -304,11 +311,14 @@ export class DashboardComponent {
     navigateToTrack(id: string) {
         this.router.navigate(['/track', id]);
     }
-    
+
     navigateToDetails(id: string) {
         this.router.navigate(['/details', id]);
     }
 }
+
+
+
 
 
 

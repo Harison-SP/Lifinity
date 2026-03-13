@@ -129,6 +129,7 @@ class AnalyticsResponse(BaseModel):
     binary_stats: Optional[BinaryHabitAnalytics] = None
     measurable_stats: Optional[MeasurableHabitAnalytics] = None
     common_stats: HabitStats # Keep existing stats as common base if needed
+    period_days: int = 90
 
 
 # Planner Models
@@ -194,6 +195,31 @@ class PlannerTask(PlannerTaskBase):
     class Config:
         from_attributes = True
 
+class DailySummaryNotes(BaseModel):
+    whatIPlanned: str = ""
+    whatIActuallyDid: str = ""
+    winsToday: str = ""
+    improvements: str = ""
+    tomorrowFocus: str = ""
+
+class DailySummaryBase(BaseModel):
+    date: str  # YYYY-MM-DD
+    plannedHours: float = 0.0
+    actualHours: float = 0.0
+    completionPercentage: float = 0.0
+    mood: str = ""
+    notes: DailySummaryNotes = Field(default_factory=DailySummaryNotes)
+
+class DailySummaryCreate(DailySummaryBase):
+    pass
+
+class DailySummary(DailySummaryBase):
+    id: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 # Weekly Planner Models
 class WeeklyTaskBase(BaseModel):
     text: str
@@ -408,4 +434,8 @@ class SystemInstantiate(BaseModel):
     system_id: str
     start_date: str          # YYYY-MM-DD
     habit_id: Optional[str] = None  # Optional parent yearly habit to attach to
+
+
+
+
 

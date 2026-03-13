@@ -7,9 +7,10 @@ from app.models import (
     PlannerTask, PlannerTaskCreate, PlannerTaskUpdate,
     Note, NoteCreate, NoteUpdate,
     MonthlyReflection, MonthlyReflectionCreate, MonthlyReflectionUpdate,
-    HabitNote, HabitNoteCreate, HabitNoteUpdate
+    HabitNote, HabitNoteCreate, HabitNoteUpdate,
+    DailySummary, DailySummaryCreate
 )
-from app.database import db, habit_collection, habit_log_collection, note_collection, monthly_reflection_collection, habit_note_collection
+from app.database import habit_collection, habit_log_collection, note_collection, monthly_reflection_collection, habit_note_collection, daily_summary_collection
 
 router = APIRouter(prefix="/planner", tags=["planner"])
 
@@ -227,51 +228,48 @@ async def delete_goal(goal_id: str):
 
 # Tasks endpoints (using habits collection with daily categorization)
 @router.get("/tasks", response_model=List[PlannerTask])
-async def get_tasks(date: Optional[str] = None):
+async def get_tasks(
+    date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+):
     """
     Get planner tasks from habits collection.
-    Tasks are daily habits with specific time blocks.
+    Supports single-day (`date`) and range (`start_date`, `end_date`) queries.
     """
-    query = {}
-    
+    query = {
+        "timeBlockStart": {"$exists": True, "$ne": None},
+        "timeBlockEnd": {"$exists": True, "$ne": None}
+    }
+
     if date:
-        # Find habits that have timeBlockStart and timeBlockEnd for the specific date
-        # Or habits that are active on this date
+        query["startDate"] = {"$lte": date}
+        query["endDate"] = {"$gte": date}
+    elif start_date and end_date:
         query["$or"] = [
-            {
-                "timeBlockStart": {"$exists": True, "$ne": None},
-                "timeBlockEnd": {"$exists": True, "$ne": None}
-            },
-            {
-                "startDate": {"$lte": date},
-                "endDate": {"$gte": date}
-            }
+            {"startDate": {"$gte": start_date, "$lte": end_date}},
+            {"endDate": {"$gte": start_date, "$lte": end_date}},
+            {"startDate": {"$lte": start_date}, "endDate": {"$gte": end_date}}
         ]
-    else:
-        # Get all habits with time blocks
-        query["timeBlockStart"] = {"$exists": True, "$ne": None}
-    
+
     tasks = []
     for habit in habit_collection.find(query):
-        # Convert habit to task format
         task_data = habit_helper(habit)
-        
         task = {
             "id": task_data.get("id"),
             "title": task_data.get("name"),
             "description": task_data.get("description"),
-            "date": date or task_data.get("startDate", ""),
+            "date": task_data.get("startDate", date or start_date or ""),
             "start_time": task_data.get("timeBlockStart"),
             "end_time": task_data.get("timeBlockEnd"),
             "status": "completed" if task_data.get("completedToday") else "pending",
-            "priority": "medium",  # Default priority
+            "priority": "medium",
             "category": task_data.get("category"),
             "created_at": task_data.get("created_at")
         }
         tasks.append(task)
-    
-    return tasks
 
+    return tasks
 @router.post("/tasks", response_model=PlannerTask)
 async def create_task(task: PlannerTaskCreate):
     """Create a new task as a habit with time block"""
@@ -406,6 +404,63 @@ async def delete_task(task_id: str):
     
     return {"message": "Task deleted successfully"}
 
+
+# Daily Summary endpoints
+
+def summary_helper(summary) -> dict:
+    serialized = {k: v for k, v in summary.items()}
+    if "_id" in serialized:
+        serialized["id"] = str(serialized["_id"])
+        del serialized["_id"]
+    return serialized
+
+
+@router.get("/summary/{date}", response_model=DailySummary)
+async def get_summary(date: str):
+    summary = daily_summary_collection.find_one({"date": date})
+
+    if not summary:
+        now = datetime.utcnow()
+        return {
+            "id": "",
+            "date": date,
+            "plannedHours": 0.0,
+            "actualHours": 0.0,
+            "completionPercentage": 0.0,
+            "mood": "",
+            "notes": {
+                "whatIPlanned": "",
+                "whatIActuallyDid": "",
+                "winsToday": "",
+                "improvements": "",
+                "tomorrowFocus": ""
+            },
+            "created_at": now,
+            "updated_at": now
+        }
+
+    return summary_helper(summary)
+
+
+@router.post("/summary", response_model=DailySummary)
+async def create_or_update_summary(summary: DailySummaryCreate):
+    now = datetime.utcnow()
+    summary_dict = summary.dict()
+
+    existing = daily_summary_collection.find_one({"date": summary.date})
+    if existing:
+        daily_summary_collection.update_one(
+            {"_id": existing["_id"]},
+            {"$set": {**summary_dict, "updated_at": now}}
+        )
+        updated = daily_summary_collection.find_one({"_id": existing["_id"]})
+        return summary_helper(updated)
+
+    summary_dict["created_at"] = now
+    summary_dict["updated_at"] = now
+    result = daily_summary_collection.insert_one(summary_dict)
+    created = daily_summary_collection.find_one({"_id": result.inserted_id})
+    return summary_helper(created)
 # Notes endpoints
 def note_helper(note) -> dict:
     """Convert note document to dict with proper serialization"""
@@ -796,3 +851,8 @@ async def delete_habit_note(note_id: str):
         raise HTTPException(status_code=404, detail="Note not found")
     
     return {"message": "Note deleted successfully"}
+
+
+
+
+

@@ -94,7 +94,7 @@ export interface HabitStats {
 
 export interface BinaryHabitAnalytics {
   success_ratio: number;
-  missed_day_pattern: { [key: string]: number };
+  missed_day_pattern: DayFrequency[];
   recovery_time: number;
   consistency_score: number;
 }
@@ -105,7 +105,7 @@ export interface MeasurableHabitAnalytics {
   best_day: number;
   worst_day: number;
   trend_percentage: number;
-  trend_direction: 'Up' | 'Down' | 'Flat';
+  trend_direction: 'up' | 'down' | 'flat';
 }
 
 export interface AnalyticsResponse {
@@ -116,3 +116,4 @@ export interface AnalyticsResponse {
   common_stats: HabitStats;
   period_days: number;
 }
+
