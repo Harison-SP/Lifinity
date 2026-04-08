@@ -1,234 +1,329 @@
-﻿import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { SystemService } from '../../services/system.service';
 import { SystemInstanceTask } from '../../models/system.model';
 
 @Component({
-  selector: 'app-daily-habit-tracker',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-   <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope pb-24 relative transition-colors duration-300 overflow-x-hidden">
-        <!-- Header -->
-        <header class="mb-10 md:mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 border-b-4 border-black dark:border-concrete-100 pb-6 bg-white dark:bg-concrete-800 p-4 sm:p-6 rigid-border-sm brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-            <div class="flex items-start sm:items-center gap-3 sm:gap-6 w-full md:w-auto">
-                <button (click)="goBack()" class="w-12 h-12 rigid-border-sm bg-white dark:bg-concrete-900 flex items-center justify-center hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors group shrink-0 border-2 border-transparent dark:border-concrete-500">
-                    <span class="material-symbols-outlined text-2xl dark:text-white dark:group-hover:text-black">arrow_back</span>
-                </button>
-                <div>
-                    <div class="bg-black dark:bg-concrete-100 text-white dark:text-black px-2 py-0.5 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
-                        Daily_Execution
+    selector: 'app-daily-habit-tracker',
+    standalone: true,
+    imports: [CommonModule, FormsModule, RouterLink],
+    template: `
+    <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body pb-24 relative transition-colors duration-300 overflow-x-hidden paper-texture">
+        <!-- Timer Overlay (Full Screen) -->
+        @if (timerRunning()) {
+            <div class="fixed inset-0 z-[100] bg-charcoal flex flex-col items-center justify-center text-white p-6 animate-in fade-in duration-500">
+                <div class="absolute top-6 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 w-[90%] md:max-w-2xl text-center md:text-left">
+                     <h2 class="text-primary font-heading text-[10px] md:text-xs font-black tracking-widest uppercase mb-1 md:mb-2 opacity-60">System Habit focus</h2>
+                     <h3 class="text-white text-2xl md:text-5xl font-black leading-tight mb-2 md:mb-4">{{ parentHabit()?.name || habit()?.name }}</h3>
+                     @if (todaySystemTask()?.title) {
+                         <p class="text-white/40 italic text-sm md:text-lg border-l-0 md:border-l-2 border-white/20 px-4 md:pl-4 line-clamp-2 md:line-clamp-none">Active Task: {{ todaySystemTask()?.title }}</p>
+                     }
+                </div>
+                
+                <div class="text-8xl md:text-[12rem] lg:text-[16rem] font-mono font-bold tracking-tighter mb-12 text-primary drop-shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+                    {{ formattedTimer() }}
+                </div>
+
+                <div class="mt-20 flex flex-col items-center">
+                    <div class="flex items-center justify-center gap-4 h-24">
+                        <span class="material-symbols-outlined transition-all duration-1000 animate-pulse text-sage" [style.fontSize]="'4rem'">
+                            {{ getTreeIcon() }}
+                        </span>
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-black text-black dark:text-white uppercase leading-none font-arvo flex items-center gap-3">
-                        {{ habit()?.name || 'LOADING...' }}
-                    </h1>
+                    <p class="text-white/60 uppercase tracking-widest text-sm mt-4">Focus Garden Growing...</p>
+                </div>
+            </div>
+        }
+
+        <!-- Header -->
+        <header class="mb-8 md:mb-10 bg-alabaster border-b border-taupe/20 p-4 sm:p-6 rounded-lg shadow-gentle">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex items-start gap-3 w-full md:w-auto">
+                    <button (click)="goBack()" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-taupe/30 bg-alabaster flex items-center justify-center hover:bg-sand transition-colors group shrink-0">
+                        <span class="material-symbols-outlined text-lg md:text-xl text-taupe group-hover:text-charcoal">arrow_back</span>
+                    </button>
+                    <div>
+                        <h1 class="font-heading text-2xl md:text-4xl font-bold text-charcoal leading-tight">
+                            {{ habit()?.name || 'Loading...' }}
+                        </h1>
+                        <p class="text-taupe text-sm md:text-base mt-1" *ngIf="habit()?.parentId">
+                            Part of: {{ parentHabit()?.name }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </header>
 
         @if (habit()) {
             @if (inconsistentDaysCount() >= 2) {
-                <div class="bg-electric-red text-white p-4 font-black uppercase tracking-widest mb-8 border-4 border-black dark:border-white flex items-center gap-3">
-                    <span class="material-symbols-outlined text-2xl">warning</span>
-                    WARNING: {{ inconsistentDaysCount() }} inconsistent days detected recently. Protocol adherence compromised!
+                <div class="bg-primary text-white p-4 font-bold tracking-wider mb-6 border border-primary rounded-lg flex items-center gap-3 shadow-gentle">
+                    <span class="material-symbols-outlined">warning</span>
+                    <span>We missed {{ inconsistentDaysCount() }} recent days. Let's get back on track!</span>
                 </div>
             }
 
-            <!-- Focus Session & Target -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <!-- Target Requirement -->
-                @if (habit()?.type === 'measurable') {
-                    <div class="p-6 bg-yellow-400 text-black border-4 border-black font-black uppercase text-xl md:text-2xl brutalist-shadow-lg flex items-center justify-between">
-                        <div class="flex flex-col">
-                            <span class="text-[10px] tracking-widest text-black/70 mb-1">Today's_Target</span>
-                            <span>
-                                {{ habit()?.targetComparator === '>=' ? 'At least' : habit()?.targetComparator === '<=' ? 'At most' : 'Exactly' }} 
-                                {{ habit()?.targetValue || '1' }} <span class="text-electric-red">{{ habit()?.targetUnit || 'units' }}</span>
-                            </span>
-                        </div>
-                        <span class="material-symbols-outlined text-4xl">flag</span>
-                    </div>
-                } @else {
-                    <div class="p-6 bg-white dark:bg-concrete-800 border-4 border-black dark:border-concrete-100 font-black uppercase text-xl md:text-2xl brutalist-shadow-lg flex items-center justify-between dark:text-white">
-                        <div class="flex flex-col">
-                            <span class="text-[10px] tracking-widest text-concrete-500 mb-1">Today's_Target</span>
-                            <span>Complete this protocol at least once today.</span>
-                        </div>
-                        <span class="material-symbols-outlined text-4xl text-concrete-400">task_alt</span>
-                    </div>
-                }
-
-                <!-- Timer Section -->
-                <div class="bg-black text-white p-6 border-4 border-black dark:border-concrete-100 brutalist-shadow-lg relative overflow-hidden group">
-                    <div class="flex items-center justify-between mb-4 relative z-10">
-                        <h3 class="text-xl font-black uppercase tracking-widest flex items-center gap-2">
-                            <span class="material-symbols-outlined">timer</span> Focus_Session
-                        </h3>
-                        <span class="text-[10px] font-black text-electric-red uppercase border border-electric-red px-1" title="If you struggle to start, just do it for 2 minutes.">2-Min_Rule</span>
-                    </div>
-                    <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10 justify-between">
-                        <div class="text-5xl sm:text-6xl font-black font-mono tracking-tighter" [class.text-electric-red]="timerRunning()">
-                            {{ formattedTimer() }}
-                        </div>
-                        <div class="flex flex-wrap gap-2 justify-end w-full sm:w-auto">
-                            @if (!timerRunning()) {
-                                <div class="flex items-center bg-white border-2 border-transparent focus-within:border-black transition-colors">
-                                    <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="w-16 px-3 py-3 text-black font-black font-mono text-xs outline-none bg-transparent text-center" min="1">
-                                    <button (click)="startCustomTimer()" class="px-3 py-3 bg-black text-white font-black uppercase text-xs hover:bg-electric-red transition-colors border-l-2 border-black">START</button>
-                                </div>
-                            } @else {
-                                <button (click)="pauseTimer()" class="px-4 py-3 bg-electric-red text-white font-black uppercase text-xs hover:bg-white hover:text-black transition-colors border-2 border-transparent">Pause</button>
-                                <button (click)="resetTimer()" class="px-4 py-3 bg-concrete-800 text-white font-black uppercase text-xs hover:bg-white hover:text-black transition-colors border-2 border-transparent">Reset</button>
+            <!-- Primary Action Card (Merged Goal & Task) -->
+            <div class="bg-alabaster rounded-2xl shadow-gentle-lg p-6 md:p-10 mb-8 border-2 border-primary/20 overflow-hidden relative group">
+                <!-- Decorative background -->
+                <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-1000"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Today's Focus</span>
+                                @if (todaySystemTask()?.timeBlockStart) {
+                                    <span class="bg-sand text-charcoal px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">schedule</span>
+                                        {{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}
+                                    </span>
+                                }
+                            </div>
+                            
+                            <!-- Task/Habit Title -->
+                            <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-charcoal mb-4 leading-tight">
+                                {{ todaySystemTask()?.title || habit()?.name }}
+                            </h2>
+                            
+                            @if (todaySystemTask()?.description) {
+                                <p class="text-taupe italic text-lg mb-6 max-w-2xl border-l-4 border-taupe/20 pl-4">
+                                    "{{ todaySystemTask()?.description }}"
+                                </p>
                             }
+
+                            <!-- Dynamic Goal Stats -->
+                            <div class="flex flex-wrap items-end gap-6 mt-8">
+                                @if (habit()?.type === 'measurable') {
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold text-taupe uppercase tracking-widest">Target</label>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-3xl font-black text-charcoal">{{ habit()?.targetValue }}</span>
+                                            <span class="text-primary font-bold">{{ habit()?.targetUnit }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="h-12 w-px bg-taupe/20 hidden md:block"></div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-xs font-bold text-taupe uppercase tracking-widest">Add Progress</label>
+                                        <div class="flex items-center gap-3">
+                                            <input type="number" [(ngModel)]="logValue" 
+                                                   class="w-32 p-4 text-3xl font-black bg-white border-2 border-taupe/20 rounded-2xl text-center focus:border-primary outline-none transition-all shadow-inner focus:ring-4 focus:ring-primary/10"
+                                                   placeholder="0" />
+                                            <div class="flex flex-col">
+                                                <button (click)="logValue = (logValue || 0) + 1" class="p-1 hover:bg-sand rounded">
+                                                    <span class="material-symbols-outlined">expand_less</span>
+                                                </button>
+                                                <button (click)="decrementValue()" class="p-1 hover:bg-sand rounded">
+                                                    <span class="material-symbols-outlined">expand_more</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                } @else {
+                                    <div class="bg-sage/10 border border-sage/30 px-5 py-3 rounded-2xl flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-sage text-3xl">task_alt</span>
+                                        <div>
+                                            <p class="text-charcoal font-bold">Standard Task</p>
+                                            <p class="text-xs text-taupe uppercase font-bold tracking-widest">Consistency is key</p>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (isCompletedToday()) {
+                                    <div class="bg-sage text-white px-4 py-2 rounded-lg flex items-center gap-2 animate-bounce-short">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                                        <span class="text-xs font-bold uppercase">Already Logged</span>
+                                    </div>
+                                }
+                            </div>
                         </div>
+
+                        <!-- Huge Primary Action Button -->
+                        <div class="shrink-0 flex flex-col items-center gap-4">
+                            <button (click)="handlePrimaryAction()" 
+                                    class="relative group overflow-hidden w-full sm:w-64 h-64 rounded-3xl font-black text-2xl transition-all active:scale-95 shadow-gentle-lg flex flex-col items-center justify-center gap-4 border-b-8"
+                                    [class]="(isCompletedToday() || todaySystemTask()?.completed) 
+                                        ? 'bg-sage border-sage-dark text-white' 
+                                        : 'bg-primary border-primary-dark text-white hover:brightness-110'">
+                                <span class="material-symbols-outlined text-7xl transition-transform group-hover:scale-110 duration-300">
+                                    {{ (isCompletedToday() || todaySystemTask()?.completed) ? 'verified' : 'bolt' }}
+                                </span>
+                                <span class="tracking-tighter">
+                                    {{ (isCompletedToday() || todaySystemTask()?.completed) ? 'COMPLETED' : 'MARK DONE' }}
+                                </span>
+                                
+                                <!-- Shine effect -->
+                                <div class="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 group-hover:animate-shine"></div>
+                            </button>
+                            <p class="text-taupe text-xs font-bold uppercase tracking-widest opacity-60">One click to rule them all</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Focus Timer Card -->
+                <div class="bg-charcoal text-white rounded-2xl shadow-gentle p-8 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="font-heading text-xl font-bold flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">timer</span> Deep Work Timer
+                            </h3>
+                            <p class="text-white/50 text-xs uppercase tracking-widest font-bold mt-1">Start a focus session</p>
+                        </div>
+                        <span class="text-xs bg-white/10 px-3 py-1.5 rounded-full text-white/80 border border-white/10">2-minute rule</span>
                     </div>
                     
-                    <!-- Gamification: Focus Garden -->
-                    <div class="mt-6 pt-4 border-t-2 border-concrete-800 relative z-10 flex flex-col items-center justify-center">
-                        <span class="text-[10px] uppercase font-black tracking-widest text-concrete-400 mb-2">Focus Garden</span>
-                        <div class="flex items-end justify-center gap-4 h-16 w-full">
-                            <div class="flex flex-col items-center justify-end h-full transition-all duration-700 ease-in-out">
-                                <span class="material-symbols-outlined transition-all duration-700" 
-                                      [ngClass]="getTreeStyle()">
-                                    {{ getTreeIcon() }}
-                                </span>
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-8">
+                        <div class="text-6xl font-mono font-bold tracking-tighter text-primary">
+                            {{ formattedTimer() }}
+                        </div>
+                        
+                        <div class="flex items-center bg-white/10 border border-white/20 rounded-2xl overflow-hidden backdrop-blur-sm">
+                            <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="w-20 p-4 text-center font-bold text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
+                            <button (click)="startCustomTimer()" class="px-6 py-4 bg-primary text-white font-black text-sm hover:bg-primary-light transition-all">START FOCUS</button>
+                        </div>
+                    </div>
+
+                    <!-- Focus Garden Stats -->
+                    <div class="mt-10 pt-8 border-t border-white/10">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <span class="text-xs uppercase tracking-widest text-white/40 font-bold block mb-1">Session Progress</span>
+                                <span class="text-sm font-medium text-white/80">{{ totalFocusedMinutes() }} minutes focused today</span>
                             </div>
+                            <span class="material-symbols-outlined transition-all duration-700 animate-pulse" [ngClass]="getTreeStyle()">
+                                {{ getTreeIcon() }}
+                            </span>
                         </div>
-                        <div class="mt-2 text-xs font-black uppercase text-concrete-300">
-                            {{ totalFocusedMinutes() }} Mins FOCUSED TODAY
-                        </div>
-                        <!-- Progress to next stage -->
                         @if (totalFocusedMinutes() < 120) {
-                            <div class="w-full max-w-xs h-1 bg-concrete-800 mt-2 relative overflow-hidden">
-                                <div class="absolute top-0 left-0 h-full bg-electric-red transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
+                            <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
                             </div>
                         }
                     </div>
+                </div>
 
-                    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #fff 10px, #fff 12px);"></div>
+                <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-heading text-xl font-bold text-charcoal flex items-center gap-2">
+                            <span class="material-symbols-outlined text-taupe">notes</span> Personal Notes
+                        </h3>
+                        <a [routerLink]="['/notes', habitId()]" 
+                           [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
+                           class="flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary hover:text-white transition-all shadow-sm">
+                            <span class="material-symbols-outlined text-sm">edit_note</span> Dedicated Notes
+                        </a>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <textarea [(ngModel)]="logNotes" placeholder="Quick log: how did it go? Any obstacles or breakthroughs?" rows="4" 
+                                  class="w-full p-4 border-2 border-taupe/10 rounded-xl bg-white text-charcoal focus:border-primary/50 outline-none transition-all resize-none shadow-inner text-sm"></textarea>
+                    </div>
+
+                    <div class="mt-4 flex justify-between items-center">
+                        @if (habit()?.parentId) {
+                            <div class="flex items-center gap-1.5 px-3 py-1 bg-charcoal text-white rounded-full text-[10px] font-black uppercase tracking-tighter">
+                                <span class="material-symbols-outlined text-xs">settings_input_component</span> System Habit
+                            </div>
+                        } @else {
+                            <div></div>
+                        }
+                        <button (click)="saveLog()" class="text-primary font-bold text-xs uppercase tracking-widest hover:text-primary-dark flex items-center gap-1 transition-colors">
+                            <span class="material-symbols-outlined text-sm">save</span> Save Progress
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Assigned System Task for Today -->
-            @if (todaySystemTask()) {
-                <div class="bg-electric-red text-white p-6 border-[4px] border-black dark:border-concrete-100 brutalist-shadow-lg mb-8 relative">
-                    <h3 class="font-black uppercase tracking-widest text-lg mb-2 flex items-center gap-2">
-                        <span class="material-symbols-outlined">assignment</span> Today's_Mission: {{ todaySystemTask()?.title }}
+            <!-- Pending Past Tasks -->
+            <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-heading text-2xl font-bold text-charcoal flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">history</span> Catch Up
                     </h3>
-                    <p class="font-bold text-sm mb-4">
-                        Phase: {{ todaySystemTask()?.phase }} | Week {{ todaySystemTask()?.weekNumber }} ({{ todaySystemTask()?.weekFocus }})
-                    </p>
-                    @if (todaySystemTask()?.description) {
-                        <p class="font-mono text-xs italic opacity-90 mb-4 bg-black/20 p-2">{{ todaySystemTask()?.description }}</p>
-                    }
-                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
-                            @if (todaySystemTask()?.timeBlockStart) {
-                                <span class="text-xs font-black bg-black px-2 py-1 text-white uppercase">{{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}</span>
-                            }
-                            @if (todaySystemTask()?.resourceLink) {
-                                <a [href]="todaySystemTask()?.resourceLink" target="_blank" class="text-xs font-black underline hover:text-black transition-colors uppercase">View_Resource</a>
-                            }
-                        </div>
-                        <button (click)="toggleMission(todaySystemTask()!)" class="w-full sm:w-auto px-4 py-2 text-xs font-black bg-white text-black border-2 border-transparent hover:bg-black hover:text-white transition-colors uppercase">
-                            {{ todaySystemTask()?.completed ? 'MARK_INCOMPLETE' : 'MARK_COMPLETE' }}
-                        </button>
-                    </div>
+                    <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full" *ngIf="pendingPastTasks().length > 0">
+                        {{ pendingPastTasks().length }} MISSING
+                    </span>
                 </div>
-            }
 
-            <!-- Validation/Commit form -->
-            <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] mb-12">
-                <h3 class="text-2xl font-black uppercase font-arvo dark:text-white mb-6 border-b-4 border-black dark:border-concrete-100 pb-2">Execution_Log / Today</h3>
-                
-                @if (habit()?.type === 'measurable') {
-                    <div class="space-y-6 max-w-xl">
-                        <div>
-                             <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Value</label>
-                             <input type="number" [(ngModel)]="logValue" class="w-full p-4 font-mono text-xl font-black border-[3px] border-black dark:border-concrete-100 outline-none focus:bg-concrete-100 dark:bg-concrete-900 dark:text-white dark:focus:bg-black transition-colors">
-                        </div>
-                        <div>
-                             <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Focus Minutes</label>
-                             <div class="flex items-center gap-2">
-                                 <input type="number" [ngModel]="totalFocusedMinutes()" (ngModelChange)="updateFocusTime($event)" class="w-24 p-4 font-mono text-xl font-black border-[3px] border-black dark:border-concrete-100 outline-none focus:bg-concrete-100 dark:bg-concrete-900 dark:text-white dark:focus:bg-black transition-colors text-center">
-                                 <span class="text-sm font-bold dark:text-concrete-300">MINS</span>
-                             </div>
-                        </div>
-                        <div>
-                             <label class="block text-xs font-black uppercase tracking-widest mb-1 dark:text-concrete-400">Notes (Optional)</label>
-                             <textarea [(ngModel)]="logNotes" rows="3" class="w-full p-3 font-mono text-sm border-[3px] border-black dark:border-concrete-100 outline-none focus:bg-concrete-100 dark:bg-concrete-900 dark:text-white dark:focus:bg-black resize-none transition-colors"></textarea>
-                        </div>
-                        <button (click)="saveLog()" class="w-full py-4 bg-electric-red text-white font-black uppercase tracking-widest hover:brightness-110 active:translate-x-1 active:translate-y-1 transition-all rigid-border-sm border-2 border-transparent dark:border-electric-red">
-                            COMMIT_DATA
-                        </button>
-                        @if (isCompletedToday()) {
-                             <div class="text-sm font-bold text-concrete-500 uppercase mt-2">Protocol already executed for today. Committing will overwrite values.</div>
-                        }
+                @if (pendingPastTasks().length === 0) {
+                    <div class="flex flex-col items-center justify-center p-12 bg-sage/5 rounded-2xl border border-dashed border-sage/20">
+                        <span class="material-symbols-outlined text-sage text-5xl mb-4">verified</span>
+                        <p class="text-taupe font-bold text-center">You're all caught up! Amazing work.</p>
                     </div>
                 } @else {
-                    <div class="max-w-xl flex flex-col items-start gap-4">
-                        <p class="text-sm font-bold dark:text-concrete-300">This is a binary protocol. Simply mark it as completed.</p>
-                        <button (click)="toggleDone()" 
-                                class="px-8 py-4 rigid-border-sm border-[3px] border-black dark:border-concrete-100 font-black uppercase tracking-widest text-lg transition-all shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white] active:translate-x-1 active:translate-y-1 active:shadow-none"
-                                [class.bg-electric-red]="!isCompletedToday()"
-                                [class.text-white]="!isCompletedToday()"
-                                [class.bg-concrete-900]="isCompletedToday()"
-                                [class.dark:bg-black]="isCompletedToday()"
-                                [class.text-white]="isCompletedToday()">
-                            {{ isCompletedToday() ? 'PROTOCOL_EXECUTED' : 'MARK_AS_EXECUTED' }}
-                        </button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        @for (task of pendingPastTasks(); track task.date + task.title) {
+                            <div class="flex items-center justify-between p-4 bg-white border border-taupe/10 rounded-2xl hover:border-primary/30 transition-all group">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-charcoal truncate">{{ task.title }}</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-xs text-primary font-bold">{{ task.date }}</span>
+                                        <span class="text-[10px] text-taupe uppercase font-black opacity-40">Phase {{ task.phase }}</span>
+                                    </div>
+                                </div>
+                                <button (click)="toggleMission(task)" class="w-12 h-12 bg-sand hover:bg-sage hover:text-white rounded-xl transition-all flex items-center justify-center">
+                                    <span class="material-symbols-outlined">{{ task.completed ? 'check_circle' : 'circle' }}</span>
+                                </button>
+                            </div>
+                        }
                     </div>
                 }
-            </div>
-
-            <!-- Pending -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div class="bg-white dark:bg-concrete-800 border-[4px] border-black dark:border-concrete-100 p-6 brutalist-shadow-lg flex flex-col">
-                    <h3 class="font-black uppercase text-lg border-b-4 border-black dark:border-concrete-100 pb-2 mb-4 flex items-center gap-2 text-electric-red dark:text-electric-red">
-                        <span class="material-symbols-outlined">warning</span> Pending_Past_Tasks
-                    </h3>
-                    @if (pendingPastTasks().length === 0) {
-                        <div class="flex-1 flex items-center justify-center p-4">
-                            <p class="font-mono text-sm text-concrete-500 dark:text-concrete-400 uppercase font-bold text-center border-2 border-dashed border-concrete-300 dark:border-concrete-600 p-4 w-full">NO PENDING PAST TASKS.</p>
-                        </div>
-                    } @else {
-                        <ul class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2 flex-1">
-                            @for (task of pendingPastTasks(); track task.date + task.title) {
-                                <li class="flex items-center justify-between border-2 border-black dark:border-white p-2 hover:bg-concrete-100 dark:hover:bg-concrete-700 transition-colors group">
-                                    <div class="flex flex-col flex-1 truncate mr-2">
-                                        <span class="font-black uppercase text-sm font-sans dark:text-white truncate" [title]="task.title">{{ task.title }}</span>
-                                        <span class="text-[10px] font-bold text-electric-red truncate">{{ task.date }} | {{ task.phase }} | W{{ task.weekNumber }}</span>
-                                    </div>
-                                    <button (click)="toggleMission(task)" [title]="task.completed ? 'Mark Incomplete' : 'Mark Complete'" class="p-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex shrink-0 border-2 border-transparent">
-                                        <span class="material-symbols-outlined text-sm">check</span>
-                                    </button>
-                                </li>
-                            }
-                        </ul>
-                    }
-                </div>
             </div>
         }
 
         <!-- Celebration Overlay -->
         @if (celebrationMessage()) {
-            <div class="fixed inset-0 pointer-events-none z-[80] flex items-center justify-center p-4 backdrop-blur-sm bg-black/20">
-                 <div class="animate-bounce text-4xl md:text-6xl lg:text-8xl font-black text-electric-red uppercase font-arvo bg-white px-8 py-6 border-8 border-black shadow-[16px_16px_0_0_black] tracking-tighter transform -rotate-2 text-center break-words max-w-[90vw]">
+            <div class="fixed inset-0 pointer-events-none z-[110] flex items-center justify-center p-4 backdrop-blur-sm bg-black/10">
+                 <div class="animate-bounce-slow text-4xl md:text-6xl lg:text-8xl font-black text-primary uppercase font-display bg-white px-10 py-8 border-8 border-charcoal shadow-2xl text-center rotate-[-2deg]">
                       {{ celebrationMessage() }}
                  </div>
             </div>
         }
-   </div>
-  `,
-  styles: [`
+    </div>
+    `,
+    styles: [`
+    :host { display: block; }
+
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #525252; }
-  `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-taupe); border-radius: 3px; }
+
+    @keyframes shine {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    .animate-shine {
+        animation: shine 1.5s ease-in-out infinite;
+    }
+
+    @keyframes bounce-short {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+    .animate-bounce-short {
+        animation: bounce-short 1s ease-in-out infinite;
+    }
+
+    @keyframes bounce-slow {
+        0%, 100% { transform: translateY(0) rotate(-2deg); }
+        50% { transform: translateY(-20px) rotate(-1deg); }
+    }
+    .animate-bounce-slow {
+        animation: bounce-slow 2s ease-in-out infinite;
+    }
+
+    .bg-primary-dark { background-color: #c2410c; }
+    .bg-sage-dark { background-color: #6a7c5c; }
+    .border-primary-dark { border-bottom-color: #9a3412; }
+    .border-sage-dark { border-bottom-color: #4a5c3c; }
+    `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     location = inject(Location);
@@ -241,8 +336,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
 
     todaySystemTask = signal<SystemInstanceTask | null>(null);
     pendingPastTasks = signal<SystemInstanceTask[]>([]);
-    
-    // Derived states
+
     allHabits = computed(() => this.habitService.habits());
 
     parentHabit = computed(() => {
@@ -251,25 +345,45 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         return this.allHabits().find(h => h.id === parentId);
     });
 
+    handlePrimaryAction() {
+        const task = this.todaySystemTask();
+        const h = this.habit();
+        
+        // 1. If there's a system task, toggle it
+        if (task) {
+            this.toggleMission(task);
+        }
+
+        // 2. If it's a measurable habit, save the log with the current logValue
+        if (h?.type === 'measurable') {
+            this.saveLog();
+        } else {
+            // 3. Otherwise treat as a standard habit completion
+            if (!this.isCompletedToday()) {
+                this.toggleDone();
+            }
+        }
+    }
+
+    decrementValue() {
+        this.logValue = Math.max(0, (this.logValue || 0) - 1);
+    }
+
     isCompletedToday = computed(() => {
         const h = this.habit();
         return !!h?.completedToday;
     });
 
-    // We assume any log fetch updates habit info. 
-    // For inconsistent days, we need heatmap logic, which meant full logs in details.
-    // If we only have basic habit info in tracker, inconsistentDaysCount might just rely on cached stats.
-    // I'll fetch deep stats oninit if I need them:
-    fullHeatmapData = signal<{date: string, level: number}[]>([]); 
+    fullHeatmapData = signal<{ date: string, level: number }[]>([]);
 
     inconsistentDaysCount = computed(() => {
         const data = this.fullHeatmapData();
         if (!data.length) return 0;
-        
+
         let missed = 0;
         const today = new Date();
-        today.setHours(0,0,0,0);
-        for (let i = 0; i < 7; i++) { 
+        today.setHours(0, 0, 0, 0);
+        for (let i = 0; i < 7; i++) {
             const checkDate = new Date(today);
             checkDate.setDate(today.getDate() - i);
             const dateStr = checkDate.toISOString().split('T')[0];
@@ -284,7 +398,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     });
 
     timerValue = signal(120);
-    initialTimerValue = signal(120); // Keep track of how much was started
+    initialTimerValue = signal(120);
     timerRunning = signal(false);
     timerInterval: any;
     celebrationMessage = signal('');
@@ -293,8 +407,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
 
     logValue: number | undefined;
     logNotes = '';
-    
-    // Track total focus time for the gamification
+
     totalFocusedMinutes = signal(0);
 
     formattedTimer = computed(() => {
@@ -305,36 +418,32 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     });
 
     ngOnInit() {
-        // Pre-fill log with latest if exists
         const h = this.habit();
         if (h && h.latestLog && this.isCompletedToday()) {
             this.logValue = h.latestLog.value;
             this.logNotes = h.latestLog.notes || '';
-            // Make sure we type-cast or assume it has focused_minutes since we just added it to backend
             this.totalFocusedMinutes.set((h.latestLog as any).focused_minutes || 0);
         }
 
-        // Fetch deep stats and today's system task
         const id = this.habitId();
         const todayStr = new Date().toISOString().split('T')[0];
 
         if (id) {
-             this.habitService.getHabitStats(id).subscribe(stats => {
-                 if (stats && stats.heatmap) {
-                     this.fullHeatmapData.set(stats.heatmap);
-                 }
-             });
+            this.habitService.getHabitStats(id).subscribe(stats => {
+                if (stats && stats.heatmap) {
+                    this.fullHeatmapData.set(stats.heatmap);
+                }
+            });
 
-             this.systemService.getInstanceTasksByDate(todayStr).subscribe(tasks => {
-                 const relatedTask = tasks.find(t => t.habitId === id);
-                 this.todaySystemTask.set(relatedTask || null);
-             });
+            this.systemService.getInstanceTasksByDate(todayStr).subscribe(tasks => {
+                const relatedTask = tasks.find(t => t.habitId === id);
+                this.todaySystemTask.set(relatedTask || null);
+            });
 
-             this.systemService.getPendingPastTasks(id, todayStr).subscribe(tasks => {
-                 // Sort older first
-                 tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-                 this.pendingPastTasks.set(tasks);
-             });
+            this.systemService.getPendingPastTasks(id, todayStr).subscribe(tasks => {
+                tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                this.pendingPastTasks.set(tasks);
+            });
         }
     }
 
@@ -393,31 +502,29 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         } as any).subscribe(() => {
             this.habitService.loadHabits();
             if (!isCompletedNow && this.logValue !== undefined && this.logValue > 0) {
-                 this.showCelebration();
+                this.showCelebration();
             }
         });
     }
 
     toggleDone() {
-        // Toggle the entire habit as executed
         const id = this.habitId();
         const isCompletedNow = this.isCompletedToday();
         const todayStr = new Date().toISOString().split('T')[0];
-        
+
         if (id) {
             this.habitService.toggleCompletion(id, todayStr).subscribe(() => {
-                 this.habitService.loadHabits(); // Update list everywhere
-                 // We don't fetch stats here on simple toggle, list will auto-update state
-                 if (!isCompletedNow) {
-                     this.showCelebration('PROTOCOL EXECUTED!');
-                 }
+                this.habitService.loadHabits();
+                if (!isCompletedNow) {
+                    this.showCelebration('Great job!');
+                }
             });
         }
     }
 
     updateFocusTime(mins: number) {
         this.totalFocusedMinutes.set(mins);
-        this.saveFocusTime(0); // auto save without celebration
+        this.saveFocusTime(0);
     }
 
     saveFocusTime(addedMins: number) {
@@ -429,33 +536,30 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
             };
             if (this.logValue !== undefined && this.logValue !== null) payload.value = this.logValue;
             if (this.logNotes) payload.notes = this.logNotes;
-            
-            // This endpoint creates/updates the log automatically 
+
             this.habitService.updateLog(id, today, payload).subscribe(() => {
                 this.habitService.loadHabits();
                 if (addedMins > 0) {
-                    this.showCelebration(`+${addedMins} MINUTE FOCUS GROW!`);
+                    this.showCelebration(`+${addedMins} minutes of focus!`);
                 }
             });
         }
     }
 
     completeSession() {
-        // Calculate minutes from the initial timer value
         const minsCompleted = Math.round(this.initialTimerValue() / 60);
         this.totalFocusedMinutes.update(m => m + minsCompleted);
-        
-        // Auto-save the focused minutes into the log
+
         const id = this.habitId();
         if (id) {
             const today = new Date().toISOString().split('T')[0];
             this.habitService.updateLog(id, today, {
-                value: this.logValue !== undefined ? this.logValue : 1, // Fallback value if measurable vs bool config is tricky
+                value: this.logValue !== undefined ? this.logValue : 1,
                 notes: this.logNotes,
                 focused_minutes: this.totalFocusedMinutes()
             } as any).subscribe(() => {
                 this.habitService.loadHabits();
-                this.showCelebration(`+${minsCompleted} MINUTE FOCUS GROW!`);
+                this.showCelebration(`+${minsCompleted} minute focus!`);
             });
         }
     }
@@ -472,7 +576,6 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
             const id = this.habitId();
             const todayStr = new Date().toISOString().split('T')[0];
             if (id) {
-                // Refresh to get updated completed status
                 this.systemService.getInstanceTasksByDate(todayStr).subscribe(tasks => {
                     const relatedTask = tasks.find(t => t.habitId === id);
                     this.todaySystemTask.set(relatedTask || null);
@@ -481,7 +584,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
                     tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
                     this.pendingPastTasks.set(tasks);
                 });
-                this.showCelebration(task.completed ? 'MISSION UNMARKED' : 'MISSION COMPLETED!');
+                this.showCelebration(task.completed ? 'Task unmarked' : 'Task completed!');
             }
         });
     }
@@ -489,36 +592,36 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     // Gamification Helpers
     getTreeIcon(): string {
         const mins = this.totalFocusedMinutes();
-        if (mins === 0) return 'eco'; // Seed/leaf
-        if (mins < 25) return 'park'; // Small tree
-        if (mins < 60) return 'forest'; // Few trees
-        return 'forest'; // Maximum stage, handled by styling
+        if (mins === 0) return 'eco';
+        if (mins < 25) return 'park';
+        if (mins < 60) return 'forest';
+        return 'forest';
     }
 
     getTreeStyle(): string {
         const mins = this.totalFocusedMinutes();
-        if (mins === 0) return 'text-concrete-500 text-2xl';
-        if (mins < 25) return 'text-green-500 text-4xl';
-        if (mins < 60) return 'text-green-400 text-5xl';
-        if (mins < 120) return 'text-green-300 text-6xl drop-shadow-[0_0_15px_rgba(7ade80,0.5)]';
-        return 'text-green-400 text-7xl drop-shadow-[0_0_25px_rgba(7ade80,0.8)] animate-pulse';
+        if (mins === 0) return 'text-taupe text-2xl';
+        if (mins < 25) return 'text-sage text-4xl';
+        if (mins < 60) return 'text-green-500 text-5xl';
+        if (mins < 120) return 'text-green-400 text-6xl drop-shadow-[0_0_15px_rgba(7,173,80,0.5)]';
+        return 'text-green-400 text-7xl drop-shadow-[0_0_25px_rgba(7,173,80,0.8)]';
     }
-    
+
     getProgressPer(): number {
         const mins = this.totalFocusedMinutes();
         let target = 25;
         if (mins >= 25) target = 60;
         if (mins >= 60) target = 120;
         if (mins >= 120) return 100;
-        
+
         const prevMilestone = mins < 25 ? 0 : (mins < 60 ? 25 : 60);
         return ((mins - prevMilestone) / (target - prevMilestone)) * 100;
     }
 
     showCelebration(msg?: string) {
-        const messages = ['CRUSHED IT!', 'OUTSTANDING!', 'PROTOCOL EXECUTED!', 'ANOTHER WIN!', 'UNSTOPPABLE!'];
+        const messages = ['Great job!', 'Awesome!', 'Keep it up!', 'Another one!', 'On fire!', 'Well done!'];
         this.celebrationMessage.set(msg || messages[Math.floor(Math.random() * messages.length)]);
-        
+
         if (!(window as any).confetti) {
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js';
@@ -537,7 +640,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
                 particleCount: 150,
                 spread: 100,
                 origin: { y: 0.5 },
-                colors: ['#000000', '#ffffff', '#ef4444', '#facc15'],
+                colors: ['#f97316', '#8c9a81', '#f8f6f6', '#4a443e'],
                 zIndex: 2147483647
             });
         }

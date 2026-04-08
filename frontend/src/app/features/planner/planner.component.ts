@@ -1,4 +1,4 @@
-﻿import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { YearlyViewComponent } from './yearly-view/yearly-view.component';
@@ -7,100 +7,86 @@ import { WeeklyViewComponent } from './weekly-view/weekly-view.component';
 import { DailyViewComponent } from './daily-view/daily-view.component';
 
 @Component({
-  selector: 'app-planner',
-  imports: [CommonModule, YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent],
-  template: `
-    <div class="h-full overflow-y-auto overflow-x-hidden relative z-10 bg-concrete-200 dark:bg-concrete-900 min-h-screen font-manrope footer-pb transition-colors duration-300">
-        
-        <div class="px-3 py-4 sm:p-6 lg:p-10 max-w-[1600px] mx-auto relative z-10">
-          <!-- Header -->
-          <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-b-4 border-black dark:border-white pb-6">
-            <div class="flex items-center gap-4">
-              <button (click)="goBack()" class="w-12 h-12 flex items-center justify-center rigid-border-sm bg-white dark:bg-concrete-800 dark:border-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all group">
-                <span class="material-symbols-outlined text-xl">arrow_back</span>
-              </button>
-              <div>
-                <div class="bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
-                    System_Planner // Beta
+    selector: 'app-planner',
+    standalone: true,
+    imports: [CommonModule, YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent],
+    template: `
+    <div class="min-h-screen bg-white font-body transition-colors duration-300 paper-texture">
+        <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 lg:py-10">
+            <!-- Header -->
+            <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-8">
+                <div class="flex items-center gap-4">
+                    <button (click)="goBack()" class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg border border-taupe/30 bg-alabaster hover:bg-sand transition-colors">
+                        <span class="material-symbols-outlined text-taupe">arrow_back</span>
+                    </button>
+                    <div>
+                        <h2 class="font-heading text-2xl md:text-4xl font-bold text-charcoal">
+                            Planner
+                        </h2>
+                        <p class="text-taupe text-sm mt-1">Plan and visualize your habits</p>
+                    </div>
                 </div>
-                <h2 class="text-4xl md:text-6xl font-black text-black dark:text-white tracking-tight uppercase font-arvo">
-                    Temporal_Grid
-                </h2>
-              </div>
-            </div>
 
-            <!-- Period Tabs -->
-            <div class="flex w-full md:w-auto overflow-x-auto p-1 gap-2 no-scrollbar">
-              @for (period of periods; track period.value) {
-                <button 
-                  (click)="activePeriod.set(period.value)"
-                  class="shrink-0 px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all rigid-border-sm border-[2px] flex items-center gap-2"
-                  [class.bg-black]="activePeriod() === period.value"
-                  [class.dark:bg-white]="activePeriod() === period.value"
-                  [class.text-white]="activePeriod() === period.value"
-                  [class.dark:text-black]="activePeriod() === period.value"
-                  [class.shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]]="activePeriod() === period.value"
-                  [class.dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.4)]]="activePeriod() === period.value"
-                  [class.bg-white]="activePeriod() !== period.value"
-                  [class.dark:bg-concrete-800]="activePeriod() !== period.value"
-                  [class.text-black]="activePeriod() !== period.value"
-                  [class.dark:text-white]="activePeriod() !== period.value"
-                  [class.hover:translate-x-[1px]]="activePeriod() !== period.value"
-                  [class.hover:translate-y-[1px]]="activePeriod() !== period.value">
-                  <span class="material-symbols-outlined text-sm">{{period.icon}}</span>
-                  <span class="hidden md:inline">{{period.label}}</span>
-                </button>
-              }
-            </div>
-          </header>
+                <!-- Period Tabs -->
+                <div class="flex w-full md:w-auto gap-2 overflow-x-auto py-1 no-scrollbar">
+                    @for (period of periods; track period.value) {
+                        <button
+                            (click)="activePeriod.set(period.value)"
+                            class="shrink-0 px-4 py-2 text-sm font-medium rounded-full border transition-all flex items-center gap-2 whitespace-nowrap"
+                            [class.bg-primary]="activePeriod() === period.value"
+                            [class.text-white]="activePeriod() === period.value"
+                            [class.border-primary]="activePeriod() === period.value"
+                            [class.border-taupe/30]="activePeriod() !== period.value"
+                            [class.text-charcoal]="activePeriod() !== period.value"
+                            [class.hover:bg-sand]="activePeriod() !== period.value">
+                            <span class="material-symbols-outlined text-base">{{period.icon}}</span>
+                            <span>{{period.label}}</span>
+                        </button>
+                    }
+                </div>
+            </header>
 
-          <!-- Content Area -->
-          <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-white p-3 sm:p-4 md:p-6 min-h-[520px] md:min-h-[600px] relative brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] overflow-hidden">
-            @if (activePeriod() === 'yearly') {
-              <app-yearly-view></app-yearly-view>
-            } @else if (activePeriod() === 'monthly') {
-              <app-monthly-view></app-monthly-view>
-            } @else if (activePeriod() === 'weekly') {
-              <app-weekly-view></app-weekly-view>
-            } @else if (activePeriod() === 'daily') {
-              <app-daily-view></app-daily-view>
-            }
-          </div>
+            <!-- Content Area -->
+            <div class="bg-alabaster rounded-lg shadow-gentle p-4 md:p-6 min-h-[520px] md:min-h-[600px] border border-taupe/10">
+                @if (activePeriod() === 'yearly') {
+                    <app-yearly-view></app-yearly-view>
+                } @else if (activePeriod() === 'monthly') {
+                    <app-monthly-view></app-monthly-view>
+                } @else if (activePeriod() === 'weekly') {
+                    <app-weekly-view></app-weekly-view>
+                } @else if (activePeriod() === 'daily') {
+                    <app-daily-view></app-daily-view>
+                }
+            </div>
         </div>
     </div>
-  `,
-  styles: [`
-    :host { display: block; height: 100%; }
-    .footer-pb { padding-bottom: 100px; }
-  `]
+    `,
+    styles: [`
+        :host { display: block; height: 100%; }
+    `]
 })
 export class PlannerComponent implements OnInit {
-  private location = inject(Location);
-  private route = inject(ActivatedRoute);
-  activePeriod = signal<'yearly' | 'monthly' | 'weekly' | 'daily'>('daily');
-  
-  periods = [
-    { value: 'yearly' as const, label: 'Yearly', icon: 'calendar_today' },
-    { value: 'monthly' as const, label: 'Monthly', icon: 'event' },
-    { value: 'weekly' as const, label: 'Weekly', icon: 'view_week' },
-    { value: 'daily' as const, label: 'Daily', icon: 'schedule' }
-  ];
+    private location = inject(Location);
+    private route = inject(ActivatedRoute);
+    activePeriod = signal<'yearly' | 'monthly' | 'weekly' | 'daily'>('daily');
 
-  ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      const view = params['view'];
-      if (view && this.periods.some(p => p.value === view)) {
-        this.activePeriod.set(view);
-      }
-    });
-  }
+    periods = [
+        { value: 'yearly' as const, label: 'Yearly', icon: 'calendar_month' },
+        { value: 'monthly' as const, label: 'Monthly', icon: 'calendar_month' },
+        { value: 'weekly' as const, label: 'Weekly', icon: 'view_week' },
+        { value: 'daily' as const, label: 'Daily', icon: 'today' }
+    ];
 
-  goBack() {
-    this.location.back();
-  }
+    ngOnInit() {
+        this.route.queryParams.subscribe(params => {
+            const view = params['view'];
+            if (view && this.periods.some(p => p.value === view)) {
+                this.activePeriod.set(view);
+            }
+        });
+    }
+
+    goBack() {
+        this.location.back();
+    }
 }
-
-
-
-
-

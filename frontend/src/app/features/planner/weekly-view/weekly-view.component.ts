@@ -28,195 +28,230 @@ interface WeekDay {
   standalone: true,
   imports: [CommonModule, FormsModule, DragDropModule],
   template: `
-    <div class="h-full flex flex-col font-manrope p-3 sm:p-4 gap-5 sm:gap-6 bg-concrete-50 dark:bg-concrete-900 transition-colors duration-300 overflow-x-hidden">
+    <div class="h-full flex flex-col font-body p-4 sm:p-6 gap-6 bg-white transition-colors duration-300 overflow-x-hidden paper-texture">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="flex w-full md:w-auto items-center gap-2 sm:gap-4">
-          <div class="flex items-center gap-2">
-            <button (click)="changeWeek(-1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-concrete-100 dark:hover:text-black transition-all rigid-border-sm border-[2px] bg-white dark:bg-black dark:text-white dark:border-concrete-100">
+        <div class="flex w-full md:w-auto items-center gap-4">
+          <div class="flex items-center gap-3">
+            <button (click)="changeWeek(-1)" 
+                    class="p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
               <span class="material-symbols-outlined">chevron_left</span>
             </button>
-            <h2 class="text-base sm:text-xl md:text-2xl font-black text-black dark:text-white uppercase font-arvo text-center">
+            <h2 class="text-xl sm:text-2xl font-bold text-charcoal font-heading text-center min-w-[200px]">
               {{ weekDateRange() }}
             </h2>
-            <button (click)="changeWeek(1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-concrete-100 dark:hover:text-black transition-all rigid-border-sm border-[2px] bg-white dark:bg-black dark:text-white dark:border-concrete-100">
+            <button (click)="changeWeek(1)" 
+                    class="p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
               <span class="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
         </div>
         
         <div class="flex items-center gap-3">
-          <button (click)="carryForwardTasks()" class="w-full md:w-auto px-4 sm:px-6 py-3 bg-blue-600 text-white rigid-border-sm border-[2px] font-black uppercase text-[10px] sm:text-xs hover:bg-blue-700 hover:-translate-y-1 transition-all brutalist-shadow-sm">
-            Carry Forward Incomplete Tasks
+          <button (click)="carryForwardTasks()" 
+                  class="w-full md:w-auto px-6 py-3 bg-white text-charcoal border border-taupe/20 rounded-lg font-bold text-xs hover:bg-sand transition-all shadow-gentle flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">forward_to_inbox</span>
+            Carry Forward Tasks
           </button>
         </div>
       </div>
 
-      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-5 sm:gap-8 overflow-hidden">
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8 overflow-hidden">
         <!-- Left Panel: Targets & Metrics -->
-        <div class="lg:col-span-1 flex flex-col gap-8 overflow-y-auto custom-scrollbar pr-2">
+        <div class="lg:col-span-1 flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
           <!-- Weekly Targets -->
-          <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white] flex flex-col min-h-[400px]">
-            <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo border-b-4 border-black dark:border-concrete-100 pb-3 mb-6 flex items-center gap-2">
-              <span class="material-symbols-outlined">target</span>
+          <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 flex flex-col min-h-[400px]">
+            <h3 class="text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-4 mb-6 flex items-center gap-2">
+              <span class="material-symbols-outlined text-orange-500">target</span>
               Weekly Targets
             </h3>
             <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar">
               @for(target of weeklyTargets(); track target.id) {
-                <div class="flex items-center gap-3 group bg-concrete-50 dark:bg-concrete-900 p-2 rigid-border-sm border-[2px] dark:border-concrete-500 hover:border-black dark:hover:border-white transition-colors">
-                  <input type="checkbox" [checked]="target.completed" (change)="toggleTargetCompletion(target)" class="size-5 accent-black cursor-pointer"/>
+                <div class="flex items-center gap-3 group bg-alabaster/50 p-3 rounded-lg border border-taupe/5 hover:border-taupe/20 transition-all">
+                  <div class="relative flex items-center">
+                    <input type="checkbox" [checked]="target.completed" (change)="toggleTargetCompletion(target)" 
+                           class="size-5 rounded border-taupe/30 text-orange-500 focus:ring-orange-500 cursor-pointer"/>
+                  </div>
                   <input [(ngModel)]="target.text" (ngModelChange)="updateTarget(target)" 
-                         class="flex-1 bg-transparent border-none focus:outline-none text-sm font-mono uppercase font-bold dark:text-white" 
+                         class="flex-1 bg-transparent border-none focus:outline-none text-sm font-medium text-charcoal" 
                          [class.line-through]="target.completed"
+                         [class.text-taupe]="target.completed"
                          [disabled]="target.completed">
-                  <button (click)="deleteTarget(target.id)" class="opacity-0 group-hover:opacity-100 text-red-500 transition-opacity">
+                  <button (click)="deleteTarget(target.id)" class="opacity-0 group-hover:opacity-100 text-taupe hover:text-red-500 transition-all">
                     <span class="material-symbols-outlined text-xl">delete</span>
                   </button>
                 </div>
               }
             </div>
-            <div class="flex flex-col gap-2 mt-6 pt-4 border-t-4 border-black dark:border-concrete-100">
-               <input [(ngModel)]="newTargetText" placeholder="New Target" (keyup.enter)="addTarget()" 
-                      class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-100 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none uppercase placeholder:text-concrete-400">
-               <button (click)="addTarget()" class="w-full py-3 bg-black dark:bg-concrete-100 text-white dark:text-black rigid-border-sm border-[2px] font-black uppercase text-sm hover:bg-gray-800 dark:hover:bg-concrete-200 transition-colors">Add Target</button>
+            <div class="flex flex-col gap-3 mt-6 pt-6 border-t border-taupe/10">
+               <input [(ngModel)]="newTargetText" placeholder="What's your goal?" (keyup.enter)="addTarget()" 
+                      class="w-full px-4 py-3 bg-alabaster rounded-lg border border-taupe/10 focus:border-orange-500 focus:bg-white text-charcoal text-sm outline-none transition-all placeholder:text-taupe/50">
+               <button (click)="addTarget()" 
+                       class="w-full py-3 bg-orange-500 text-white rounded-lg font-bold text-sm hover:bg-orange-400 transition-all shadow-gentle">
+                 Add Target
+               </button>
             </div>
           </div>
 
            <!-- Weekly Metrics -->
-           <div class="bg-yellow-100 dark:bg-yellow-600 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white]">
-              <h3 class="text-xl font-black text-black uppercase font-arvo border-b-4 border-black dark:border-black pb-3 mb-6 flex items-center gap-2">
-                <span class="material-symbols-outlined">analytics</span>
-                Weekly Metrics
+           <div class="bg-orange-50 rounded-xl shadow-gentle p-6 border border-orange-100">
+              <h3 class="text-xl font-bold text-charcoal font-heading border-b border-orange-200 pb-4 mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-orange-600">analytics</span>
+                Weekly Stats
               </h3>
               <div class="space-y-4">
-                 <div class="flex justify-between items-center p-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500">
-                     <span class="text-sm font-black uppercase dark:text-white">Focus Hours</span>
+                 <div class="flex justify-between items-center p-4 bg-white rounded-lg border border-orange-100 shadow-sm">
+                     <span class="text-sm font-bold text-taupe uppercase tracking-wider">Focus Time</span>
                     <div class="flex items-center gap-2">
                        <input type="number" [(ngModel)]="metrics().focus_hours" (ngModelChange)="updateMetrics()" 
-                              class="w-16 text-center py-1 bg-transparent font-mono font-bold text-lg outline-none border-none dark:text-white">
-                       <span class="font-bold text-xs dark:text-white">HRS</span>
+                              class="w-12 text-center py-1 bg-sand/30 rounded font-bold text-lg text-charcoal outline-none">
+                       <span class="font-bold text-xs text-taupe">HRS</span>
                     </div>
                 </div>
-                 <div class="flex justify-between items-center p-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500">
-                     <span class="text-sm font-black uppercase dark:text-white">Completion</span>
-                     <span class="font-mono font-black text-xl text-blue-600 dark:text-blue-400">{{ tasksCompleted() }}/{{ totalTasks() }}</span>
+                 <div class="flex justify-between items-center p-4 bg-white rounded-lg border border-orange-100 shadow-sm">
+                     <span class="text-sm font-bold text-taupe uppercase tracking-wider">Completion</span>
+                     <span class="font-bold text-xl text-orange-600">{{ tasksCompleted() }}/{{ totalTasks() }}</span>
                  </div>
-                  <div class="flex justify-between items-center p-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500">
-                     <span class="text-sm font-black uppercase dark:text-white">Consistency</span>
-                     <span class="font-mono font-black text-xl text-green-600 dark:text-green-400">{{ consistencyScore() | number:'1.0-0' }}%</span>
+                  <div class="flex justify-between items-center p-4 bg-white rounded-lg border border-orange-100 shadow-sm">
+                     <span class="text-sm font-bold text-taupe uppercase tracking-wider">Consistency</span>
+                     <span class="font-bold text-xl text-sage">{{ consistencyScore() | number:'1.0-0' }}%</span>
                 </div>
              </div>
           </div>
         </div>
 
-        <!-- Right Panel: Task Distribution - NOW 2 COLUMNS AND BIGGER -->
-        <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto custom-scrollbar p-1" cdkDropListGroup>
+        <!-- Right Panel: Task Distribution -->
+        <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto custom-scrollbar p-1" cdkDropListGroup>
           @for(day of weekDays(); track day.dateString) {
-            <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 flex flex-col gap-4 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white] min-h-[450px]">
-              <div class="flex justify-between items-center border-b-4 border-black dark:border-concrete-100 pb-3 mb-2">
-                <h4 class="text-xl font-black uppercase font-arvo dark:text-white">{{ day.name }}</h4>
-                <span class="bg-black dark:bg-concrete-100 text-white dark:text-black px-3 py-1 font-mono text-sm font-bold">{{ day.date | date:'MMMM d' }}</span>
+            <div class="bg-white rounded-xl shadow-gentle p-6 flex flex-col gap-5 border border-taupe/10 min-h-[450px] transition-all hover:border-taupe/20">
+              <div class="flex justify-between items-start border-b border-taupe/10 pb-5">
+                <div>
+                  <h4 class="text-2xl font-bold text-charcoal font-heading leading-tight">{{ day.name }}</h4>
+                  <p class="text-[10px] font-bold text-taupe uppercase tracking-[0.2em] mt-1.5">{{ day.date | date:'MMMM d' }}</p>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                  <div class="w-10 h-10 rounded-full bg-sand/40 flex items-center justify-center text-charcoal font-black text-xs shadow-inner">
+                     {{ day.tasks.length + getSystemTasksForDay(day.dateString).length }}
+                  </div>
+                  <span class="text-[8px] font-bold text-taupe uppercase tracking-tighter">Items</span>
+                </div>
               </div>
               
-              <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2 min-h-[250px]"
+              <div class="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2 min-h-[150px]"
                    cdkDropList
                    [cdkDropListData]="day.tasks"
                    (cdkDropListDropped)="drop($event, day)">
                 @for(task of day.tasks; track task.id) {
-                   <div cdkDrag class="p-3 rigid-border-sm border-[2px] bg-concrete-50 dark:bg-concrete-700 dark:border-concrete-500 cursor-grab active:cursor-grabbing flex items-start gap-3 group hover:border-black dark:hover:border-white transition-all"
-                        [class.border-blue-500]="task.task_type === 'habit'"
-                        [class.dark:border-blue-400]="task.task_type === 'habit'"
-                        [class.bg-blue-50]="task.task_type === 'habit'"
-                        [class.dark:bg-blue-900]="task.task_type === 'habit'">
+                   <div cdkDrag class="p-4 rounded-xl bg-white border border-taupe/10 shadow-sm cursor-grab active:cursor-grabbing flex items-start gap-4 group transition-all hover:shadow-gentle hover:bg-alabaster/50"
+                        [class.border-l-4]="task.task_type === 'habit'"
+                        [style.border-left-color]="task.task_type === 'habit' ? '#f97316' : ''">
                       
                       <button (click)="toggleTaskCompletion(task)" class="mt-1 flex-shrink-0">
-                        <span class="material-symbols-outlined text-2xl" 
-                              [class.text-green-600]="task.completed"
-                              [class.dark:text-green-400]="task.completed"
-                              [class.text-concrete-300]="!task.completed"
-                              [class.dark:text-concrete-500]="!task.completed">
-                          {{ task.completed ? 'check_box' : 'check_box_outline_blank' }}
-                        </span>
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                             [class.bg-sage]="task.completed"
+                             [class.border-sage]="task.completed"
+                             [class.border-taupe/30]="!task.completed">
+                          @if (task.completed) {
+                            <span class="material-symbols-outlined text-white text-base">check</span>
+                          } @else {
+                            <div class="w-1.5 h-1.5 rounded-full bg-taupe/20 group-hover:bg-orange-500/40 transition-colors"></div>
+                          }
+                        </div>
                       </button>
                       
-                      <div class="flex-1 flex flex-col min-w-0">
+                      <div class="flex-1 flex flex-col min-w-0 gap-1">
                         @if(task.habit_id) {
-                          <span class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase mb-1 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[12px]">label</span>
+                          <span class="text-[9px] font-bold text-orange-500 uppercase tracking-wider bg-orange-50 px-1.5 py-0.5 rounded w-fit">
                             {{ getHabitName(task.habit_id) }}
                           </span>
                         }
-                        <span class="font-mono text-sm uppercase font-bold break-words dark:text-white" 
+                        <h5 class="text-sm font-bold text-charcoal font-heading leading-snug break-words" 
                               [class.line-through]="task.completed" 
-                              [class.text-concrete-400]="task.completed"
-                              [class.dark:text-concrete-500]="task.completed">
+                              [class.text-taupe]="task.completed">
                           {{ task.text }}
-                        </span>
+                        </h5>
                       </div>
                       
-                      <button (click)="deleteTask(task.id)" class="opacity-0 group-hover:opacity-100 text-red-500 flex-shrink-0 transition-opacity">
-                        <span class="material-symbols-outlined">close</span>
+                      <button (click)="deleteTask(task.id)" class="opacity-0 group-hover:opacity-100 text-taupe hover:text-red-500 flex-shrink-0 transition-opacity">
+                        <span class="material-symbols-outlined text-lg">delete</span>
                       </button>
 
-                      <!-- Drag Handle Placeholder -->
-                      <div *cdkDragPlaceholder class="cdk-drag-placeholder rounded"></div>
+                      <div *cdkDragPlaceholder class="cdk-drag-placeholder rounded-xl"></div>
                    </div>
                 }
 
                  <!-- System Instance Tasks for this day -->
                  @for(stask of getSystemTasksForDay(day.dateString); track stask.title) {
-                   <div class="p-3 rigid-border-sm border-[2px] flex items-start gap-3 group transition-all"
-                        [style.border-color]="stask.color || '#7c3aed'"
-                        [style.background-color]="stask.completed ? 'rgba(16,185,129,0.08)' : 'rgba(124,58,237,0.06)'">
-                     <button (click)="toggleSystemTask(stask)" class="mt-1 flex-shrink-0">
-                       <span class="material-symbols-outlined text-2xl"
-                             [style.color]="stask.completed ? '#10b981' : (stask.color || '#7c3aed')">
-                         {{ stask.completed ? 'check_circle' : 'radio_button_unchecked' }}
-                       </span>
+                   <div class="p-4 rounded-xl flex items-start gap-4 transition-all shadow-gentle border border-taupe/10 relative overflow-hidden group/stask"
+                        [class.bg-sage/5]="stask.completed"
+                        [class.bg-white]="!stask.completed"
+                        [style.border-left-color]="stask.color || '#f97316'"
+                        style="border-left-width: 4px;">
+                     
+                     <button (click)="toggleSystemTask(stask)" class="mt-1 flex-shrink-0 z-10">
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+                             [style.border-color]="stask.completed ? '#8c9a81' : (stask.color || '#f97316')"
+                             [style.background-color]="stask.completed ? '#8c9a81' : 'transparent'">
+                          @if (stask.completed) {
+                            <span class="material-symbols-outlined text-white text-base">check</span>
+                          } @else {
+                            <div class="w-1.5 h-1.5 rounded-full" [style.background-color]="stask.color || '#f97316'"></div>
+                          }
+                        </div>
                      </button>
-                     <div class="flex-1 flex flex-col min-w-0 gap-0.5">
-                       <!-- Habit / System tag -->
-                       <span class="text-[10px] font-black uppercase flex items-center gap-1"
-                             [style.color]="stask.color || '#7c3aed'">
-                         <span class="material-symbols-outlined text-[12px]">auto_stories</span>
-                         {{ stask.habitName || stask.systemTitle }}
-                       </span>
-                       <!-- Week focus label -->
-                       @if(stask.weekFocus) {
-                         <span class="text-[9px] font-bold uppercase text-concrete-400 dark:text-concrete-500">{{ stask.weekFocus }}</span>
-                       }
-                       <!-- Task title -->
-                       <span class="font-mono text-sm font-bold break-words dark:text-white"
-                             [class.line-through]="stask.completed"
-                             [class.opacity-50]="stask.completed">
-                         {{ stask.title }}
-                       </span>
-                       <!-- Time block -->
-                       @if(stask.timeBlockStart) {
-                         <span class="text-[10px] font-mono font-bold flex items-center gap-1 mt-1"
-                               [style.color]="stask.color || '#7c3aed'">
-                           <span class="material-symbols-outlined text-[12px]">schedule</span>
-                           {{ stask.timeBlockStart }}{{ stask.timeBlockEnd ? ' â€“ ' + stask.timeBlockEnd : '' }}
-                           @if(stask.durationMinutes) { <span class="text-concrete-400">({{ stask.durationMinutes }}min)</span> }
+
+                     <div class="flex-1 flex flex-col min-w-0 gap-1.5">
+                       <div class="flex items-center flex-wrap gap-2">
+                         <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-sand/50" [style.color]="stask.color || '#f97316'">
+                           {{ stask.habitName || stask.systemTitle }}
                          </span>
+                         @if(stask.weekFocus) {
+                           <span class="text-[9px] font-medium text-taupe uppercase tracking-tight line-clamp-1 italic px-2 py-0.5 rounded bg-alabaster border border-taupe/10">
+                             {{ stask.weekFocus }}
+                           </span>
+                         }
+                       </div>
+                       
+                       <h5 class="text-base font-bold text-charcoal font-heading leading-snug break-words"
+                           [class.line-through]="stask.completed"
+                           [class.text-taupe]="stask.completed">
+                         {{ stask.title }}
+                       </h5>
+
+                       @if(stask.timeBlockStart) {
+                         <div class="flex items-center gap-1.5 mt-1">
+                           <span class="material-symbols-outlined text-sm text-taupe">schedule</span>
+                           <span class="text-[11px] font-bold text-taupe tracking-wide">
+                             {{ stask.timeBlockStart }}{{ stask.timeBlockEnd ? ' — ' + stask.timeBlockEnd : '' }}
+                           </span>
+                           @if(stask.durationMinutes) {
+                             <span class="text-[10px] text-taupe/60 italic">({{ stask.durationMinutes }}m)</span>
+                           }
+                         </div>
                        }
+                     </div>
+
+                     <!-- Subtle background accent -->
+                     <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-transparent pointer-events-none opacity-5 transition-opacity group-hover/stask:opacity-10"
+                          [style.background-image]="'linear-gradient(to left, ' + (stask.color || '#f97316') + ', transparent)'">
                      </div>
                    </div>
                  }
+
                 @if(day.tasks.length === 0 && getSystemTasksForDay(day.dateString).length === 0) {
-                  <div class="h-full flex flex-col items-center justify-center text-concrete-300 border-2 border-dashed border-concrete-300 rounded-lg p-8">
+                  <div class="flex-1 flex flex-col items-center justify-center text-taupe/30 border-2 border-dashed border-taupe/10 rounded-xl p-8">
                     <span class="material-symbols-outlined text-4xl mb-2">assignment_add</span>
-                    <span class="font-mono text-xs uppercase text-center">No tasks planned for today</span>
+                    <span class="text-xs font-bold uppercase text-center">Empty Canvas</span>
                   </div>
                 }
               </div>
 
-              <!-- Input Section with Habit Tagging -->
-              <div class="mt-auto flex flex-col gap-3 pt-4 border-t-4 border-black dark:border-concrete-100">
-                <div class="flex items-center gap-2 px-2 py-1 bg-concrete-100 dark:bg-concrete-700 rigid-border-sm border-[2px] dark:border-concrete-500">
-                  <span class="material-symbols-outlined text-sm text-concrete-500 dark:text-concrete-300 uppercase font-black">sell</span>
-                  <select #habitSelect class="flex-1 bg-transparent border-none text-[10px] font-black uppercase outline-none text-concrete-700 dark:text-concrete-300 cursor-pointer hover:text-black dark:hover:text-white">
-                    <option value="">No Habit Tag</option>
+              <!-- Input Section -->
+              <div class="mt-auto space-y-3 pt-4 border-t border-taupe/10">
+                <div class="flex items-center gap-2 px-3 py-2 bg-alabaster rounded-lg border border-taupe/5 focus-within:border-taupe/20 transition-all">
+                  <span class="material-symbols-outlined text-sm text-taupe">sell</span>
+                  <select #habitSelect class="flex-1 bg-transparent border-none text-[10px] font-bold uppercase outline-none text-charcoal cursor-pointer">
+                    <option value="">No Label</option>
                     @for(habit of weeklyHabits(); track habit.id) {
                       <option [value]="habit.id">{{ habit.name }}</option>
                     }
@@ -224,10 +259,10 @@ interface WeekDay {
                 </div>
                 <div class="flex gap-2">
                   <input #taskInput (keyup.enter)="addTaskManually(day, taskInput, habitSelect)" 
-                         placeholder="What's the plan?..." 
-                         class="flex-1 px-3 py-2 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 font-mono text-sm outline-none placeholder:text-concrete-400 focus:border-black dark:focus:border-white dark:text-white">
+                         placeholder="New task..." 
+                         class="flex-1 px-4 py-2 bg-alabaster rounded-lg border border-taupe/10 text-sm outline-none transition-all placeholder:text-taupe/50 focus:border-orange-500 focus:bg-white text-charcoal">
                   <button (click)="addTaskManually(day, taskInput, habitSelect)" 
-                          class="bg-black dark:bg-concrete-100 text-white dark:text-black px-4 py-2 rigid-border-sm border-[2px] hover:bg-gray-800 dark:hover:bg-concrete-200 transition-colors">
+                          class="bg-charcoal text-white px-4 py-2 rounded-lg hover:bg-black transition-all shadow-gentle">
                     <span class="material-symbols-outlined">add</span>
                   </button>
                 </div>
@@ -238,31 +273,31 @@ interface WeekDay {
       </div>
       
        <!-- Weekly Review Section -->
-        <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-lg dark:shadow-[8px_8px_0_0_white] mt-4">
-          <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo border-b-4 border-black dark:border-concrete-100 pb-3 mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined">rate_review</span>
-            Weekly Review
+        <div class="bg-white rounded-xl shadow-gentle p-8 border border-taupe/10 mt-4">
+          <h3 class="text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-4 mb-8 flex items-center gap-2">
+            <span class="material-symbols-outlined text-orange-500">rate_review</span>
+            Weekly Reflection
           </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-             <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">What was achieved?</label>
-               <textarea [(ngModel)]="review().achieved" (ngModelChange)="updateReview()" placeholder="List achievements..." 
-                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+             <div class="flex flex-col gap-3">
+               <label class="text-xs font-bold uppercase text-taupe tracking-wider ml-1">Wins & Achievements</label>
+               <textarea [(ngModel)]="review().achieved" (ngModelChange)="updateReview()" placeholder="What went well?" 
+                         rows="5" class="w-full px-4 py-3 bg-alabaster rounded-xl border border-taupe/10 focus:border-orange-500 focus:bg-white text-charcoal text-sm outline-none resize-none transition-all placeholder:text-taupe/30"></textarea>
              </div>
-             <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">What was missed?</label>
-               <textarea [(ngModel)]="review().missed" (ngModelChange)="updateReview()" placeholder="List misses..." 
-                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+             <div class="flex flex-col gap-3">
+               <label class="text-xs font-bold uppercase text-taupe tracking-wider ml-1">Misses & Obstacles</label>
+               <textarea [(ngModel)]="review().missed" (ngModelChange)="updateReview()" placeholder="What held you back?" 
+                         rows="5" class="w-full px-4 py-3 bg-alabaster rounded-xl border border-taupe/10 focus:border-orange-500 focus:bg-white text-charcoal text-sm outline-none resize-none transition-all placeholder:text-taupe/30"></textarea>
              </div>
-             <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">Why things happened?</label>
-               <textarea [(ngModel)]="review().why" (ngModelChange)="updateReview()" placeholder="Analyze root causes..." 
-                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+             <div class="flex flex-col gap-3">
+               <label class="text-xs font-bold uppercase text-taupe tracking-wider ml-1">Insights & Analysis</label>
+               <textarea [(ngModel)]="review().why" (ngModelChange)="updateReview()" placeholder="Why stay on track?" 
+                         rows="5" class="w-full px-4 py-3 bg-alabaster rounded-xl border border-taupe/10 focus:border-orange-500 focus:bg-white text-charcoal text-sm outline-none resize-none transition-all placeholder:text-taupe/30"></textarea>
              </div>
-             <div class="flex flex-col gap-2">
-               <label class="text-xs font-black uppercase text-concrete-500 dark:text-concrete-400 ml-1">Carry forward plan?</label>
-               <textarea [(ngModel)]="review().carry_forward" (ngModelChange)="updateReview()" placeholder="Define next steps..." 
-                         rows="4" class="w-full px-4 py-3 bg-white dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-500 focus:bg-concrete-50 dark:focus:bg-black text-black dark:text-white font-mono text-sm outline-none resize-none uppercase placeholder:text-concrete-300"></textarea>
+             <div class="flex flex-col gap-3">
+               <label class="text-xs font-bold uppercase text-taupe tracking-wider ml-1">Carry Forward Plan</label>
+               <textarea [(ngModel)]="review().carry_forward" (ngModelChange)="updateReview()" placeholder="Next actions..." 
+                         rows="5" class="w-full px-4 py-3 bg-alabaster rounded-xl border border-taupe/10 focus:border-orange-500 focus:bg-white text-charcoal text-sm outline-none resize-none transition-all placeholder:text-taupe/30"></textarea>
              </div>
           </div>
         </div>
@@ -270,16 +305,15 @@ interface WeekDay {
   `,
   styles: [`
     :host { display: block; height: 100%; }
-    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #000; border-radius: 0px; border: 2px solid #f0f0f0; }
-    .custom-scrollbar-sm::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar-sm::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar-sm::-webkit-scrollbar-thumb { background: #ccc; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #dcd7d0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #c1bab0; }
+    
     .cdk-drag-placeholder {
       opacity: 0.3;
-      background: #eab308;
-      border: 4px dashed black;
+      background: #fdf6e3;
+      border: 2px dashed #e2e8f0;
       min-height: 80px;
     }
     .cdk-drag-animating {

@@ -39,13 +39,13 @@ interface DragState {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="yearly-grid-container w-full h-full flex flex-col bg-white dark:bg-concrete-900 text-black dark:text-white overflow-auto custom-scrollbar select-none font-manrope relative transition-colors duration-300" #container>
+    <div class="yearly-grid-container w-full h-full flex flex-col bg-white text-charcoal overflow-auto custom-scrollbar select-none font-body relative transition-colors duration-300 paper-texture" #container>
       
       <!-- Header Row (Days) -->
-      <div class="grid grid-cols-[60px_repeat(31,1fr)] gap-0 border-b-4 border-black dark:border-concrete-100 mb-2 sticky top-0 bg-white dark:bg-concrete-800 z-20 pb-2 shadow-sm">
-        <div class="text-[10px] text-black dark:text-white font-black uppercase tracking-wider text-center self-end pb-1 border-r-2 border-black dark:border-concrete-100 font-arvo">MON</div>
+      <div class="grid grid-cols-[80px_repeat(31,1fr)] gap-0 border-b border-taupe/10 sticky top-0 bg-white/95 backdrop-blur-sm z-20 pb-2 shadow-sm">
+        <div class="text-[10px] text-taupe font-bold uppercase tracking-widest text-center self-end pb-2 font-heading">Month</div>
         @for (day of daysHeader; track day) {
-          <div class="text-[10px] text-center text-black dark:text-white font-bold border-l border-black/30 dark:border-white/20 flex items-center justify-center h-6 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors cursor-default relative group">
+          <div class="text-[9px] text-center text-taupe font-bold flex items-center justify-center h-8 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default relative group">
               <span class="group-hover:scale-110 transition-transform">{{ day }}</span>
           </div>
         }
@@ -55,30 +55,27 @@ interface DragState {
       <div class="flex flex-col gap-0 relative z-10">
         @for (row of monthRows(); track row.name) {
           <!-- Row container -->
-          <div class="grid grid-cols-[60px_repeat(31,1fr)] gap-0 transition-colors relative group border-b-2 border-black dark:border-concrete-100 hover:bg-concrete-100 dark:hover:bg-concrete-800"
-               [style.height.px]="math.max(row.maxLanes * 32 + 10, 48)">
+          <div class="grid grid-cols-[80px_repeat(31,1fr)] gap-0 transition-colors relative group border-b border-taupe/5 hover:bg-white/50"
+               [style.height.px]="math.max(row.maxLanes * 36 + 12, 56)">
             
             <!-- Month Label -->
-            <div class="text-xs font-black text-black dark:text-white flex items-center justify-center border-r-2 border-black dark:border-concrete-100 uppercase tracking-widest bg-white dark:bg-concrete-900 sticky left-0 z-10 select-none cursor-pointer group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors font-arvo"
+            <div class="text-xs font-bold text-charcoal flex items-center justify-center border-r border-taupe/10 uppercase tracking-widest bg-white sticky left-0 z-10 select-none cursor-pointer group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors font-heading"
                  (dblclick)="onCellDoubleClick(row.index, 1)">
               {{ row.name }}
             </div>
 
             <!-- Days Grid Cells background -->
             @for (day of daysHeader; track day) {
-               <div class="border-r border-black/10 dark:border-white/10 h-full relative"
-                    [class.bg-concrete-200]="!isToday(row.index, day) && isWeekend(row.index, day)"
-                    [class.dark:bg-concrete-800]="!isToday(row.index, day) && isWeekend(row.index, day)"
-                    [class.bg-concrete-300]="!isWeekend(row.index, day) && day > row.days"
-                    [class.dark:bg-concrete-700]="!isWeekend(row.index, day) && day > row.days"
-                    [class.diagonal-stripe]="!isWeekend(row.index, day) && day > row.days"
-                    [class.bg-electric-red]="isToday(row.index, day)"
-                    [class.dark:bg-electric-red]="isToday(row.index, day)"
-                    [class.!bg-opacity-20]="isToday(row.index, day)"
+               <div class="border-r border-taupe/5 h-full relative group/cell"
+                    [class.bg-sand/20]="!isToday(row.index, day) && isWeekend(row.index, day)"
+                    [class.opacity-30]="day > row.days"
+                    [class.pointer-events-none]="day > row.days"
+                    [class.bg-orange-500/10]="isToday(row.index, day)"
                     (click)="onCellClick(row.index, day)"
                     (dblclick)="onCellDoubleClick(row.index, day)">
                     @if (day <= row.days) {
-                      <span class="absolute inset-x-0 bottom-1 text-[7px] text-center text-concrete-500 dark:text-concrete-400 pointer-events-none uppercase opacity-0 group-hover:opacity-100 transition-opacity font-mono font-bold">
+                      <div class="absolute inset-0 opacity-0 group-hover/cell:opacity-100 bg-orange-50/50 transition-opacity"></div>
+                      <span class="absolute inset-x-0 bottom-1 text-[7px] text-center text-taupe pointer-events-none uppercase font-bold tracking-tighter">
                         {{ getWeekdayLabel(row.index, day) }}
                       </span>
                     }
@@ -86,31 +83,30 @@ interface DragState {
             }
             
             <!-- Events Overlay for this Row -->
-            <div class="absolute inset-0 left-[60px] right-0 pointer-events-none grid grid-cols-[repeat(31,1fr)]">
+            <div class="absolute inset-0 left-[80px] right-0 pointer-events-none grid grid-cols-[repeat(31,1fr)]">
                @for (seg of row.segments; track seg.id + '-' + seg.startDay) {
                  <!-- Event Segment -->
-                 <div class="absolute rigid-border-sm border-[2px] pointer-events-auto flex items-center px-1 overflow-hidden transition-all shadow-[2px_2px_0_0_rgba(0,0,0,0.2)] dark:shadow-[2px_2px_0_0_rgba(255,255,255,0.4)]"
+                 <div class="absolute rounded-md pointer-events-auto flex items-center px-2 overflow-hidden transition-all shadow-gentle border border-black/5"
                       [class.z-30]="isSegmentActive(seg)"
                       [class.z-10]="!isSegmentActive(seg)"
                       [class.ring-2]="isSegmentActive(seg)"
-                      [class.ring-black]="isSegmentActive(seg)"
-                      [class.dark:ring-white]="isSegmentActive(seg)"
-                      [class.scale-[1.02]]="isSegmentActive(seg)"
+                      [class.ring-orange-500]="isSegmentActive(seg)"
+                      [class.scale-[1.01]]="isSegmentActive(seg)"
                       [style.left.%]="getSegmentLeft(seg, row)"
                       [style.width.%]="getSegmentWidth(seg, row)"
-                      [style.top.px]="(seg.lane || 0) * 32 + 4"
-                      [style.height.px]="28"
+                      [style.top.px]="(seg.lane || 0) * 36 + 6"
+                      [style.height.px]="30"
                       [style.background-color]="seg.color || '#fff'"
                       (mousedown)="onMouseDown($event, seg, row, 'move')"
                       (click)="$event.stopPropagation(); onEventClick(seg.originalEvent)">
                    
                    <!-- Content -->
-                   <span class="text-[9px] font-bold text-black whitespace-nowrap truncate w-full pointer-events-none relative z-10 font-mono tracking-tight mix-blend-hard-light uppercase bg-white/50 px-1">{{ seg.title }}</span>
+                   <span class="text-[10px] font-bold text-black/80 whitespace-nowrap truncate w-full pointer-events-none relative z-10 tracking-tight uppercase px-1">{{ seg.title }}</span>
 
-                   <!-- Resize Handles (Only show on hover or active) -->
-                   <div class="resize-handle left absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/20 z-20"
+                   <!-- Resize Handles -->
+                   <div class="resize-handle left absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-black/10 z-20 transition-colors"
                         (mousedown)="onMouseDown($event, seg, row, 'resize-start')"></div>
-                   <div class="resize-handle right absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/20 z-20"
+                   <div class="resize-handle right absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-black/10 z-20 transition-colors"
                         (mousedown)="onMouseDown($event, seg, row, 'resize-end')"></div>
                  </div>
                }
@@ -122,24 +118,14 @@ interface DragState {
     </div>
   `,
   styles: [`
-    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: white; border-left: 2px solid black; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: black; border: 2px solid white; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ff0000; }
+    :host { display: block; height: 100%; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(139, 115, 85, 0.1); }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #dcd7d0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #c1bab0; }
     
-    /* Dark scrollbar */
-    :host-context(.dark) .custom-scrollbar::-webkit-scrollbar-track { background: #262626; border-left: 2px solid white; }
-    :host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb { background: white; border: 2px solid #262626; }
-    
-    .writing-vertical-lr { writing-mode: vertical-lr; }
-    .diagonal-stripe {
-        background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent);
-        background-size: 4px 4px;
-        opacity: 0.1;
-    }
-    
-    :host-context(.dark) .diagonal-stripe {
-        background-image: linear-gradient(45deg, #fff 25%, transparent 25%, transparent 50%, #fff 50%, #fff 75%, transparent 75%, transparent);
+    .yearly-grid-container {
+      border-radius: 1rem;
     }
   `]
 })

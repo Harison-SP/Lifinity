@@ -43,6 +43,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/systems/system-manager/system-manager.component').then(m => m.SystemManagerComponent)
     },
     {
+        path: 'notes',
+        loadComponent: () => import('./features/notes/note-taking.component').then(m => m.NoteTakingComponent)
+    },
+    {
+        path: 'notes/:habitId',
+        loadComponent: () => import('./features/notes/note-taking.component').then(m => m.NoteTakingComponent)
+    },
+    {
         path: '**',
         redirectTo: ''
     }

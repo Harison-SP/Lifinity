@@ -9,7 +9,7 @@ import { PlannerTask } from '../../../../services/planner.service';
   template: `
     <div class="flex flex-col md:flex-row gap-4 mb-4">
       <div class="flex-1 bg-white dark:bg-concrete-800 p-4 rigid-border-sm border-[2px] dark:border-concrete-100 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:shadow-[4px_4px_0_0_white] relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-1 h-full bg-electric-red"></div>
+        <div class="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
         <h3 class="text-[10px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400 mb-1">Total Focus Time Today</h3>
         <p class="text-2xl font-black font-mono text-black dark:text-white">{{ totalFocusTime() | number:'1.0-1' }}h</p>
         <p class="text-[9px] font-mono text-concrete-400 dark:text-concrete-500 uppercase mt-1">Completed tasks by time block</p>

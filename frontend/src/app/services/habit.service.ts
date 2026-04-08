@@ -181,4 +181,9 @@ export class HabitService {
         const params = new HttpParams().set('tier', tier);
         return this.http.get<Habit[]>(this.apiUrl, { params });
     }
+
+    // Helper to get habit by ID from the local signal (synchronous)
+    getHabitById(id: string): Habit | undefined {
+        return this._habits().find(h => h.id === id);
+    }
 }

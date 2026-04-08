@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed, signal, effect, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, signal, OnDestroy } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,152 +9,196 @@ import { SystemService } from '../../services/system.service';
     selector: 'app-dashboard',
     imports: [RouterLink, CommonModule, FormsModule],
     template: `
-    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope transition-colors duration-300 overflow-x-hidden">
+    <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture">
         <!-- Dashboard Header -->
         <header class="flex flex-col md:flex-row items-start justify-between gap-4 mb-8">
-            <div class="space-y-1">
-                <div class="bg-concrete-900 dark:bg-concrete-100 text-white dark:text-black px-3 py-1 inline-block text-[10px] font-bold uppercase tracking-[0.15em]">User Profile // Identity Verified</div>
-                <h1 class="text-4xl md:text-5xl font-black text-concrete-900 dark:text-white uppercase leading-none font-arvo">STATUS: COMMANDER</h1>
-                <div class="flex items-center gap-3 pt-1">
-                    <div class="h-4 w-1 bg-electric-red"></div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-concrete-400">
-                        Pending Tasks: <span class="text-concrete-900 dark:text-white underline">{{ remainingHabits() }} UNITS</span>
-                    </p>
-                </div>
+            <div class="space-y-2">
+                <h1 class="font-heading text-3xl md:text-5xl font-bold text-charcoal">
+                    {{ getGreeting() }}, Habit Tracker
+                </h1>
+                <p class="text-taupe text-base">
+                    {{ getDateMessage() }}
+                </p>
             </div>
-            <a routerLink="/add" class="rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] bg-electric-red text-white font-black py-3 px-6 flex items-center gap-2 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter cursor-pointer text-sm">
-                <span class="material-symbols-outlined text-xl">add_box</span>
-                <span>Initialize New Process</span>
-            </a>
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <a routerLink="/statistics" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-sage/10 text-sage font-bold py-3 px-6 rounded-lg border border-sage/20 hover:bg-sage/20 transition-all">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Statistics
+                </a>
+                <a routerLink="/systems" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-charcoal/5 text-charcoal font-bold py-3 px-6 rounded-lg border border-charcoal/20 hover:bg-charcoal/10 transition-all">
+                    <span class="material-symbols-outlined">hub</span>
+                    Systems
+                </a>
+                <a routerLink="/add" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-6 rounded-lg shadow-gentle hover:bg-orange-400 transition-all">
+                    <span class="material-symbols-outlined">add</span>
+                    Add Habit
+                </a>
+            </div>
         </header>
 
         <!-- Stats Grid -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <!-- Efficiency Rating -->
-            <div class="bg-concrete-100 dark:bg-concrete-800 rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-4 flex flex-col active-scan relative overflow-hidden">
-                <span class="text-[9px] font-black text-concrete-400 uppercase mb-4 border-b-2 border-concrete-900 dark:border-concrete-100 pb-1 z-10 relative">Efficiency_Rating // 01</span>
-                <div class="flex items-end gap-2 mb-3 z-10 relative">
-                    <span class="text-5xl font-black leading-none dark:text-white">{{ completionPercent() }}%</span>
-                    <span class="text-[10px] font-bold text-electric-red pb-1 underline">NOMINAL</span>
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
+            <!-- Completion Rate -->
+            <div class="bg-alabaster rounded-lg shadow-gentle p-6 border border-taupe/10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-taupe">Completion Rate</span>
+                    <span class="material-symbols-outlined text-orange-500 text-xl">trending_up</span>
                 </div>
-                <div class="w-full h-3 bg-concrete-300 dark:bg-concrete-600 mt-auto z-10 relative">
-                    <div class="bg-concrete-900 dark:bg-white h-full transition-all duration-1000" [style.width.%]="completionPercent()"></div>
+                <div class="flex items-baseline gap-2 mb-3">
+                    <span class="text-4xl font-bold text-charcoal">{{ completionPercent() }}%</span>
+                    <span class="text-sm text-taupe">today</span>
                 </div>
-            </div>
-
-            <!-- Uptime Sequence (Best Streak) -->
-            <div class="bg-concrete-900 dark:bg-white rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-4 text-white dark:text-black flex flex-col justify-between">
-                <span class="text-[9px] font-bold text-concrete-400 dark:text-concrete-500 uppercase mb-3 border-b border-concrete-400 dark:border-concrete-500 pb-1">Uptime_Sequence</span>
-                <div class="flex items-center gap-3">
-                    <span class="text-6xl font-black italic leading-none text-yellow-400 dark:text-electric-red">{{ bestStreak() }}</span>
-                    <div class="text-[10px] font-bold leading-tight uppercase">Consecutive<br/>Cycles<br/>Recorded</div>
+                <div class="w-full h-2 bg-sand rounded-full overflow-hidden">
+                    <div class="h-full bg-orange-500 rounded-full transition-all duration-1000" [style.width.%]="completionPercent()"></div>
                 </div>
             </div>
 
-            <!-- Aggregate Output (Total Habits) -->
-            <div class="bg-concrete-100 dark:bg-concrete-800 rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-4 flex flex-col">
-                <span class="text-[9px] font-black text-concrete-400 uppercase mb-4 border-b-2 border-concrete-900 dark:border-concrete-100 pb-1">Total_Protocols</span>
-                <div class="flex items-baseline gap-1 mb-2">
-                    <span class="text-5xl font-black text-concrete-900 dark:text-white leading-none">{{ habitService.habits().length }}</span>
-                    <span class="text-xl font-black text-concrete-400">ACTIVE</span>
+            <!-- Best Streak -->
+            <div class="bg-orange-500 text-white rounded-lg shadow-gentle p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-white/80">Best Streak</span>
+                    <span class="material-symbols-outlined text-white">local_fire_department</span>
                 </div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-bold">{{ bestStreak() }}</span>
+                    <span class="text-sm">days</span>
+                </div>
+                <p class="text-sm text-white/80 mt-2">Keep building your momentum!</p>
+            </div>
+
+            <!-- Active Habits -->
+            <div class="bg-alabaster rounded-lg shadow-gentle p-6 border border-taupe/10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-taupe">Active Habits</span>
+                    <span class="material-symbols-outlined text-sage text-xl">check_circle</span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-bold text-charcoal">{{ habitService.habits().length }}</span>
+                    <span class="text-sm text-taupe">habits</span>
+                </div>
+                <p class="text-sm text-taupe mt-2">You're building {{ habitService.habits().length }} new habits</p>
             </div>
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Active Protocols List -->
+            <!-- Today's Habits List -->
             <section class="lg:col-span-8">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <div class="flex items-baseline gap-3">
-                        <h2 class="text-2xl md:text-3xl font-black text-concrete-900 dark:text-white uppercase font-arvo">Active_Protocols</h2>
-                        <span class="text-lg font-bold text-concrete-400">[{{ remainingHabits() }}]</span>
+                    <div>
+                        <h2 class="font-heading text-2xl md:text-3xl font-bold text-charcoal">Today's Habits</h2>
+                        <p class="text-sm text-taupe mt-1">{{ remainingHabits() }} remaining, {{ completedCount() }} completed</p>
                     </div>
-                    <a routerLink="/planner" class="text-xs font-black uppercase tracking-widest border-2 border-concrete-900 dark:border-concrete-100 px-3 py-1 hover:bg-concrete-900 dark:hover:bg-concrete-100 hover:text-white dark:hover:text-black transition-colors cursor-pointer dark:text-white">
-                        View_Planner
+                    <a routerLink="/planner" class="text-sm font-bold text-orange-500 hover:text-orange-400 transition-colors flex items-center gap-1">
+                        View Planner
+                        <span class="material-symbols-outlined text-base">arrow_forward</span>
                     </a>
                 </div>
+
                 <div class="space-y-3">
                     @for (habit of todaysHabits(); track habit.id) {
-                        <div class="rigid-border border-[2px] dark:border-concrete-400 brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white] p-3 flex items-center gap-4 cursor-pointer transition-all hover:translate-x-1"
-                             [class.bg-white]="!habit.completedToday"
-                             [class.dark:bg-concrete-800]="!habit.completedToday"
-                             [class.bg-concrete-100]="habit.completedToday"
-                             [class.dark:bg-concrete-900]="habit.completedToday"
-                             [class.opacity-60]="habit.completedToday"
-                             [class.grayscale]="habit.completedToday"
-                             [class.border-l-electric-red]="!habit.completedToday"
-                             [class.border-l-[10px]]="!habit.completedToday"
-                             (click)="handleHabitClick(habit)">
-                            
-                            <div class="w-9 h-9 border-2 border-concrete-900 dark:border-concrete-100 flex items-center justify-center transition-colors"
-                                 [class.bg-concrete-900]="habit.completedToday"
-                                 [class.dark:bg-concrete-100]="habit.completedToday"
+                        <div class="bg-white rounded-lg shadow-gentle p-4 flex items-center gap-4 cursor-pointer transition-all hover:shadow-gentle-lg border border-taupe/10"
+                             (click)="navigateToTrack(habit.id)">
+                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all shrink-0"
+                                  [class.bg-sage]="habit.completedToday"
                                  [class.text-white]="habit.completedToday"
-                                 [class.dark:text-black]="habit.completedToday"
-                                 [class.bg-transparent]="!habit.completedToday">
+                                 [class.border-sage]="habit.completedToday"
+                                 [class.border-taupe/30]="!habit.completedToday"
+                                 [class.text-taupe]="!habit.completedToday">
                                 @if (habit.completedToday) {
-                                    <span class="material-symbols-outlined text-xl">done_all</span>
+                                    <span class="material-symbols-outlined">check</span>
+                                } @else {
+                                    <span class="material-symbols-outlined text-xl">circle</span>
                                 }
                             </div>
-                            
-                            <div class="flex-1">
-                                <h3 class="text-xl font-black text-concrete-900 dark:text-white uppercase transition-all"
-                                    [class.line-through]="habit.completedToday">
-                                    {{ habit.systemTaskTitle ? habit.systemTaskTitle + ' (' + habit.name + ')' : habit.name }}
+
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-heading text-lg font-bold text-charcoal truncate"
+                                    [class.line-through]="habit.completedToday"
+                                    [class.text-taupe]="habit.completedToday">
+                                    {{ habit.name }}
                                 </h3>
-                                @if (habit.systemTitle) {
-                                    <p class="text-xs font-bold text-electric-red uppercase mb-0.5">{{ habit.systemTitle }}</p>
+                                @if (habit.systemTaskTitle) {
+                                    <p class="text-xs text-orange-500 font-medium mt-1">{{ habit.systemTaskTitle }}</p>
                                 }
-                                @if (habit.systemTaskDescription || habit.systemDescription) {
-                                    <p class="text-[10px] text-concrete-400 dark:text-concrete-300 mb-1 line-clamp-1">{{ habit.systemTaskDescription || habit.systemDescription }}</p>
-                                }
-                                @if (habit.systemTaskResourceLink) {
-                                    <a [href]="habit.systemTaskResourceLink" target="_blank" (click)="$event.stopPropagation()" class="text-[10px] text-blue-500 hover:text-blue-400 hover:underline mb-2 flex items-center gap-1 w-max">
-                                        <span class="material-symbols-outlined text-[12px]">link</span> Resource Link
-                                    </a>
-                                }
-                                <div class="mt-1">
-                                    <span class="text-[9px] font-bold px-2 py-0.5 uppercase border border-concrete-900 dark:border-concrete-100"
-                                          [class.bg-concrete-200]="habit.completedToday"
-                                          [class.dark:bg-concrete-800]="habit.completedToday"
-                                          [class.bg-concrete-900]="!habit.completedToday"
-                                          [class.dark:bg-concrete-100]="!habit.completedToday"
-                                          [class.text-white]="!habit.completedToday"
-                                          [class.dark:text-black]="!habit.completedToday"
-                                          [class.dark:text-concrete-300]="habit.completedToday">
-                                        {{ habit.category || 'GEN' }} // {{ habit.frequencyType || 'DAILY' }}
+                                <div class="flex items-center gap-2 mt-2 flex-wrap">
+                                    <span class="text-xs px-2 py-1 rounded-full bg-sand text-charcoal font-medium">
+                                        {{ habit.category || 'General' }}
                                     </span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-sand/50 text-taupe">
+                                        {{ habit.frequencyType || 'Daily' }}
+                                    </span>
+                                    @if (habit.bestStreak > 0) {
+                                        <span class="text-xs flex items-center gap-1 text-orange-600">
+                                            <span class="material-symbols-outlined text-[14px]">local_fire_department</span>
+                                            {{ habit.bestStreak }} day streak
+                                        </span>
+                                    }
                                 </div>
                             </div>
-                            
-                            <div class="flex items-center gap-2">
-                                <button (click)="$event.stopPropagation(); navigateToDetails(habit.id)" class="w-7 h-7 flex items-center justify-center border-2 border-transparent hover:border-concrete-900 dark:hover:border-concrete-100 rounded-full transition-colors">
-                                    <span class="material-symbols-outlined text-concrete-900 dark:text-white text-xl">arrow_forward</span>
-                                </button>
+
+                            <div class="flex items-center gap-2 shrink-0">
+                                @if (habit.completedToday) {
+                                    <span class="text-sm font-bold text-sage">Completed</span>
+                                } @else {
+                                    <span class="text-sm text-taupe">Tap to track</span>
+                                }
+                                <span class="material-symbols-outlined text-taupe">arrow_forward</span>
                             </div>
-                        </div>
-                    } @empty {
-                        <div class="p-6 text-center border-3 border-dashed border-concrete-300 dark:border-concrete-600">
-                            <p class="text-concrete-400 font-bold uppercase tracking-widest text-sm">No Active Protocols For Today</p>
                         </div>
                     }
                 </div>
+
+                @if (todaysHabits().length === 0) {
+                    <div class="p-8 text-center bg-alabaster rounded-lg border border-dashed border-taupe/30">
+                        <span class="material-symbols-outlined text-5xl text-taupe mb-4">checklist</span>
+                        <p class="text-taupe font-medium">No habits scheduled for today.</p>
+                        <a routerLink="/add" class="inline-flex items-center gap-2 text-orange-500 font-bold mt-4 hover:text-orange-400">
+                            Create your first habit
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </a>
+                    </div>
+                }
             </section>
 
-            <!-- Quote / Side Panel -->
+            <!-- Inspiration / Quote Panel -->
             <section class="lg:col-span-4 space-y-6">
-                <div class="bg-yellow-400 rigid-border border-[3px] dark:border-concrete-100 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] p-6 relative overflow-hidden">
-                    <span class="material-symbols-outlined text-[8rem] absolute -right-6 -bottom-6 opacity-20 text-black select-none">format_quote</span>
-                    <div class="w-9 h-9 bg-black flex items-center justify-center text-white mb-4 relative z-10">
-                        <span class="material-symbols-outlined text-xl">bolt</span>
+                <div class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-orange-600">format_quote</span>
+                        <h3 class="font-heading text-lg font-bold text-charcoal">Inspiration</h3>
                     </div>
-                    <blockquote class="text-base font-black text-black mb-4 leading-tight uppercase relative z-10">
+                    <blockquote class="text-base text-charcoal leading-relaxed italic mb-4">
                         "{{ currentQuote() }}"
                     </blockquote>
+                    <div class="h-1 w-full bg-sand rounded-full overflow-hidden">
+                        <div class="h-full bg-orange-500 w-1/3 rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Tips -->
+                <div class="bg-sage/10 rounded-lg p-6 border border-sage/20">
+                    <h3 class="font-heading text-lg font-bold text-charcoal mb-4">Tips for Success</h3>
+                    <ul class="space-y-3 text-sm text-charcoal">
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-sage text-lg shrink-0">check_circle</span>
+                            <span>Start small—tiny habits are easier to maintain</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-sage text-lg shrink-0">check_circle</span>
+                            <span>Track consistently—every day counts</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-sage text-lg shrink-0">check_circle</span>
+                            <span>Celebrate small wins to stay motivated</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-sage text-lg shrink-0">check_circle</span>
+                            <span>Don't break the chain—keep your streak alive</span>
+                        </li>
+                    </ul>
                 </div>
             </section>
         </div>
-
     </div>
     `,
     styles: [`
@@ -169,26 +213,25 @@ export class DashboardComponent implements OnDestroy {
 
     todaySystemTasks = signal<any[]>([]);
 
-    // Motivational quotes array
+    // Gentle, supportive motivational quotes
     private motivationalQuotes = [
-        "CONSISTENCY IS THE KEY TO ACHIEVING ANY GOAL. REPEAT_PROCESS_UNTIL_SUCCESS.",
-        "DISCIPLINE EQUALS FREEDOM. EXECUTE_DAILY_PROTOCOLS_WITHOUT_EXCEPTION.",
-        "SUCCESS IS NOT FINAL, FAILURE IS NOT FATAL. COURAGE_TO_CONTINUE_IS_WHAT_COUNTS.",
-        "THE ONLY WAY TO DO GREAT WORK IS TO LOVE WHAT YOU DO. PASSION_DRIVES_EXCELLENCE.",
-        "YOUR ONLY LIMIT IS YOU. BREAK_BARRIERS_DAILY.",
-        "SMALL PROGRESS IS STILL PROGRESS. EVERY_STEP_COUNTS_COMMANDER.",
-        "THE HARDER YOU WORK, THE LUCKIER YOU GET. EFFORT_MULTIPLIES_OPPORTUNITY.",
-        "DON'T WATCH THE CLOCK; DO WHAT IT DOES. KEEP_GOING_FORWARD.",
-        "BELIEVE YOU CAN AND YOU'RE HALFWAY THERE. MINDSET_IS_EVERYTHING.",
-        "THE BEST TIME TO PLANT A TREE WAS 20 YEARS AGO. SECOND_BEST_IS_NOW.",
-        "SUCCESS USUALLY COMES TO THOSE WHO ARE TOO BUSY TO BE LOOKING FOR IT. FOCUS_ON_THE_WORK.",
-        "OPPORTUNITIES DON'T HAPPEN. YOU CREATE THEM. BUILD_YOUR_FUTURE_TODAY.",
-        "DON'T STOP WHEN YOU'RE TIRED. STOP WHEN YOU'RE DONE. FINISH_STRONG.",
-        "THE SECRET OF GETTING AHEAD IS GETTING STARTED. INITIATE_ALL_PROTOCOLS.",
-        "QUALITY IS NOT AN ACT, IT IS A HABIT. EXCELLENCE_IS_ROUTINE."
+        "Small progress is still progress. Every step counts.",
+        "Consistency is more important than perfection. Keep going.",
+        "Habits are the compound interest of self-improvement.",
+        "You don't have to be great to start, but you have to start to be great.",
+        "The secret of getting ahead is getting started.",
+        "Success is not final, failure is not fatal. Courage to continue is what counts.",
+        "What gets measured gets improved.",
+        "Fall in love with the process and the results will come.",
+        "Your only limit is you. Break barriers daily.",
+        "Don't watch the clock; do what it does—keep going.",
+        "The best time to start was yesterday. The second best is now.",
+        "Build your habits, and your habits will build you.",
+        " Excellence is not an act, but a habit.",
+        "Motivation gets you going. Habit keeps you growing.",
+        "One day at a time. One habit at a time."
     ];
 
-    // Random quote signal
     currentQuote = signal<string>(this.getRandomQuote());
 
     private getLocalDateString(): string {
@@ -199,58 +242,40 @@ export class DashboardComponent implements OnDestroy {
         return `${year}-${month}-${day}`;
     }
 
-    // Filter habits for today
     todaysHabits = computed(() => {
         const today = new Date();
-        const currentDay = today.getDay(); // 0 = Sun, 1 = Mon...
-        
+        const currentDay = today.getDay();
         const todayStr = this.getLocalDateString();
         const systemTasks = this.todaySystemTasks();
 
         return this.habitService.habits().filter(h => {
-            // Priority 1: If completed today, ALWAY show it (so users can see what they've done)
-            if (h.completedToday) {
-                return true;
-            }
+            if (h.completedToday) return true;
 
-            // 1. Date Range Check
             if (h.startDate && h.endDate) {
-                // Ensure we compare strings properly
                 if (todayStr < h.startDate || todayStr > h.endDate) {
                     return false;
                 }
             }
 
-            // 2. Weekday Check
-            // We expect weekdays to be populated. If it's missing or empty:
-            // - If 'daily', show it (assume all days).
-            // - If 'specific_days', hide it (assume config missing means none).
             const weekdays = h.weekdays || (h as any).frequencyDays || (h as any).targetDays;
-            
+
             if (weekdays && weekdays.length > 0) {
-               // Standard check: Does the list include today?
-               if (!weekdays.includes(currentDay)) {
-                   return false;
-               }
+                if (!weekdays.includes(currentDay)) return false;
             } else if (h.frequencyType === 'specific_days') {
-                // Strict check: Specific days requested but none listed -> Hide
-                return false; 
+                return false;
             }
-            // For 'daily' or others with empty weekdays, we allow passing (default to show)
-            
             return true;
         }).map(h => {
-             // Find matching system task for today (if any)
-             const task = systemTasks.find(t => t.habitId === h.id);
-             if (task) {
-                 return {
-                     ...h,
-                     systemTaskTitle: task.title,
-                     systemTaskDescription: task.description,
-                     systemTaskResourceLink: task.resourceLink
-                 };
-             }
-             return h;
+            const task = systemTasks.find(t => t.habitId === h.id);
+            if (task) {
+                return {
+                    ...h,
+                    systemTaskTitle: task.title,
+                    systemTaskDescription: task.description,
+                    systemTaskResourceLink: task.resourceLink
+                };
+            }
+            return h;
         });
     });
 
@@ -268,28 +293,20 @@ export class DashboardComponent implements OnDestroy {
         return Math.max(...habits.map(h => h.bestStreak || 0));
     });
 
-    // Modal State
-    selectedHabit = signal<any | null>(null);
-    logValue: number | undefined;
-    logNotes: string = '';
     private quoteIntervalId?: ReturnType<typeof setInterval>;
 
     constructor() {
-        // Rotate quotes every 30 seconds
         this.quoteIntervalId = setInterval(() => {
             this.currentQuote.set(this.getRandomQuote());
         }, 30000);
 
-        // Fetch today's protocol tasks
         this.systemService.getInstanceTasksByDate(this.getLocalDateString()).subscribe(tasks => {
             this.todaySystemTasks.set(tasks);
         });
     }
 
     ngOnDestroy() {
-        if (this.quoteIntervalId) {
-            clearInterval(this.quoteIntervalId);
-        }
+        if (this.quoteIntervalId) clearInterval(this.quoteIntervalId);
     }
 
     private getRandomQuote(): string {
@@ -297,15 +314,16 @@ export class DashboardComponent implements OnDestroy {
         return this.motivationalQuotes[randomIndex];
     }
 
-    handleHabitClick(habit: any) {
-        this.navigateToTrack(habit.id);
+    getGreeting(): string {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good morning';
+        if (hour < 17) return 'Good afternoon';
+        return 'Good evening';
     }
 
-    toggleCompletion(id: string) {
-        const habit = this.habitService.habits().find(h => h.id === id);
-        if (habit?.type !== 'measurable') {
-            this.habitService.toggleCompletion(id, 'today').subscribe();
-        }
+    getDateMessage(): string {
+        const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+        return new Date().toLocaleDateString('en-US', options);
     }
 
     navigateToTrack(id: string) {
@@ -316,9 +334,3 @@ export class DashboardComponent implements OnDestroy {
         this.router.navigate(['/details', id]);
     }
 }
-
-
-
-
-
-

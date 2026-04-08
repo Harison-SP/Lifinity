@@ -19,19 +19,19 @@ export class HabitAnalyticsComponent implements OnChanges {
   successRatioData = signal<any[]>([]);
   missedDayPatternData = signal<any[]>([]);
   
-  // Colors
+  // Colors - Warm natural palette
   colorScheme: Color = {
     name: 'custom',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: ['#ec5b13', '#2a3441', '#1e293b', '#475569', '#94a3b8']
+    domain: ['#f97316', '#4a443e', '#9a9086', '#8c9a81', '#f4efea']
   };
-  
+
   successColorScheme: Color = {
     name: 'success',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: ['#ec5b13', '#1e293b'] 
+    domain: ['#f97316', '#8c9a81']
   };
 
   ngOnChanges(changes: SimpleChanges): void {

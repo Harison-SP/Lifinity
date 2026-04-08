@@ -1,111 +1,477 @@
-﻿/* You can add global styles to this file, and also import other style files */
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+﻿@import 'tailwindcss';
+@import "@angular/material/prebuilt-themes/deeppurple-amber.css";
 
-@import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #2b8cee;
-  --color-electric-red: #ff0000;
-  --color-accent-red: #ff3e3e;
-  
-  --color-concrete-100: #e5e5e5;
-  --color-concrete-200: #ccc;
-  --color-concrete-300: #b3b3b3;
-  --color-concrete-400: #808080;
-  --color-concrete-800: #333;
-  --color-concrete-900: #1a1a1a;
-  
+  /* Warm Natural Color Palette (Orange primary) - Light Mode */
+  --color-primary: #f97316;
+  --color-primary-light: #fb923c;
+  --color-background-light: #f8f6f6;
+  --color-alabaster: #fcfaf8;
+  --color-charcoal: #4a443e;
+  --color-taupe: #9a9086;
+  --color-sage: #8c9a81;
+  --color-terracotta: #ea580c;
+
+  /* Neutrals - Light Mode */
+  --color-cream: #fcfaf8;
+  --color-sand: #f4efea;
+  --color-sand-dark: #e8e0d8;
+
+  /* Semantic aliases - Light Mode */
+  --color-background: var(--color-background-light);
+  --color-surface: var(--color-alabaster);
+  --color-text-primary: var(--color-charcoal);
+  --color-text-secondary: var(--color-taupe);
+  --color-accent: var(--color-primary);
+  --color-success: var(--color-sage);
+
+  /* Font Families */
+  --font-display: 'Newsreader', serif;
+  --font-heading: 'Libre Baskerville', serif;
+  --font-body: 'Cabin', sans-serif;
   --font-manrope: 'Manrope', sans-serif;
-  --font-arvo: 'Arvo', serif;
+  /* Fallback/reserved */
   --font-mono: 'Space Mono', monospace;
-  --font-jetbrains: 'JetBrains Mono', monospace;
-  --font-inter: 'Inter', sans-serif;
-  --font-public: 'Public Sans', sans-serif;
 }
 
+/* Dark Mode Color Overrides */
+:host-context(.dark) {
+  /* Primary colors (stay consistent) */
+  --color-primary: #f97316;
+  --color-primary-light: #fb923c;
+
+  /* Backgrounds - Dark palette */
+  --color-background-light: #1c1917;
+  /* Dark warm gray */
+  --color-alabaster: #272623;
+  /* Dark surface */
+  --color-cream: #272623;
+
+  /* Text colors - Light text on dark background */
+  --color-charcoal: #fcfaf8;
+  /* Off-white for primary text */
+  --color-taupe: #a8a095;
+  /* Muted taupe for secondary text */
+
+  /* Neutrals - Dark palette */
+  --color-sand: #3d3834;
+  /* Dark sand */
+  --color-sand-dark: #56524f;
+  /* Darker sand */
+
+  /* Semantic aliases - Dark Mode */
+  --color-background: var(--color-background-light);
+  --color-surface: var(--color-alabaster);
+  --color-text-primary: var(--color-charcoal);
+  --color-text-secondary: var(--color-taupe);
+
+  /* Material 3 Component Token Overrides - Dark Mode */
+  --mat-sys-primary: #f97316;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #431407;
+  --mat-sys-on-primary-container: #ffdbcf;
+  
+  --mat-sys-secondary: #a8a095;
+  --mat-sys-on-secondary: #1c1917;
+  --mat-sys-surface: #1c1917;
+  --mat-sys-on-surface: #fcfaf8;
+  --mat-sys-surface-container-highest: #3d3834;
+  --mat-sys-outline: #56524f;
+}
+
+/* Material 3 Global Component Token Overrides - Light Mode */
+:root {
+  --mat-sys-primary: #f97316;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #ffdbcf;
+  --mat-sys-on-primary-container: #431407;
+  
+  --mat-sys-secondary: #9a9086;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-surface: #fcfaf8;
+  --mat-sys-on-surface: #4a443e;
+  --mat-sys-surface-container-highest: #f4efea;
+  --mat-sys-outline: #9a9086;
+  
+  /* Form Field Overrides */
+  --mdc-outlined-text-field-outline-color: rgba(154, 144, 134, 0.4);
+  --mdc-outlined-text-field-focus-outline-color: #f97316;
+  --mdc-outlined-text-field-label-text-color: #9a9086;
+  --mdc-outlined-text-field-focus-label-text-color: #f97316;
+  --mdc-outlined-text-field-container-shape: 12px;
+}
+
+/* Dark mode overrides for Tailwind default colors (non-variable based) */
+:host-context(.dark) .bg-white {
+  background-color: var(--color-alabaster) !important;
+}
+
+:host-context(.dark) .text-white {
+  color: #ffffff !important;
+  /* Keep white for high contrast elements */
+}
+
+:host-context(.dark) .bg-orange-500 {
+  background-color: #f97316 !important;
+}
+
+:host-context(.dark) .text-orange-500,
+:host-context(.dark) .text-orange-400 {
+  color: #fb923c !important;
+}
+
+:host-context(.dark) .text-orange-600 {
+  color: #fb923c !important;
+}
+
+:host-context(.dark) .bg-sage\/10 {
+  background-color: rgba(168, 176, 154, 0.1) !important;
+  /* Dark mode sage at 10% */
+}
+
+:host-context(.dark) .text-sage {
+  color: #a8b09a !important;
+  /* Dark mode sage text */
+}
+
+:host-context(.dark) .bg-primary\/5 {
+  background-color: rgba(249, 115, 22, 0.05) !important;
+}
+
+:host-context(.dark) .bg-primary\/10 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+:host-context(.dark) .border-taupe\/10 {
+  border-color: rgba(168, 160, 149, 0.1) !important;
+}
+
+:host-context(.dark) .border-taupe\/20 {
+  border-color: rgba(168, 160, 149, 0.2) !important;
+}
+
+:host-context(.dark) .border-taupe\/30 {
+  border-color: rgba(168, 160, 149, 0.3) !important;
+}
+
+/* Paper grain texture for backgrounds */
+.paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+}
+
+/* Gentle shadow utilities */
 @layer utilities {
-    .brutalist-shadow { box-shadow: 16px 16px 0px 0px #000000; }
-    .brutalist-shadow-sm { box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 1); }
-    .brutalist-shadow-md { box-shadow: 8px 8px 0 0 rgba(0, 0, 0, 1); }
-    
-    .rigid-border { border: 4px solid #000000; }
-    .rigid-border-sm { border: 2px solid #000000; }
-    
-    .industrial-bg {
-        background: repeating-linear-gradient(
-            45deg,
-            #e5e5e5,
-            #e5e5e5 10px,
-            #dbdbdb 10px,
-            #dbdbdb 20px
-        );
-    }
-    
-    .active-scan {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .active-scan::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: #ff3e3e;
-        animation: scan 3s linear infinite;
-        pointer-events: none;
-    }
-    
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
+  .shadow-gentle {
+    box-shadow: 0 4px 20px rgba(74, 68, 62, 0.05);
+  }
 
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
+  .shadow-gentle-lg {
+    box-shadow: 0 8px 30px rgba(74, 68, 62, 0.08);
+  }
 
-    @keyframes scan {
-        0% { top: 0; } 100% { top: 100%; }
-    }
+  /* Custom scrollbar - taupe theme */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--color-sand);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-taupe);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-charcoal);
+  }
+
+  /* No scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Floating label styles for form inputs */
+  .floating-input:focus~.floating-label,
+  .floating-input:not(:placeholder-shown)~.floating-label {
+    transform: translateY(-1.5rem) scale(0.75);
+    color: var(--color-primary);
+  }
+
+  .floating-label {
+    transition: all 0.3s ease;
+    transform-origin: left center;
+  }
 }
 
 @layer base {
-  html, body {
-      width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
-  body { 
-      font-family: 'Manrope', sans-serif; 
-      @apply bg-concrete-100 text-black dark:bg-concrete-900 dark:text-concrete-100;
+  body {
+    font-family: var(--font-body), sans-serif;
+    background-color: var(--color-background-light);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+    color: var(--color-charcoal);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading), serif;
+    font-weight: 700;
+    color: var(--color-charcoal);
+  }
+
+  .display-text {
+    font-family: var(--font-display), serif;
+  }
+
+  .body-text {
+    font-family: var(--font-body), sans-serif;
   }
 }
 
-/* Global Scrollbar */
-::-webkit-scrollbar { width: 12px; height: 12px; }
-::-webkit-scrollbar-track { background: #aaa; border-left: 3px solid black; }
-::-webkit-scrollbar-thumb { background: black; }
-::-webkit-scrollbar-thumb:hover { background: #333; }
-
-/* Material Overrides for Brutalist Theme */
-.mat-datepicker-content {
-    border: 4px solid black !important;
-    box-shadow: 8px 8px 0 0 rgba(0, 0, 0, 1) !important;
-    border-radius: 0 !important;
+/* Global Scrollbar - taupe colored */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-.mat-calendar-body-selected {
-    background-color: #ff3e3e !important;
-    color: white !important;
+::-webkit-scrollbar-track {
+  background: var(--color-sand);
 }
 
-.mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
-    background-color: #e5e5e5 !important;
+::-webkit-scrollbar-thumb {
+  background: var(--color-taupe);
+  border-radius: 5px;
 }
 
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-charcoal);
+}
 
+/* Material Input Overrides - Soft Style */
+.soft-input.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-shape: 16px !important;
+  margin-bottom: 8px;
+}
+
+::ng-deep .soft-input .mdc-notched-outline__leading,
+::ng-deep .soft-input .mdc-notched-outline__notch,
+::ng-deep .soft-input .mdc-notched-outline__trailing {
+  border-color: rgba(154, 144, 134, 0.3) !important;
+  border-width: 1px !important;
+}
+
+::ng-deep .soft-input.mat-focused .mdc-notched-outline__leading,
+::ng-deep .soft-input.mat-focused .mdc-notched-outline__notch,
+::ng-deep .soft-input.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--color-primary) !important;
+  border-width: 2px !important;
+}
+
+::ng-deep .soft-input .mat-mdc-form-field-flex {
+  background-color: var(--color-alabaster) !important;
+  border-radius: 16px !important;
+}
+
+::ng-deep .soft-input .mat-mdc-input-element {
+  font-family: var(--font-body), sans-serif !important;
+  color: var(--color-charcoal) !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+}
+
+::ng-deep .soft-input .mat-mdc-floating-label {
+  font-family: var(--font-body), sans-serif !important;
+  color: var(--color-taupe) !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 0.02em !important;
+}
+
+::ng-deep .soft-input.mat-focused .mat-mdc-floating-label {
+  color: var(--color-primary) !important;
+}
+
+/* Fix for overlapping icons/text in image */
+::ng-deep .mat-mdc-form-field-icon-suffix {
+  color: var(--color-taupe) !important;
+  padding-right: 8px !important;
+}
+
+::ng-deep .mat-datepicker-toggle button {
+  color: var(--color-taupe) !important;
+}
+
+/* Datepicker/Timepicker Soft Theme */
+::ng-deep .soft-datepicker .mat-datepicker-content,
+::ng-deep .mat-timepicker-content {
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-taupe) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 40px rgba(74, 68, 62, 0.15) !important;
+  overflow: hidden !important;
+  padding: 8px !important;
+}
+
+::ng-deep .soft-datepicker .mat-calendar-body-selected,
+::ng-deep .mat-timepicker-cell-selected {
+  background-color: var(--color-primary) !important;
+  border-radius: 0.5rem !important;
+  color: white !important;
+}
+
+::ng-deep .soft-datepicker .mat-calendar-body-cell:hover .mat-calendar-body-cell-content,
+::ng-deep .mat-timepicker-cell:hover {
+  background-color: var(--color-sand) !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Fix for range label 'to' alignment */
+.range-separator {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 56px !important; /* height of standard mat-form-field */
+  color: var(--color-taupe) !important;
+  font-family: var(--font-body) !important;
+  font-weight: 500 !important;
+}
+
+/* Dark mode soft adaptation */
+:host-context(.dark) body {
+  background-color: #1c1917;
+  color: #fcfaf8;
+}
+
+:host-context(.dark) .paper-texture {
+  opacity: 0.05;
+}
+
+:host-context(.dark) .shadow-gentle {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+:host-context(.dark) .shadow-gentle-lg {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+:host-context(.dark) .text-orange-600 {
+  color: #fb923c !important;
+}
+
+:host-context(.dark) .custom-scrollbar::-webkit-scrollbar-track {
+  background: #2a2927;
+}
+
+:host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #666;
+}
+
+:host-context(.dark) h1,
+:host-context(.dark) h2,
+:host-context(.dark) h3,
+:host-context(.dark) h4,
+:host-context(.dark) h5,
+:host-context(.dark) h6 {
+  color: #fcfaf8;
+}
+
+/* Dark mode overrides for Tailwind default colors */
+:host-context(.dark) .bg-white {
+  background-color: var(--color-alabaster) !important;
+}
+
+:host-context(.dark) .text-white {
+  color: var(--color-charcoal) !important;
+}
+
+:host-context(.dark) .border-white\/10 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+:host-context(.dark) .border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+:host-context(.dark) .bg-orange-500 {
+  background-color: #f97316 !important;
+}
+
+:host-context(.dark) .text-orange-500 {
+  color: #fb923c !important;
+}
+
+:host-context(.dark) .text-orange-400 {
+  color: #fb923c !important;
+}
+
+:host-context(.dark) .bg-sage\/10 {
+  background-color: rgba(140, 154, 129, 0.1) !important;
+}
+
+:host-context(.dark) .text-sage {
+  color: #a8b09a !important;
+}
+
+:host-context(.dark) .bg-sand {
+  background-color: var(--color-sand) !important;
+}
+
+:host-context(.dark) .text-charcoal {
+  color: var(--color-text-primary) !important;
+}
+
+:host-context(.dark) .text-taupe {
+  color: var(--color-text-secondary) !important;
+}
+
+:host-context(.dark) .border-taupe\/10 {
+  border-color: rgba(154, 144, 134, 0.1) !important;
+}
+
+:host-context(.dark) .border-taupe\/20 {
+  border-color: rgba(154, 144, 134, 0.2) !important;
+}
+
+:host-context(.dark) .border-taupe\/30 {
+  border-color: rgba(154, 144, 134, 0.3) !important;
+}
+
+:host-context(.dark) .bg-sage\/10 {
+  background-color: rgba(140, 154, 129, 0.1) !important;
+}
+
+:host-context(.dark) .bg-primary\/5 {
+  background-color: rgba(249, 115, 22, 0.05) !important;
+}
+
+:host-context(.dark) .bg-primary\/10 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+:host-context(.dark) .bg-white {
+  background-color: var(--color-background-light) !important;
+}
+
+:host-context(.dark) .bg-alabaster {
+  background-color: var(--color-alabaster) !important;
+}

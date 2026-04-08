@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { HabitAnalyticsComponent } from './habit-analytics/habit-analytics';
@@ -10,168 +10,148 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 @Component({
     selector: 'app-habit-details',
     standalone: true,
-    imports: [CommonModule, FormsModule, HabitAnalyticsComponent, NgxChartsModule, RouterLink],
+    imports: [CommonModule, FormsModule, HabitAnalyticsComponent, NgxChartsModule],
     template: `
-    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope pb-24 relative transition-colors duration-300 overflow-x-hidden">
+    <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture pb-24">
         <!-- Header -->
-        <header class="mb-10 md:mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 border-b-4 border-black dark:border-concrete-100 pb-6 bg-white dark:bg-concrete-800 p-4 sm:p-6 rigid-border-sm brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-            <div class="flex items-start sm:items-center gap-3 sm:gap-6 w-full md:w-auto">
-                <button (click)="goBack()" class="w-12 h-12 rigid-border-sm bg-white dark:bg-concrete-900 flex items-center justify-center hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors group shrink-0 border-2 border-transparent dark:border-concrete-500">
-                    <span class="material-symbols-outlined text-2xl dark:text-white dark:group-hover:text-black">arrow_back</span>
+        <header class="flex flex-col md:flex-row items-start justify-between gap-6 mb-10">
+            <div class="flex items-center gap-4">
+                <button (click)="goBack()" class="w-10 h-10 rounded-full bg-white shadow-gentle flex items-center justify-center hover:bg-sand transition-colors text-charcoal border border-taupe/10">
+                    <span class="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>
-                    <div class="bg-black dark:bg-concrete-100 text-white dark:text-black px-2 py-0.5 inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
-                        Protocol_Analysis
-                    </div>
-                    <h1 class="text-3xl md:text-5xl font-black text-black dark:text-white uppercase leading-none font-arvo flex items-center gap-3">
-                        {{ habit()?.name || 'LOADING...' }}
+                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-taupe mb-1 block">Protocol Analysis</span>
+                    <h1 class="font-heading text-3xl md:text-5xl font-bold text-charcoal leading-tight">
+                        {{ habit()?.name || 'Protocol Offline' }}
                     </h1>
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-start md:justify-end">
-                <a routerLink="/add" class="px-4 py-2 bg-electric-red text-white rigid-border-sm border-[2px] dark:border-concrete-100 text-xs font-black uppercase tracking-widest hover:bg-black dark:hover:bg-white dark:hover:text-black dark:hover:border-white transition-colors flex items-center gap-2">
-                    <span class="material-symbols-outlined text-base">add_box</span>
-                    Initialize_Protocol
-                </a>
-                <button (click)="editHabit()" class="px-4 py-2 bg-concrete-100 dark:bg-concrete-700 rigid-border-sm border-[2px] dark:border-concrete-500 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center gap-2 dark:text-white">
-                    <span class="material-symbols-outlined text-base">edit</span>
-                    Edit
-                </button>
-                <button (click)="deleteHabit()" class="px-4 py-2 bg-concrete-100 dark:bg-concrete-700 rigid-border-sm border-[2px] dark:border-concrete-500 text-xs font-black uppercase tracking-widest hover:bg-electric-red hover:text-white hover:border-black dark:hover:border-electric-red transition-colors flex items-center gap-2 dark:text-white">
-                    <span class="material-symbols-outlined text-base">delete</span>
-                    Purge
-                </button>
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <button (click)="toggleDone()" 
-                        class="px-6 py-2 rigid-border-sm border-[2px] dark:border-concrete-100 font-black uppercase tracking-widest text-xs transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white] dark:text-white"
-                        [class.bg-electric-red]="!isCompletedOnSelectedDate()"
+                        class="px-6 py-2.5 rounded-lg font-bold text-sm transition-all shadow-gentle hover:shadow-gentle-lg flex items-center gap-2"
+                        [class.bg-orange-500]="!isCompletedOnSelectedDate()"
                         [class.text-white]="!isCompletedOnSelectedDate()"
-                        [class.bg-concrete-900]="isCompletedOnSelectedDate()"
-                        [class.dark:bg-black]="isCompletedOnSelectedDate()"
+                        [class.bg-sage]="isCompletedOnSelectedDate()"
                         [class.text-white]="isCompletedOnSelectedDate()">
-                    {{ isCompletedOnSelectedDate() ? 'COMPLETED' : 'MARK_COMPLETE' }}
+                    <span class="material-symbols-outlined text-base">
+                        {{ isCompletedOnSelectedDate() ? 'check_circle' : 'pending_actions' }}
+                    </span>
+                    {{ isCompletedOnSelectedDate() ? 'Completed Today' : 'Mark Complete' }}
                 </button>
+                <div class="flex gap-2">
+                    <button (click)="editHabit()" class="w-10 h-10 rounded-full bg-white shadow-gentle flex items-center justify-center hover:bg-sand transition-colors text-charcoal border border-taupe/10" title="Edit Protocol">
+                        <span class="material-symbols-outlined text-xl">edit</span>
+                    </button>
+                    <button (click)="deleteHabit()" class="w-10 h-10 rounded-full bg-white shadow-gentle flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors text-charcoal border border-taupe/10" title="Purge Protocol">
+                        <span class="material-symbols-outlined text-xl">delete</span>
+                    </button>
+                </div>
             </div>
         </header>
 
         @if (habit()) {
-            <!-- Protocol Details Grid -->
+            <!-- Protocol Config Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <!-- System Type -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">System_Type</p>
-                    <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.type === 'yes_no' ? 'Binary State' : 'Quantitative' }}</p>
+                <div class="bg-white rounded-lg shadow-gentle p-4 border border-taupe/10">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-taupe mb-1">System Type</p>
+                    <p class="text-sm font-bold text-charcoal">{{ habit()?.type === 'yes_no' ? 'Binary Adherence' : 'Quantitative Metric' }}</p>
                 </div>
-                <!-- Time Range -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">Timeline_Range</p>
-                    <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.startDate | date:'MMM d' }} - {{ habit()?.endDate | date:'MMM d, yy' }}</p>
+                <div class="bg-white rounded-lg shadow-gentle p-4 border border-taupe/10">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-taupe mb-1">Timeline</p>
+                    <p class="text-sm font-bold text-charcoal">{{ habit()?.startDate | date:'MMM d' }} - {{ habit()?.endDate | date:'MMM d, yy' }}</p>
                 </div>
-                <!-- Recurrence -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">Frequency</p>
-                    <p class="text-sm font-bold uppercase dark:text-white">
-                        {{ habit()?.frequencyType === 'daily' ? 'Daily' : 
-                           habit()?.frequencyType === 'specific_days' ? 'Specific Days' : 
+                <div class="bg-white rounded-lg shadow-gentle p-4 border border-taupe/10">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-taupe mb-1">Frequency</p>
+                    <p class="text-sm font-bold text-charcoal">
+                        {{ habit()?.frequencyType === 'daily' ? 'Constant (Daily)' : 
+                           habit()?.frequencyType === 'specific_days' ? 'Scheduled Days' : 
                            'Every ' + habit()?.frequencyInterval + ' Days' }}
                     </p>
                 </div>
-                <!-- Time Block -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border-sm border-[2px] dark:border-concrete-100 p-4 brutalist-shadow-sm dark:shadow-[2px_2px_0_0_white]">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-1">Time_Block</p>
-                    <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.timeBlockStart || 'ANY' }} - {{ habit()?.timeBlockEnd || 'ANY' }}</p>
+                <div class="bg-white rounded-lg shadow-gentle p-4 border border-taupe/10">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-taupe mb-1">Execution Window</p>
+                    <p class="text-sm font-bold text-charcoal">{{ habit()?.timeBlockStart || 'Any Time' }} - {{ habit()?.timeBlockEnd || 'Any Time' }}</p>
                 </div>
-                <!-- Target (If Measurable) -->
-                @if (habit()?.type === 'measurable') {
-                    <div class="col-span-2 md:col-span-4 bg-concrete-100 dark:bg-concrete-900 rigid-border-sm border-[2px] dark:border-concrete-100 p-4">
-                        <p class="text-[9px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400 mb-1">Metric_Target</p>
-                        <p class="text-sm font-bold uppercase dark:text-white">{{ habit()?.targetComparator }} {{ habit()?.targetValue }} {{ habit()?.targetUnit }}</p>
-                    </div>
-                }
             </div>
 
             @if (inconsistentDaysCount() >= 2) {
-                <div class="bg-electric-red text-white p-4 font-black uppercase tracking-widest mb-8 border-4 border-black dark:border-white flex items-center gap-3">
-                    <span class="material-symbols-outlined text-2xl">warning</span>
-                    WARNING: {{ inconsistentDaysCount() }} inconsistent days detected recently. Protocol adherence compromised!
+                <div class="bg-orange-500/10 border border-orange-500/20 text-orange-600 p-4 rounded-lg font-bold text-sm mb-8 flex items-center gap-3">
+                    <span class="material-symbols-outlined">warning</span>
+                    <span>System Alert: {{ inconsistentDaysCount() }} missed cycles detected. Restoration protocol advised.</span>
                 </div>
             }
 
-            <!-- Stats Grid -->
+            <!-- Key Performance Indicators -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-
                 <!-- Streak -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative group overflow-hidden brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-2 border-b-2 border-black dark:border-concrete-100 pb-1">Current_Sequence</p>
+                <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 hover:shadow-gentle-lg transition-all border-l-4 border-l-orange-500">
+                    <p class="text-xs font-bold uppercase tracking-widest text-taupe mb-2">Current Sequence</p>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-6xl font-black font-arvo leading-none dark:text-white">{{ habit()?.streak }}</span>
-                        <span class="text-xs font-bold text-electric-red uppercase">Days</span>
+                        <span class="text-5xl font-bold font-heading text-charcoal">{{ habit()?.streak }}</span>
+                        <span class="text-sm font-bold text-orange-500">days active</span>
                     </div>
                 </div>
 
                 <!-- Best Streak -->
-                <div class="bg-black dark:bg-white text-white dark:text-black rigid-border border-[4px] dark:border-concrete-100 p-6 relative group overflow-hidden brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-600 mb-2 border-b border-concrete-400 dark:border-concrete-600 pb-1">Max_Continuity</p>
+                <div class="bg-orange-500 text-white rounded-xl shadow-gentle p-6 hover:shadow-gentle-lg transition-all">
+                    <p class="text-xs font-bold uppercase tracking-widest text-white/80 mb-2">Maximum Continuity</p>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-6xl font-black font-arvo leading-none text-yellow-400 dark:text-electric-red">{{ habit()?.bestStreak }}</span>
-                        <span class="text-xs font-bold uppercase">Record</span>
+                        <span class="text-5xl font-bold font-heading">{{ habit()?.bestStreak }}</span>
+                        <span class="text-sm font-bold opacity-90">record streak</span>
                     </div>
                 </div>
 
                 <!-- Total Completions -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative group overflow-hidden brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-concrete-400 dark:text-concrete-500 mb-2 border-b-2 border-black dark:border-concrete-100 pb-1">Total_Executions</p>
+                <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 hover:shadow-gentle-lg transition-all border-l-4 border-l-sage">
+                    <p class="text-xs font-bold uppercase tracking-widest text-taupe mb-2">Total Executions</p>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-6xl font-black font-arvo leading-none dark:text-white">{{ stats()?.total_completions || 0 }}</span>
-                        <span class="text-xs font-bold uppercase dark:text-concrete-200">Ops</span>
+                        <span class="text-5xl font-bold font-heading text-charcoal">{{ stats()?.total_completions || 0 }}</span>
+                        <span class="text-sm font-bold text-sage">successes</span>
                     </div>
                 </div>
-
             </div>
 
-            <!-- Removed Tracker Modules (now in Daily Track feature) -->
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
                 <!-- Activity Heatmap -->
-                <div class="lg:col-span-2 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
-                    <div class="flex items-center justify-between mb-6 border-b-4 border-black dark:border-concrete-100 pb-4">
-                        <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo">Activity_Matrix</h3>
-                        <div class="flex items-center gap-4">
-                            <!-- Legend -->
-                            <div class="hidden md:flex items-center gap-1 text-[9px] font-bold uppercase">
-                                <span>Less</span>
-                                <div class="w-3 h-3 bg-concrete-100 border border-black/30"></div>
-                                <div class="w-3 h-3 bg-concrete-300 border border-black/30"></div>
-                                <div class="w-3 h-3 bg-concrete-500 border border-black/30"></div>
-                                <div class="w-3 h-3 bg-black border border-black/30"></div>
-                                <span>More</span>
+                <div class="lg:col-span-8 bg-white rounded-2xl shadow-gentle p-8 border border-taupe/10">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <h3 class="font-heading text-xl font-bold text-charcoal">Activity Matrix</h3>
+                            <p class="text-xs text-taupe mt-1">Visualization of historical adherence</p>
+                        </div>
+                        <div class="flex items-center gap-2 text-[10px] font-bold text-taupe bg-sand p-2 rounded-lg">
+                            <span>Muted</span>
+                            <div class="flex gap-1">
+                                <div class="w-3 h-3 bg-sand-dark rounded-[2px]"></div>
+                                <div class="w-3 h-3 bg-orange-500/40 rounded-[2px]"></div>
+                                <div class="w-3 h-3 bg-orange-500/70 rounded-[2px]"></div>
+                                <div class="w-3 h-3 bg-orange-600 rounded-[2px]"></div>
                             </div>
+                            <span>Active</span>
                         </div>
                     </div>
-                    <div class="space-y-8">
+                    
+                    <div class="flex flex-wrap gap-8 justify-center sm:justify-start">
                         @for (monthData of timelineMonths(); track monthData.monthYear) {
-                            <div class="max-w-xs mx-auto">
-                                <h4 class="text-sm font-bold font-mono uppercase mb-3 text-center dark:text-concrete-200">
+                            <div class="w-full max-w-[200px]">
+                                <h4 class="text-xs font-bold text-charcoal mb-3 uppercase tracking-wider text-center">
                                     {{ monthData.monthName }} {{ monthData.year }}
                                 </h4>
-                                <div class="grid grid-cols-7 gap-1 mb-1">
+                                <div class="grid grid-cols-7 gap-1.5">
                                     @for (d of ['S','M','T','W','T','F','S']; track $index) {
-                                        <div class="text-center text-[9px] font-black text-concrete-400 dark:text-concrete-500">{{ d }}</div>
+                                        <div class="text-center text-[9px] font-bold text-taupe">{{ d }}</div>
                                     }
-                                </div>
-                                <div class="grid grid-cols-7 gap-1">
                                     @for (day of monthData.days; track $index) {
                                         @if (day.isEmpty) {
                                             <div class="aspect-square"></div>
                                         } @else {
-                                            <div class="w-full aspect-square border border-black/10 dark:border-white/10 transition-all hover:scale-125 relative cursor-help rounded-sm"
-                                                [class.bg-concrete-100]="day.level === 0"
-                                                [class.dark:bg-concrete-700]="day.level === 0"
-                                                [class.bg-concrete-300]="day.level === 1"
-                                                [class.dark:bg-concrete-500]="day.level === 1"
-                                                [class.bg-concrete-500]="day.level === 2"
-                                                [class.bg-black]="day.level >= 3"
-                                                [title]="day.date + ': Level ' + (day.level || 0)">
+                                            <div class="w-full aspect-square rounded-[3px] transition-all hover:scale-125 cursor-help relative"
+                                                [class.bg-sand]="day.level === 0"
+                                                [class.bg-orange-500/40]="day.level === 1"
+                                                [class.bg-orange-500/70]="day.level === 2"
+                                                [class.bg-orange-600]="day.level >= 3"
+                                                [title]="day.date + ': Adherence Level ' + (day.level || 0)">
                                             </div>
                                         }
                                     }
@@ -182,64 +162,59 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                 </div>
 
                 <!-- Calendar -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
-                    <div class="flex items-center justify-between mb-6 border-b-4 border-black dark:border-concrete-100 pb-2">
-                        <h3 class="text-lg font-black uppercase font-arvo dark:text-white">{{ calendarMonthName() }} {{ calendarYear() }}</h3>
+                <div class="lg:col-span-4 bg-white rounded-2xl shadow-gentle p-6 border border-taupe/10">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-heading text-lg font-bold text-charcoal">{{ calendarMonthName() }} {{ calendarYear() }}</h3>
                         <div class="flex gap-1">
-                            <button (click)="previousMonth()" [disabled]="!canPrevMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 dark:bg-concrete-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none">
-                                <span class="material-symbols-outlined text-sm dark:text-white dark:group-hover:text-black">chevron_left</span>
+                            <button (click)="$event.stopPropagation(); previousMonth()" [disabled]="!canPrevMonth()" class="w-8 h-8 rounded-full bg-sand flex items-center justify-center hover:bg-sand-dark transition-colors disabled:opacity-20">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
                             </button>
-                            <button (click)="nextMonth()" [disabled]="!canNextMonth()" class="w-8 h-8 rigid-border-sm bg-concrete-100 dark:bg-concrete-900 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors flex items-center justify-center disabled:opacity-20 disabled:pointer-events-none">
-                                <span class="material-symbols-outlined text-sm dark:text-white dark:group-hover:text-black">chevron_right</span>
+                            <button (click)="$event.stopPropagation(); nextMonth()" [disabled]="!canNextMonth()" class="w-8 h-8 rounded-full bg-sand flex items-center justify-center hover:bg-sand-dark transition-colors disabled:opacity-20">
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </button>
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-7 gap-1 mb-2">
                         @for (d of ['S','M','T','W','T','F','S']; track $index) {
-                            <div class="text-center text-[10px] font-black uppercase dark:text-concrete-400">{{d}}</div>
+                            <div class="text-center text-[10px] font-bold text-taupe uppercase">{{d}}</div>
                         }
                     </div>
-                    <div class="grid grid-cols-7 gap-1">
+                    <div class="grid grid-cols-7 gap-2">
                         @for (day of calendarDays(); track day.date) {
                             @if (day.isEmpty) {
                                 <div></div>
                             } @else {
                                 <div (click)="selectDate(day.date)" 
-                                     class="aspect-square flex items-center justify-center text-xs font-mono font-bold border-2 border-transparent transition-all cursor-pointer relative"
-                                     [class.hover:bg-concrete-200]="!day.isFuture"
-                                     [class.dark:hover:bg-concrete-700]="!day.isFuture"
+                                     class="aspect-square flex items-center justify-center text-xs font-bold rounded-lg border-2 border-transparent transition-all cursor-pointer relative"
+                                     [class.hover:bg-sand]="!day.isFuture"
                                      [class.opacity-30]="day.isFuture"
                                      [class.pointer-events-none]="day.isFuture"
                                      
-                                     [class.bg-black]="day.isCompleted"
-                                     [class.dark:bg-white]="day.isCompleted"
+                                     [class.bg-sage]="day.isCompleted"
                                      [class.text-white]="day.isCompleted"
-                                     [class.dark:text-black]="day.isCompleted"
-                                     [class.border-black]="day.isCompleted"
-                                     [class.dark:border-white]="day.isCompleted"
                                      
-                                     [class.border-electric-red]="day.isToday && !day.isCompleted"
-                                     [class.text-electric-red]="day.isToday && !day.isCompleted"
+                                     [class.border-orange-500]="day.isToday && !day.isCompleted"
+                                     [class.text-orange-600]="day.isToday && !day.isCompleted"
                                      
-                                     [class.bg-concrete-100]="!day.isCompleted && !day.isToday && !day.isFuture"
-                                     [class.dark:bg-concrete-700]="!day.isCompleted && !day.isToday && !day.isFuture"
-                                     [class.dark:text-white]="!day.isCompleted && !day.isToday && !day.isFuture">
+                                     [class.bg-sand/50]="!day.isCompleted && !day.isToday && !day.isFuture"
+                                     [class.text-taupe]="!day.isCompleted && !day.isToday && !day.isFuture">
                                     {{ day.dayNumber }}
                                 </div>
                             }
                         }
                     </div>
+                    <p class="text-[10px] text-taupe mt-4 text-center">Tap a date to update adherence</p>
                 </div>
             </div>
 
-            <!-- Weekly Distribution & Efficiency Vector -->
+            <!-- Analytics Visualizations -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                 <!-- Weekly Distribution -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
-                    <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo mb-6 flex items-center gap-2 border-b-4 border-black dark:border-concrete-100 pb-2">
-                        <span class="material-symbols-outlined text-electric-red">bubble_chart</span>
-                        Weekly_Distribution
+                <div class="bg-white rounded-2xl shadow-gentle p-8 border border-taupe/10">
+                    <h3 class="font-heading text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-orange-500">bubble_chart</span>
+                        Weekly Distribution
                     </h3>
                     @if (stats()?.weekly_frequency) {
                         <div class="h-48 w-full">
@@ -257,25 +232,25 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                     }
                 </div>
 
-                <!-- Efficiency Vector (Trend Line) -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white] flex flex-col">
-                    <h3 class="text-xl font-black text-black dark:text-white uppercase font-arvo mb-6 flex items-center gap-2 border-b-4 border-black dark:border-concrete-100 pb-2">
-                        <span class="material-symbols-outlined text-electric-red">trending_up</span>
-                        Efficiency_Vector
+                <!-- Adherence Efficiency -->
+                <div class="bg-white rounded-2xl shadow-gentle p-8 border border-taupe/10 flex flex-col">
+                    <h3 class="font-heading text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sage">trending_up</span>
+                        Adherence Efficiency
                     </h3>
-                    <div class="flex-1 flex items-end relative h-48 w-full bg-concrete-100 border-2 border-black p-2">
+                    <div class="flex-1 flex items-end relative h-48 w-full bg-sand/30 rounded-xl overflow-hidden p-2">
                         <svg viewBox="0 0 100 50" class="w-full h-full overflow-visible relative z-10" preserveAspectRatio="none">
                             <defs>
                                 <linearGradient id="trendGradient" x1="0" x2="0" y1="0" y2="1">
-                                    <stop offset="0%" stop-color="black" stop-opacity="0.2"/>
-                                    <stop offset="100%" stop-color="black" stop-opacity="0"/>
+                                    <stop offset="0%" [attr.stop-color]="'#f97316'" stop-opacity="0.2"/>
+                                    <stop offset="100%" [attr.stop-color]="'#f97316'" stop-opacity="0"/>
                                 </linearGradient>
                             </defs>
                             <path [attr.d]="trendArea()" fill="url(#trendGradient)" />
-                            <path [attr.d]="trendLine()" fill="none" stroke="black" class="dark:stroke-white text-black dark:text-white" stroke-width="2.5" stroke-linecap="square" vector-effect="non-scaling-stroke" />
+                            <path [attr.d]="trendLine()" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" />
                         </svg>
                     </div>
-                    <div class="flex justify-between text-[10px] font-black text-concrete-400 mt-3 font-mono uppercase">
+                    <div class="flex justify-between text-[10px] font-bold text-taupe mt-3 uppercase tracking-wider">
                         @if (stats()?.completion_trend?.length) {
                             <span>{{ stats()!.completion_trend[0].period }}</span>
                             <span>{{ stats()!.completion_trend[stats()!.completion_trend.length - 1].period }}</span>
@@ -284,48 +259,57 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
                 </div>
             </div>
 
-            <!-- Advanced Analytics -->
+            <!-- Advanced Analytics Component -->
              @if (analytics()) {
-                 <div class="bg-black dark:bg-white rigid-border border-[4px] dark:border-concrete-100 p-8 brutalist-shadow-md mb-12">
+                 <div class="bg-charcoal rounded-2xl shadow-gentle p-8 mb-12">
                      <app-habit-analytics [habit]="habit()!" [analytics]="analytics()!"></app-habit-analytics>
                  </div>
              }
 
-            <!-- History Log -->
-            <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-8 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
-                <div class="flex items-center justify-between mb-8 border-b-4 border-black dark:border-concrete-100 pb-4">
-                    <h3 class="text-2xl font-black uppercase font-arvo dark:text-white">Data_Log</h3>
-                    <div class="flex gap-2 text-xs font-bold font-mono dark:text-white">
-                         <button [disabled]="currentPage() === 1" (click)="prevPage()" class="px-2 hover:underline disabled:opacity-30">PREV</button>
-                         <span>{{ currentPage() }} / {{ totalPages() }}</span>
-                         <button [disabled]="currentPage() >= totalPages()" (click)="nextPage()" class="px-2 hover:underline disabled:opacity-30">NEXT</button>
+            <!-- Data Log Table -->
+            <div class="bg-white rounded-2xl shadow-gentle p-8 border border-taupe/10 overflow-hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h3 class="font-heading text-2xl font-bold text-charcoal">Historical Log</h3>
+                        <p class="text-sm text-taupe mt-1">Detailed record of protocol executions</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-bold text-taupe">
+                         <button [disabled]="currentPage() === 1" (click)="prevPage()" class="w-8 h-8 rounded-full bg-sand flex items-center justify-center hover:bg-sand-dark transition-colors disabled:opacity-30">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                         </button>
+                         <span class="bg-sand px-3 py-1 rounded-full">{{ currentPage() }} / {{ totalPages() }}</span>
+                         <button [disabled]="currentPage() >= totalPages()" (click)="nextPage()" class="w-8 h-8 rounded-full bg-sand flex items-center justify-center hover:bg-sand-dark transition-colors disabled:opacity-30">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                         </button>
                     </div>
                 </div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left font-mono text-xs uppercase">
-                        <thead class="bg-black dark:bg-white text-white dark:text-black">
+                <div class="overflow-x-auto rounded-xl border border-taupe/10">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-sand text-charcoal border-b border-taupe/10">
                             <tr>
-                                <th class="p-4 font-black">Timestamp</th>
-                                <th class="p-4 font-black">Status</th>
-                                <th class="p-4 font-black">Value</th>
-                                <th class="p-4 font-black">Notes</th>
+                                <th class="p-4 font-bold uppercase tracking-wider text-xs">Timestamp</th>
+                                <th class="p-4 font-bold uppercase tracking-wider text-xs">Status</th>
+                                <th class="p-4 font-bold uppercase tracking-wider text-xs">Value</th>
+                                <th class="p-4 font-bold uppercase tracking-wider text-xs">Notes</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y-2 divide-black dark:divide-concrete-100 border-2 border-black dark:border-concrete-100 text-black dark:text-white">
+                        <tbody class="divide-y divide-taupe/10 text-charcoal">
                             @for (log of history(); track log.id) {
-                                <tr class="hover:bg-concrete-100 dark:hover:bg-concrete-700 transition-colors">
-                                    <td class="p-4 font-bold border-r-2 border-black dark:border-concrete-100">{{ log.completed_at | date:'yyyy-MM-dd HH:mm' }}</td>
-                                    <td class="p-4 border-r-2 border-black dark:border-concrete-100">
-                                        <span class="bg-electric-red text-white px-2 py-0.5 font-black text-[10px]">SUCCESS</span>
+                                <tr class="hover:bg-sand/30 transition-colors">
+                                    <td class="p-4 font-medium">{{ log.completed_at | date:'MMM d, yyyy · HH:mm' }}</td>
+                                    <td class="p-4">
+                                        <span class="bg-sage/10 text-sage px-3 py-1 rounded-full font-bold text-xs">SUCCESS</span>
                                     </td>
-                                    <td class="p-4 border-r-2 border-black dark:border-concrete-100 font-bold">{{ log.value || '--' }}</td>
-                                    <td class="p-4 text-concrete-400 dark:text-concrete-500 italic">{{ log.notes || 'N/A' }}</td>
+                                    <td class="p-4 font-bold">{{ log.value || '--' }}</td>
+                                    <td class="p-4 text-taupe text-xs italic">{{ log.notes || 'No observation recorded' }}</td>
                                 </tr>
                              } @empty {
-                                [diff_line_limit]
                                 <tr>
-                                    <td colspan="4" class="p-8 text-center font-bold text-concrete-400">NO_DATA_AVAILABLE</td>
+                                    <td colspan="4" class="p-12 text-center text-taupe italic">
+                                        <span class="material-symbols-outlined text-4xl block mb-2 opacity-20">inventory_2</span>
+                                        No log entries found for this protocol
+                                    </td>
                                 </tr>
                              }
                         </tbody>
@@ -338,8 +322,8 @@ import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
     styles: [`
         :host { display: block; }
         .custom-scrollbar::-webkit-scrollbar { height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #e5e5e5; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: var(--color-sand); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-taupe); border-radius: 3px; }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -370,10 +354,10 @@ export class HabitDetailsComponent implements OnInit {
     analytics = signal<AnalyticsResponse | null>(null);
 
     colorScheme: Color = {
-        name: 'vivid',
+        name: 'warmNatural',
         selectable: true,
         group: ScaleType.Ordinal,
-        domain: ['#3b82f6', '#16a34a', '#ef4444', '#f97316', '#8b5cf6', '#d946ef', '#f43f5e']
+        domain: ['#f97316', '#8c9a81', '#4a443e', '#9a9086', '#ea580c', '#fb923c', '#8b5cf6']
     };
 
     weeklyBarData = computed(() => {

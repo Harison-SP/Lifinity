@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SystemService } from '../../../services/system.service';
@@ -11,52 +11,11 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
+import { ViewTabsComponent } from './components/view-tabs/view-tabs.component';
+import { TableViewComponent } from './components/table-view/table-view.component';
+import { MindMapViewComponent } from './components/mind-map-view/mind-map-view.component';
+import { ViewMode, WeekNode, PhaseNode, SystemPreset } from './system-manager.types';
 
-interface WeekNode {
-  weekNum: number;
-  focus: string;
-  goal: string;
-  outcome: string;
-  items: SystemItem[];
-  isExpanded: boolean;
-  time_block_start: string | null;
-  time_block_end: string | null;
-}
-
-interface PhaseNode {
-  name: string;
-  objective: string;
-  weeks: WeekNode[];
-  isExpanded: boolean;
-}
-
-interface PresetTask {
-  day: number;
-  title: string;
-  description: string;
-}
-
-interface PresetWeek {
-  focus: string;
-  goal: string;
-  outcome: string;
-  tasks: PresetTask[];
-}
-
-interface PresetPhase {
-  name: string;
-  objective: string;
-  weeks: PresetWeek[];
-}
-
-interface SystemPreset {
-  id: string;
-  label: string;
-  description: string;
-  category: string;
-  tags: string[];
-  phases: PresetPhase[];
-}
 
 const SYSTEM_PRESETS: SystemPreset[] = [
   {
@@ -163,96 +122,105 @@ const SYSTEM_PRESETS: SystemPreset[] = [
     MatTimepickerModule,
     MatFormFieldModule,
     MatInputModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    ViewTabsComponent,
+    TableViewComponent,
+    MindMapViewComponent
   ],
   template: `
-    <div class="h-full overflow-y-auto overflow-x-hidden bg-concrete-100 dark:bg-concrete-950 p-3 sm:p-4 md:p-6 font-manrope custom-scrollbar">
+    <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture custom-scrollbar">
       <div class="mx-auto flex h-full max-w-[1700px] flex-col gap-6">
 
-        <section class="rigid-border border-[4px] border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 p-5 md:p-6 brutalist-shadow-lg">
-          <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-            <div class="max-w-3xl">
-              <p class="mb-2 inline-flex items-center gap-2 bg-yellow-300 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
-                <span class="material-symbols-outlined text-sm">tune</span>
-                System Studio
-              </p>
-              <h2 class="font-arvo text-3xl font-black uppercase text-black dark:text-white md:text-4xl">
-                Build clearer protocol systems
-              </h2>
-              <p class="mt-3 max-w-2xl text-sm font-mono text-concrete-600 dark:text-concrete-300">
-                1) Define metadata, 2) build phase-week-task structure, 3) launch to planner.
-              </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 md:grid-cols-4 xl:w-[540px]">
-              <div class="border-2 border-black dark:border-concrete-200 bg-concrete-50 dark:bg-concrete-800 p-3">
-                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Systems</p>
-                <p class="mt-2 text-3xl font-black text-black dark:text-white">{{ systems().length }}</p>
-              </div>
-              <div class="border-2 border-black dark:border-concrete-200 bg-concrete-50 dark:bg-concrete-800 p-3">
-                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Phases</p>
-                <p class="mt-2 text-3xl font-black text-black dark:text-white">{{ getMetrics().phases }}</p>
-              </div>
-              <div class="border-2 border-black dark:border-concrete-200 bg-concrete-50 dark:bg-concrete-800 p-3">
-                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Weeks</p>
-                <p class="mt-2 text-3xl font-black text-black dark:text-white">{{ getMetrics().weeks }}</p>
-              </div>
-              <div class="border-2 border-black dark:border-concrete-200 bg-black dark:bg-concrete-100 p-3 text-white dark:text-black">
-                <p class="text-[10px] font-black uppercase tracking-[0.18em] opacity-70">Tasks</p>
-                <p class="mt-2 text-3xl font-black">{{ getMetrics().tasks }}</p>
-              </div>
-            </div>
+        <header class="flex flex-col md:flex-row items-start justify-between gap-4 mb-2">
+          <div class="space-y-2">
+            <h1 class="font-heading text-3xl md:text-5xl font-bold text-charcoal">
+              System Studio
+            </h1>
+            <p class="text-taupe text-base">
+              Define metadata, build phase-week-task structure, then launch to planner.
+            </p>
           </div>
+          <button
+            (click)="createNewSystem()"
+            class="inline-flex items-center gap-2 bg-orange-500 text-white font-bold py-3 px-6 rounded-lg shadow-gentle hover:bg-orange-400 transition-all">
+            <span class="material-symbols-outlined">add</span>
+            New System
+          </button>
+        </header>
 
-          <div class="mt-5 flex flex-wrap gap-3">
-            <button
-              (click)="createNewSystem()"
-              class="inline-flex items-center gap-2 border-2 border-black bg-black px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white hover:bg-electric-red transition-colors">
-              <span class="material-symbols-outlined text-sm">add</span>
-              New System
-            </button>
-            <button
-              (click)="showHelp.set(true)"
-              class="inline-flex items-center gap-2 border-2 border-black bg-concrete-200 dark:bg-concrete-800 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-black dark:text-white hover:bg-concrete-300 dark:hover:bg-concrete-700 transition-colors">
-              <span class="material-symbols-outlined text-sm">help</span>
-              Workflow
-            </button>
-            <label
-              class="inline-flex cursor-pointer items-center gap-2 border-2 border-black bg-yellow-300 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-black hover:bg-yellow-400 transition-colors">
-              <span class="material-symbols-outlined text-sm">upload_file</span>
-              Import Excel
-              <input type="file" class="hidden" (change)="onFileChange($event)" accept=".xlsx,.xls,.csv" />
-            </label>
-            <button
-              (click)="isPasting.set(true)"
-              class="inline-flex items-center gap-2 border-2 border-black bg-white dark:bg-concrete-900 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-black dark:text-white hover:bg-concrete-100 dark:hover:bg-concrete-800 transition-colors">
-              <span class="material-symbols-outlined text-sm">content_paste</span>
-              Paste CSV
-            </button>
-            <button
-              (click)="isGeneratingAI.set(true)"
-              class="inline-flex items-center gap-2 border-2 border-black bg-green-500 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white hover:bg-black transition-colors">
-              <span class="material-symbols-outlined text-sm">auto_awesome</span>
-              AI Generate
-            </button>
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+          <div class="bg-alabaster rounded-lg shadow-gentle p-6 border border-taupe/10">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-taupe">Systems</span>
+              <span class="material-symbols-outlined text-orange-500 text-xl">layers</span>
+            </div>
+            <span class="text-4xl font-bold text-charcoal">{{ systems().length }}</span>
+          </div>
+          <div class="bg-alabaster rounded-lg shadow-gentle p-6 border border-taupe/10">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-taupe">Phases</span>
+              <span class="material-symbols-outlined text-sage text-xl">account_tree</span>
+            </div>
+            <span class="text-4xl font-bold text-charcoal">{{ getMetrics().phases }}</span>
+          </div>
+          <div class="bg-alabaster rounded-lg shadow-gentle p-6 border border-taupe/10">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-taupe">Weeks</span>
+              <span class="material-symbols-outlined text-orange-500 text-xl">date_range</span>
+            </div>
+            <span class="text-4xl font-bold text-charcoal">{{ getMetrics().weeks }}</span>
+          </div>
+          <div class="bg-orange-500 text-white rounded-lg shadow-gentle p-6">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-white/80">Tasks</span>
+              <span class="material-symbols-outlined text-white">task_alt</span>
+            </div>
+            <span class="text-4xl font-bold">{{ getMetrics().tasks }}</span>
           </div>
         </section>
+
+        <div class="flex flex-wrap gap-3">
+          <button
+            (click)="showHelp.set(true)"
+            class="inline-flex items-center gap-2 bg-white text-charcoal font-bold py-2.5 px-5 rounded-lg shadow-gentle border border-taupe/10 hover:shadow-gentle-lg transition-all text-sm">
+            <span class="material-symbols-outlined text-base">help</span>
+            Workflow
+          </button>
+          <label
+            class="inline-flex cursor-pointer items-center gap-2 bg-white text-charcoal font-bold py-2.5 px-5 rounded-lg shadow-gentle border border-taupe/10 hover:shadow-gentle-lg transition-all text-sm">
+            <span class="material-symbols-outlined text-base text-orange-500">upload_file</span>
+            Import Excel
+            <input type="file" class="hidden" (change)="onFileChange($event)" accept=".xlsx,.xls,.csv" />
+          </label>
+          <button
+            (click)="isPasting.set(true)"
+            class="inline-flex items-center gap-2 bg-white text-charcoal font-bold py-2.5 px-5 rounded-lg shadow-gentle border border-taupe/10 hover:shadow-gentle-lg transition-all text-sm">
+            <span class="material-symbols-outlined text-base">content_paste</span>
+            Paste CSV
+          </button>
+          <button
+            (click)="isGeneratingAI.set(true)"
+            class="inline-flex items-center gap-2 bg-sage text-white font-bold py-2.5 px-5 rounded-lg shadow-gentle hover:opacity-90 transition-all text-sm">
+            <span class="material-symbols-outlined text-base">auto_awesome</span>
+            AI Generate
+          </button>
+        </div>
 
         <div class="grid min-h-0 flex-1 grid-cols-1 gap-6 xl:grid-cols-12">
 
           <aside class="xl:col-span-3 min-h-0">
-            <div class="flex h-full min-h-[720px] flex-col gap-4 rigid-border border-[4px] border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 p-4 brutalist-shadow-lg">
-              <div class="border-b-4 border-black dark:border-concrete-100 pb-4">
-                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Library</p>
-                <h3 class="font-arvo text-xl font-black uppercase text-black dark:text-white">Systems</h3>
+            <div class="flex h-full min-h-[720px] flex-col gap-4 bg-white rounded-lg shadow-gentle p-5 border border-taupe/10">
+              <div class="border-b border-taupe/10 pb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-taupe">Library</span>
+                <h3 class="font-heading text-xl font-bold text-charcoal mt-1">Systems</h3>
                 <div class="mt-3 space-y-3">
                   <input
                     [(ngModel)]="systemSearch"
                     placeholder="Search title/category/tag"
-                    class="w-full border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none focus:border-electric-red dark:text-white" />
+                    class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2.5 text-sm font-medium outline-none focus:border-orange-500 text-charcoal transition-colors" />
                   <select
                     [(ngModel)]="categoryFilter"
-                    class="w-full border-2 border-black dark:border-concrete-300 bg-white dark:bg-concrete-800 px-3 py-2 text-xs font-black uppercase outline-none dark:text-white">
+                    class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal">
                     <option value="All">All categories</option>
                     @for (category of availableCategories(); track category) {
                       <option [value]="category">{{ category }}</option>
@@ -261,41 +229,39 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                 </div>
               </div>
 
-              <div class="space-y-3 overflow-y-auto custom-scrollbar pr-1">
+              <div class="space-y-2 overflow-y-auto custom-scrollbar pr-1 flex-1">
                 @for (system of filteredSystems(); track system.id ?? system.title) {
                   <button
                     (click)="selectSystem(system)"
-                    class="block w-full border-2 p-3 text-left transition-colors"
-                    [class.border-black]="selectedSystem()?.id === system.id"
-                    [class.bg-black]="selectedSystem()?.id === system.id"
+                    class="block w-full rounded-lg p-3.5 text-left transition-all"
+                    [class.bg-orange-500]="selectedSystem()?.id === system.id"
                     [class.text-white]="selectedSystem()?.id === system.id"
-                    [class.border-concrete-300]="selectedSystem()?.id !== system.id"
-                    [class.bg-concrete-50]="selectedSystem()?.id !== system.id"
-                    [class.dark:border-concrete-700]="selectedSystem()?.id !== system.id"
-                    [class.dark:bg-concrete-800]="selectedSystem()?.id !== system.id"
-                    [class.dark:text-white]="selectedSystem()?.id !== system.id">
-                    <p class="text-sm font-black uppercase truncate">{{ system.title }}</p>
-                    <div class="mt-2 flex items-center justify-between text-[10px] font-bold uppercase opacity-80">
+                    [class.shadow-gentle]="selectedSystem()?.id === system.id"
+                    [class.bg-sand]="selectedSystem()?.id !== system.id"
+                    [class.text-charcoal]="selectedSystem()?.id !== system.id"
+                    [class.hover:bg-sand-dark]="selectedSystem()?.id !== system.id">
+                    <p class="text-sm font-bold truncate">{{ system.title }}</p>
+                    <div class="mt-1.5 flex items-center justify-between text-xs opacity-80">
                       <span>{{ system.category || 'General' }}</span>
                       <span>{{ system.items.length }} tasks</span>
                     </div>
                   </button>
                 } @empty {
-                  <div class="border-2 border-dashed border-concrete-300 dark:border-concrete-700 p-4 text-center text-xs font-black uppercase text-concrete-500 dark:text-concrete-400">
+                  <div class="rounded-lg border border-dashed border-taupe/30 p-4 text-center text-sm text-taupe">
                     No systems found
                   </div>
                 }
               </div>
 
-              <div class="border-t-4 border-black dark:border-concrete-100 pt-4">
-                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500 mb-2">Starter Presets</p>
+              <div class="border-t border-taupe/10 pt-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-taupe mb-2 block">Starter Presets</span>
                 <div class="space-y-2">
                   @for (preset of presets; track preset.id) {
                     <button
                       (click)="applyPreset(preset.id)"
-                      class="w-full border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 text-left p-3 hover:bg-yellow-100 dark:hover:bg-concrete-700 transition-colors">
-                      <p class="text-xs font-black uppercase dark:text-white">{{ preset.label }}</p>
-                      <p class="mt-1 text-[11px] font-medium text-concrete-600 dark:text-concrete-300">{{ preset.description }}</p>
+                      class="w-full bg-sand rounded-lg text-left p-3.5 hover:bg-sand-dark transition-colors">
+                      <p class="text-sm font-bold text-charcoal">{{ preset.label }}</p>
+                      <p class="mt-1 text-xs text-taupe">{{ preset.description }}</p>
                     </button>
                   }
                 </div>
@@ -307,40 +273,40 @@ const SYSTEM_PRESETS: SystemPreset[] = [
             @if (selectedSystem() || isCreating()) {
               <div class="flex h-full min-h-[720px] flex-col gap-4">
 
-                <section class="rigid-border border-[4px] border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 p-5 brutalist-shadow-lg">
+                <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
                   <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div class="flex-1">
-                      <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Step 1 - Define</p>
+                      <span class="text-xs font-bold uppercase tracking-wider text-taupe">Step 1 — Define</span>
                       <input
                         [(ngModel)]="editForm.title"
                         placeholder="System title"
-                        class="mt-2 w-full bg-transparent font-arvo text-3xl font-black uppercase outline-none dark:text-white md:text-4xl" />
+                        class="mt-2 w-full bg-transparent font-heading text-3xl font-bold outline-none text-charcoal md:text-4xl" />
                       <textarea
                         [(ngModel)]="editForm.description"
                         rows="3"
                         placeholder="Describe intent and expected result."
-                        class="mt-3 w-full resize-none border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-3 text-sm font-medium outline-none focus:border-electric-red dark:text-white"></textarea>
+                        class="mt-3 w-full resize-none border border-taupe/20 bg-sand rounded-lg p-3 text-sm font-medium outline-none focus:border-orange-500 text-charcoal"></textarea>
                     </div>
 
                     <div class="grid w-full sm:w-auto sm:min-w-[260px] grid-cols-2 gap-3">
-                      <div class="border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-3">
-                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Readiness</p>
-                        <p class="mt-2 text-3xl font-black text-black dark:text-white">{{ readinessScore() }}%</p>
+                      <div class="bg-sand rounded-lg p-4">
+                        <span class="text-xs font-bold uppercase tracking-wider text-taupe">Readiness</span>
+                        <p class="mt-2 text-3xl font-bold text-charcoal">{{ readinessScore() }}%</p>
                       </div>
-                      <div class="border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-3">
-                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Issues</p>
-                        <p class="mt-2 text-3xl font-black text-black dark:text-white">{{ getValidationIssues().length }}</p>
+                      <div class="bg-sand rounded-lg p-4">
+                        <span class="text-xs font-bold uppercase tracking-wider text-taupe">Issues</span>
+                        <p class="mt-2 text-3xl font-bold text-charcoal">{{ getValidationIssues().length }}</p>
                       </div>
                       <button
                         (click)="saveSystem()"
-                        class="inline-flex items-center justify-center gap-2 border-2 border-black bg-green-500 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-white hover:bg-black transition-colors">
+                        class="inline-flex items-center justify-center gap-2 bg-sage text-white rounded-lg px-3 py-3 text-sm font-bold hover:opacity-90 transition-all">
                         <span class="material-symbols-outlined text-sm">save</span>
                         Save
                       </button>
                       <button
                         (click)="deleteSystem()"
                         [disabled]="!selectedSystem()?.id"
-                        class="inline-flex items-center justify-center gap-2 border-2 border-black bg-red-500 px-3 py-3 text-xs font-black uppercase tracking-[0.16em] text-white hover:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                        class="inline-flex items-center justify-center gap-2 bg-red-500 text-white rounded-lg px-3 py-3 text-sm font-bold hover:bg-red-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                         <span class="material-symbols-outlined text-sm">delete</span>
                         Delete
                       </button>
@@ -349,11 +315,11 @@ const SYSTEM_PRESETS: SystemPreset[] = [
 
                   <div class="mt-4 grid gap-4 lg:grid-cols-3">
                     <div>
-                      <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Category</label>
+                      <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Category</label>
                       <input
                         [(ngModel)]="editForm.category"
                         list="category-list"
-                        class="w-full border-2 border-black dark:border-concrete-300 bg-white dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none focus:border-electric-red dark:text-white" />
+                        class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none focus:border-orange-500 text-charcoal" />
                       <datalist id="category-list">
                         @for (cat of availableCategories(); track cat) {
                           <option [value]="cat"></option>
@@ -361,27 +327,51 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                       </datalist>
                     </div>
                     <div class="lg:col-span-2">
-                      <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Tags (comma separated)</label>
+                      <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Tags (comma separated)</label>
                       <input
                         [(ngModel)]="tagsInput"
                         (blur)="syncTagsFromInput()"
                         placeholder="python, interview, backend"
-                        class="w-full border-2 border-black dark:border-concrete-300 bg-white dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none focus:border-electric-red dark:text-white" />
+                        class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none focus:border-orange-500 text-charcoal" />
                     </div>
                   </div>
                 </section>
 
+                <!-- ── View Tabs ── -->
+                <div class="flex items-center justify-between">
+                  <app-view-tabs
+                    [activeView]="currentView()"
+                    (viewChange)="currentView.set($event)" />
+                  <span class="text-xs text-taupe font-medium hidden md:inline">
+                    {{ currentView() === 'form' ? 'Detailed editor' : currentView() === 'table' ? 'Bulk editing mode' : 'Visual hierarchy' }}
+                  </span>
+                </div>
+
+                <!-- ── Conditional Views ── -->
+                @if (currentView() === 'table') {
+                  <app-table-view
+                    [hierarchy]="hierarchy()"
+                    (hierarchyChange)="hierarchy.set($event)" />
+                }
+
+                @if (currentView() === 'mindmap') {
+                  <app-mind-map-view
+                    [hierarchy]="hierarchy()"
+                    [systemTitle]="editForm.title" />
+                }
+
+                @if (currentView() === 'form') {
                 <section class="grid gap-4 xl:grid-cols-12">
                   <div class="xl:col-span-8 flex flex-col gap-4">
-                    <div class="rigid-border border-[4px] border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 p-5 brutalist-shadow-lg">
-                      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b-4 border-black dark:border-concrete-100 pb-4">
+                    <div class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-taupe/10 pb-4">
                         <div>
-                          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Step 2 - Structure</p>
-                          <h3 class="font-arvo text-xl font-black uppercase text-black dark:text-white">Phase / Week / Task Builder</h3>
+                          <span class="text-xs font-bold uppercase tracking-wider text-taupe">Step 2 — Structure</span>
+                          <h3 class="font-heading text-xl font-bold text-charcoal mt-1">Phase / Week / Task Builder</h3>
                         </div>
                         <button
                           (click)="addPhase()"
-                          class="inline-flex items-center gap-2 border-2 border-black bg-black px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-white hover:bg-concrete-700 transition-colors">
+                          class="inline-flex items-center gap-2 bg-orange-500 text-white rounded-lg px-4 py-2.5 text-sm font-bold hover:bg-orange-400 transition-all">
                           <span class="material-symbols-outlined text-sm">add</span>
                           Add Phase
                         </button>
@@ -389,21 +379,21 @@ const SYSTEM_PRESETS: SystemPreset[] = [
 
                       <div class="mt-4 space-y-4">
                         @for (phase of hierarchy(); track $index; let phaseIndex = $index) {
-                          <div class="border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800">
-                            <div class="p-4 border-b-2 border-black dark:border-concrete-300 bg-white dark:bg-concrete-900">
+                          <div class="bg-sand/50 rounded-lg border border-taupe/10 overflow-hidden">
+                            <div class="p-4 border-b border-taupe/10 bg-white">
                               <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                 <div class="flex-1 space-y-3">
                                   <div class="flex items-center gap-3">
                                     <button
                                       (click)="phase.isExpanded = !phase.isExpanded"
-                                      class="h-9 w-9 border-2 border-black dark:border-concrete-300 bg-concrete-100 dark:bg-concrete-800 inline-flex items-center justify-center dark:text-white">
+                                      class="h-9 w-9 rounded-lg bg-sand border border-taupe/20 inline-flex items-center justify-center text-charcoal hover:bg-sand-dark transition-colors">
                                       <span class="material-symbols-outlined transition-transform" [class.rotate-90]="phase.isExpanded">chevron_right</span>
                                     </button>
                                     <input
                                       [(ngModel)]="phase.name"
-                                      class="flex-1 bg-transparent text-lg font-black uppercase outline-none dark:text-white"
+                                      class="flex-1 bg-transparent text-lg font-bold outline-none text-charcoal"
                                       placeholder="Phase name" />
-                                    <span class="border-2 border-black dark:border-concrete-300 px-2 py-1 text-[10px] font-black uppercase dark:text-white">
+                                    <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-sand text-charcoal">
                                       {{ phase.weeks.length }} weeks
                                     </span>
                                   </div>
@@ -411,19 +401,19 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                                     [(ngModel)]="phase.objective"
                                     rows="2"
                                     placeholder="Phase objective"
-                                    class="w-full resize-none border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-3 text-sm font-medium outline-none focus:border-electric-red dark:text-white"></textarea>
+                                    class="w-full resize-none border border-taupe/20 bg-sand rounded-lg p-3 text-sm font-medium outline-none focus:border-orange-500 text-charcoal"></textarea>
                                 </div>
 
                                 <div class="flex flex-wrap gap-2">
                                   <button
                                     (click)="addWeek(phase)"
-                                    class="inline-flex items-center gap-2 border-2 border-black bg-yellow-300 px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-black hover:bg-yellow-400 transition-colors">
+                                    class="inline-flex items-center gap-2 bg-orange-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-orange-400 transition-all">
                                     <span class="material-symbols-outlined text-sm">calendar_add_on</span>
                                     Add Week
                                   </button>
                                   <button
                                     (click)="removePhase(phaseIndex)"
-                                    class="inline-flex items-center gap-2 border-2 border-black bg-red-500 px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-white hover:bg-black transition-colors">
+                                    class="inline-flex items-center gap-2 bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-red-400 transition-all">
                                     <span class="material-symbols-outlined text-sm">close</span>
                                     Remove
                                   </button>
@@ -434,29 +424,29 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                             @if (phase.isExpanded) {
                               <div class="p-4 space-y-4">
                                 @for (week of phase.weeks; track $index; let weekIndex = $index) {
-                                  <div class="border-2 border-concrete-300 dark:border-concrete-600 bg-white dark:bg-concrete-900 p-4">
-                                    <div class="flex flex-col gap-3 border-b border-concrete-300 dark:border-concrete-700 pb-4">
+                                  <div class="bg-white rounded-lg border border-taupe/10 shadow-gentle p-4">
+                                    <div class="flex flex-col gap-3 border-b border-taupe/10 pb-4">
                                       <div class="grid gap-3 md:grid-cols-[80px,1fr,1fr]">
                                         <div>
-                                          <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Week</label>
+                                          <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Week</label>
                                           <input
                                             type="number"
                                             [(ngModel)]="week.weekNum"
-                                            class="w-full border border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 px-2 py-2 text-sm font-black outline-none dark:text-white" />
+                                            class="w-full border border-taupe/20 bg-sand rounded-lg px-2 py-2 text-sm font-bold outline-none text-charcoal" />
                                         </div>
                                         <div>
-                                          <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Focus</label>
+                                          <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Focus</label>
                                           <input
                                             [(ngModel)]="week.focus"
                                             placeholder="Weekly focus"
-                                            class="w-full border border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                                            class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
                                         </div>
                                         <div>
-                                          <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Goal</label>
+                                          <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Goal</label>
                                           <input
                                             [(ngModel)]="week.goal"
                                             placeholder="Weekly goal"
-                                            class="w-full border border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                                            class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
                                         </div>
                                       </div>
 
@@ -464,7 +454,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                                         [(ngModel)]="week.outcome"
                                         rows="2"
                                         placeholder="Success criteria for this week"
-                                        class="w-full resize-none border border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-3 text-sm font-medium outline-none dark:text-white"></textarea>
+                                        class="w-full resize-none border border-taupe/20 bg-sand rounded-lg p-3 text-sm font-medium outline-none text-charcoal"></textarea>
 
                                       <div class="grid gap-3 md:grid-cols-[1fr,1fr,auto]">
                                         <div class="flex items-center gap-2">
@@ -472,7 +462,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                                             [matTimepicker]="weekStartPicker"
                                             [(ngModel)]="week.time_block_start"
                                             placeholder="Start"
-                                            class="w-full border border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                                            class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
                                           <mat-timepicker #weekStartPicker />
                                         </div>
                                         <div class="flex items-center gap-2">
@@ -480,18 +470,18 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                                             [matTimepicker]="weekEndPicker"
                                             [(ngModel)]="week.time_block_end"
                                             placeholder="End"
-                                            class="w-full border border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                                            class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
                                           <mat-timepicker #weekEndPicker />
                                         </div>
                                         <div class="flex flex-wrap gap-2">
                                           <button
                                             (click)="duplicateWeek(phase, weekIndex)"
-                                            class="border-2 border-black bg-concrete-100 dark:bg-concrete-800 dark:border-concrete-300 px-3 py-2 text-[11px] font-black uppercase dark:text-white">
+                                            class="bg-sand border border-taupe/20 rounded-lg px-3 py-2 text-xs font-bold text-charcoal hover:bg-sand-dark transition-colors">
                                             Duplicate
                                           </button>
                                           <button
                                             (click)="removeWeek(phase, weekIndex)"
-                                            class="border-2 border-black bg-red-500 px-3 py-2 text-[11px] font-black uppercase text-white">
+                                            class="bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-red-400 transition-colors">
                                             Remove
                                           </button>
                                         </div>
@@ -500,60 +490,60 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                                       <div class="flex flex-wrap gap-2">
                                         <button
                                           (click)="injectTaskBundle(week, 'study')"
-                                          class="border-2 border-black px-3 py-2 bg-blue-100 text-[11px] font-black uppercase">
+                                          class="bg-blue-50 text-blue-700 border border-blue-200 rounded-lg px-3 py-2 text-xs font-bold hover:bg-blue-100 transition-colors">
                                           + Study Bundle
                                         </button>
                                         <button
                                           (click)="injectTaskBundle(week, 'project')"
-                                          class="border-2 border-black px-3 py-2 bg-green-100 text-[11px] font-black uppercase">
+                                          class="bg-green-50 text-green-700 border border-green-200 rounded-lg px-3 py-2 text-xs font-bold hover:bg-green-100 transition-colors">
                                           + Project Bundle
                                         </button>
                                         <button
                                           (click)="addTask(week)"
-                                          class="border-2 border-black px-3 py-2 bg-black text-white text-[11px] font-black uppercase">
+                                          class="bg-orange-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-orange-400 transition-colors">
                                           + Task
                                         </button>
                                         <button
                                           (click)="sortWeekTasks(week)"
-                                          class="border-2 border-black px-3 py-2 bg-concrete-100 dark:bg-concrete-800 dark:border-concrete-300 text-[11px] font-black uppercase dark:text-white">
+                                          class="bg-sand border border-taupe/20 rounded-lg px-3 py-2 text-xs font-bold text-charcoal hover:bg-sand-dark transition-colors">
                                           Sort Days
                                         </button>
                                       </div>
 
-                                      <div class="rounded-sm border-2 border-dashed border-concrete-300 dark:border-concrete-700 bg-concrete-50 dark:bg-concrete-800 p-3 text-[11px] font-medium text-concrete-600 dark:text-concrete-300">
+                                      <div class="rounded-lg bg-sand/70 border border-taupe/10 p-3 text-xs font-medium text-taupe">
                                         {{ describeWeek(week) }}
                                       </div>
                                     </div>
 
                                     <div class="mt-4 space-y-3">
                                       @for (item of week.items; track $index; let taskIndex = $index) {
-                                        <div class="border-2 border-concrete-200 dark:border-concrete-700 bg-concrete-50 dark:bg-concrete-800 p-3">
+                                        <div class="bg-alabaster rounded-lg border border-taupe/10 p-3">
                                           <div class="grid gap-3 lg:grid-cols-[70px,1.2fr,1fr,auto]">
                                             <div>
-                                              <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Day</label>
+                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Day</label>
                                               <input
                                                 type="number"
                                                 [(ngModel)]="item.day_number"
-                                                class="w-full border border-black dark:border-concrete-300 bg-white dark:bg-concrete-900 px-2 py-2 text-sm font-black outline-none dark:text-white" />
+                                                class="w-full border border-taupe/20 bg-white rounded-lg px-2 py-2 text-sm font-bold outline-none text-charcoal" />
                                             </div>
                                             <div>
-                                              <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Task title</label>
+                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Task title</label>
                                               <input
                                                 [(ngModel)]="item.title"
                                                 placeholder="Task title"
-                                                class="w-full border border-black dark:border-concrete-300 bg-white dark:bg-concrete-900 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                                                class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-bold outline-none text-charcoal" />
                                             </div>
                                             <div>
-                                              <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Resource link</label>
+                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Resource link</label>
                                               <input
                                                 [(ngModel)]="item.resource_link"
                                                 placeholder="Optional URL"
-                                                class="w-full border border-black dark:border-concrete-300 bg-white dark:bg-concrete-900 px-3 py-2 text-sm font-medium outline-none dark:text-white" />
+                                                class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
                                             </div>
                                             <div class="flex items-end">
                                               <button
                                                 (click)="removeTask(week, taskIndex)"
-                                                class="w-full border-2 border-black bg-red-500 px-3 py-2 text-[11px] font-black uppercase text-white">
+                                                class="w-full bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-red-400 transition-colors">
                                                 Remove
                                               </button>
                                             </div>
@@ -561,31 +551,31 @@ const SYSTEM_PRESETS: SystemPreset[] = [
 
                                           <div class="mt-3 grid gap-3 lg:grid-cols-[1.6fr,130px,130px]">
                                             <div>
-                                              <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Description</label>
+                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Description</label>
                                               <textarea
                                                 [(ngModel)]="item.description"
                                                 rows="2"
                                                 placeholder="Task description"
-                                                class="w-full resize-none border border-black dark:border-concrete-300 bg-white dark:bg-concrete-900 p-3 text-sm font-medium outline-none dark:text-white"></textarea>
+                                                class="w-full resize-none border border-taupe/20 bg-white rounded-lg p-3 text-sm font-medium outline-none text-charcoal"></textarea>
                                             </div>
                                             <div>
-                                              <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Start</label>
+                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Start</label>
                                               <input
                                                 type="time"
                                                 [(ngModel)]="item.time_block_start"
-                                                class="w-full border border-black dark:border-concrete-300 bg-white dark:bg-concrete-900 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                                                class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
                                             </div>
                                             <div>
-                                              <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">End</label>
+                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">End</label>
                                               <input
                                                 type="time"
                                                 [(ngModel)]="item.time_block_end"
-                                                class="w-full border border-black dark:border-concrete-300 bg-white dark:bg-concrete-900 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                                                class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
                                             </div>
                                           </div>
                                         </div>
                                       } @empty {
-                                        <div class="border-2 border-dashed border-concrete-300 dark:border-concrete-700 p-4 text-center text-xs font-black uppercase text-concrete-500 dark:text-concrete-400">
+                                        <div class="rounded-lg border border-dashed border-taupe/30 p-4 text-center text-sm text-taupe">
                                           No tasks in this week
                                         </div>
                                       }
@@ -596,7 +586,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                             }
                           </div>
                         } @empty {
-                          <div class="border-2 border-dashed border-concrete-300 dark:border-concrete-700 p-8 text-center text-xs font-black uppercase text-concrete-500 dark:text-concrete-400">
+                          <div class="rounded-lg border border-dashed border-taupe/30 p-8 text-center text-sm text-taupe">
                             No phases configured
                           </div>
                         }
@@ -606,45 +596,45 @@ const SYSTEM_PRESETS: SystemPreset[] = [
 
                   <div class="xl:col-span-4 flex flex-col gap-4">
 
-                    <section class="rigid-border border-[4px] border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 p-5 brutalist-shadow-lg">
-                      <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Health Check</p>
-                      <h3 class="mt-2 font-arvo text-xl font-black uppercase text-black dark:text-white">Validation</h3>
+                    <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                      <span class="text-xs font-bold uppercase tracking-wider text-taupe">Health Check</span>
+                      <h3 class="mt-1 font-heading text-xl font-bold text-charcoal">Validation</h3>
 
                       <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-3">
-                          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Timed</p>
-                          <p class="mt-2 text-2xl font-black text-black dark:text-white">{{ getMetrics().timed }}</p>
+                        <div class="bg-sand rounded-lg p-4">
+                          <span class="text-xs font-bold uppercase tracking-wider text-taupe">Timed</span>
+                          <p class="mt-2 text-2xl font-bold text-charcoal">{{ getMetrics().timed }}</p>
                         </div>
-                        <div class="border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-3">
-                          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Resources</p>
-                          <p class="mt-2 text-2xl font-black text-black dark:text-white">{{ getMetrics().resources }}</p>
+                        <div class="bg-sand rounded-lg p-4">
+                          <span class="text-xs font-bold uppercase tracking-wider text-taupe">Resources</span>
+                          <p class="mt-2 text-2xl font-bold text-charcoal">{{ getMetrics().resources }}</p>
                         </div>
                       </div>
 
                       <div class="mt-4 space-y-2">
                         @for (issue of getValidationIssues(); track issue) {
-                          <div class="border-2 border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/40 p-3 text-xs font-medium text-red-800 dark:text-red-200">
+                          <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-800">
                             {{ issue }}
                           </div>
                         } @empty {
-                          <div class="border-2 border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-950/40 p-3 text-xs font-medium text-green-800 dark:text-green-200">
+                          <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-xs font-medium text-green-800">
                             Looks good. Save and launch.
                           </div>
                         }
                       </div>
                     </section>
 
-                    <section class="rigid-border border-[4px] border-black dark:border-concrete-100 bg-white dark:bg-concrete-900 p-5 brutalist-shadow-lg">
-                      <p class="text-[10px] font-black uppercase tracking-[0.18em] text-concrete-500">Step 3 - Launch</p>
-                      <h3 class="mt-2 font-arvo text-xl font-black uppercase text-black dark:text-white">Instantiate</h3>
+                    <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                      <span class="text-xs font-bold uppercase tracking-wider text-taupe">Step 3 — Launch</span>
+                      <h3 class="mt-1 font-heading text-xl font-bold text-charcoal">Instantiate</h3>
 
                       @if (selectedSystem()?.id) {
                         <div class="mt-4 space-y-3">
                           <div>
-                            <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Parent habit</label>
+                            <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Parent habit</label>
                             <select
                               [(ngModel)]="selectedHabitId"
-                              class="w-full border-2 border-black dark:border-concrete-300 bg-white dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none dark:text-white">
+                              class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal">
                               <option [ngValue]="null">No parent habit</option>
                               @for (habit of habits(); track habit.id) {
                                 <option [value]="habit.id">{{ habit.name }}</option>
@@ -653,27 +643,27 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                           </div>
 
                           <div>
-                            <label class="mb-1 block text-[10px] font-black uppercase tracking-[0.16em] text-concrete-500">Start date</label>
+                            <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Start date</label>
                             <input
                               type="date"
                               [(ngModel)]="instantiateDate"
-                              class="w-full border-2 border-black dark:border-concrete-300 bg-white dark:bg-concrete-800 px-3 py-2 text-sm font-bold outline-none dark:text-white" />
+                              class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal" />
                           </div>
 
-                          <div class="rounded-sm border-2 border-dashed border-concrete-300 dark:border-concrete-700 bg-concrete-50 dark:bg-concrete-800 p-3 text-[11px] font-medium text-concrete-600 dark:text-concrete-300">
+                          <div class="rounded-lg bg-sand/70 border border-taupe/10 p-3 text-xs font-medium text-taupe">
                             {{ launchSummary() }}
                           </div>
 
                           <button
                             (click)="applySystem()"
                             [disabled]="isRunning() || getValidationIssues().length > 0"
-                            class="w-full inline-flex items-center justify-center gap-2 border-2 border-black bg-black px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-white hover:bg-electric-red transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                            class="w-full inline-flex items-center justify-center gap-2 bg-orange-500 text-white rounded-lg px-4 py-3 text-sm font-bold hover:bg-orange-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                             <span class="material-symbols-outlined text-sm">{{ isRunning() ? 'hourglass_top' : 'play_arrow' }}</span>
                             {{ isRunning() ? 'Launching...' : 'Launch System' }}
                           </button>
 
                           @if (lastResult()) {
-                            <div class="border-2 border-green-500 bg-green-50 dark:bg-green-950/40 p-3 text-xs font-bold text-green-800 dark:text-green-200">
+                            <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-xs font-bold text-green-800">
                               {{ lastResult()!.message }}<br/>
                               Starts: {{ lastResult()!.startDate }} | Tasks: {{ lastResult()!.totalTasks }}
                               @if (lastResult()!.habitName) {
@@ -683,22 +673,23 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                           }
                         </div>
                       } @else {
-                        <div class="mt-4 border-2 border-dashed border-concrete-300 dark:border-concrete-700 p-4 text-sm font-medium text-concrete-500 dark:text-concrete-400">
+                        <div class="mt-4 rounded-lg border border-dashed border-taupe/30 p-4 text-sm font-medium text-taupe">
                           Save this draft first to enable launch.
                         </div>
                       }
                     </section>
                   </div>
                 </section>
+                } <!-- end form view -->
               </div>
             } @else {
-              <div class="flex min-h-[720px] items-center justify-center rigid-border border-[4px] border-dashed border-concrete-300 dark:border-concrete-700 bg-white dark:bg-concrete-900 p-10 text-center brutalist-shadow-lg">
+              <div class="flex min-h-[720px] items-center justify-center bg-alabaster rounded-lg border border-dashed border-taupe/30 p-10 text-center shadow-gentle">
                 <div class="max-w-xl">
-                  <span class="material-symbols-outlined text-7xl text-concrete-300 dark:text-concrete-600">settings_suggest</span>
-                  <p class="mt-4 font-arvo text-3xl font-black uppercase text-concrete-500 dark:text-concrete-200">
+                  <span class="material-symbols-outlined text-7xl text-taupe/40">settings_suggest</span>
+                  <p class="mt-4 font-heading text-3xl font-bold text-taupe">
                     Select a system or create one
                   </p>
-                  <p class="mt-3 text-sm font-mono text-concrete-500 dark:text-concrete-400">
+                  <p class="mt-3 text-sm text-taupe">
                     Use search, presets, import, or AI generation to start quickly.
                   </p>
                 </div>
@@ -710,31 +701,31 @@ const SYSTEM_PRESETS: SystemPreset[] = [
     </div>
 
     @if (showHelp()) {
-      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
-        <div class="bg-white dark:bg-concrete-900 rigid-border border-[4px] border-black dark:border-concrete-100 p-6 brutalist-shadow-lg w-full max-w-3xl max-h-[85vh] overflow-y-auto custom-scrollbar">
-          <div class="flex justify-between items-center border-b-4 border-black dark:border-concrete-100 pb-3">
-            <h3 class="text-2xl font-black uppercase font-arvo dark:text-white">How to use</h3>
-            <button (click)="showHelp.set(false)" class="text-black dark:text-white">
+      <div class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+        <div class="bg-white rounded-xl shadow-gentle-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto custom-scrollbar border border-taupe/10">
+          <div class="flex justify-between items-center border-b border-taupe/10 pb-3">
+            <h3 class="text-2xl font-bold font-heading text-charcoal">How to use</h3>
+            <button (click)="showHelp.set(false)" class="text-taupe hover:text-charcoal transition-colors">
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
 
-          <div class="mt-4 grid gap-4 md:grid-cols-3 text-xs">
-            <div class="border-2 border-black dark:border-concrete-300 p-4 bg-concrete-50 dark:bg-concrete-800 dark:text-white">
-              <p class="font-black uppercase mb-2">1. Define</p>
+          <div class="mt-4 grid gap-4 md:grid-cols-3 text-sm">
+            <div class="rounded-lg p-4 bg-sand border border-taupe/10 text-charcoal">
+              <p class="font-bold mb-2">1. Define</p>
               <p>Add title, category, description, and tags.</p>
             </div>
-            <div class="border-2 border-black dark:border-concrete-300 p-4 bg-concrete-50 dark:bg-concrete-800 dark:text-white">
-              <p class="font-black uppercase mb-2">2. Structure</p>
+            <div class="rounded-lg p-4 bg-sand border border-taupe/10 text-charcoal">
+              <p class="font-bold mb-2">2. Structure</p>
               <p>Create phases, weeks, tasks. Use bundles and validation.</p>
             </div>
-            <div class="border-2 border-black dark:border-concrete-300 p-4 bg-concrete-50 dark:bg-concrete-800 dark:text-white">
-              <p class="font-black uppercase mb-2">3. Launch</p>
+            <div class="rounded-lg p-4 bg-sand border border-taupe/10 text-charcoal">
+              <p class="font-bold mb-2">3. Launch</p>
               <p>Save then instantiate to a start date and optional parent habit.</p>
             </div>
           </div>
 
-          <div class="mt-4 border-2 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/40 p-3 text-xs font-medium text-yellow-900 dark:text-yellow-200">
+          <div class="mt-4 rounded-lg border border-orange-200 bg-orange-50 p-3 text-xs font-medium text-orange-900">
             Import columns: Phase, Week, WeekFocus, Day, Title, Description, StartTime, EndTime
           </div>
         </div>
@@ -742,33 +733,33 @@ const SYSTEM_PRESETS: SystemPreset[] = [
     }
 
     @if (isPasting()) {
-      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
-        <div class="bg-white dark:bg-concrete-900 rigid-border border-[4px] border-black dark:border-concrete-100 p-6 brutalist-shadow-lg w-full max-w-2xl">
-          <div class="flex justify-between items-center border-b-4 border-black dark:border-concrete-100 pb-3">
-            <h3 class="text-xl font-black uppercase font-arvo dark:text-white">Paste CSV</h3>
-            <button (click)="isPasting.set(false)" class="text-black dark:text-white">
+      <div class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+        <div class="bg-white rounded-xl shadow-gentle-lg p-6 w-full max-w-2xl border border-taupe/10">
+          <div class="flex justify-between items-center border-b border-taupe/10 pb-3">
+            <h3 class="text-xl font-bold font-heading text-charcoal">Paste CSV</h3>
+            <button (click)="isPasting.set(false)" class="text-taupe hover:text-charcoal transition-colors">
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
 
-          <p class="mt-3 text-[11px] font-mono uppercase text-concrete-500">
+          <p class="mt-3 text-xs font-mono text-taupe">
             Phase, Week, WeekFocus, Day, Title, Description, StartTime, EndTime
           </p>
 
           <textarea
             [(ngModel)]="pastedCsv"
-            class="w-full h-80 mt-3 p-4 border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 font-mono text-xs outline-none custom-scrollbar dark:text-white"
+            class="w-full h-80 mt-3 p-4 border border-taupe/20 bg-sand rounded-lg font-mono text-xs outline-none custom-scrollbar text-charcoal"
             placeholder="Phase,Week,WeekFocus,Day,Title,Description,StartTime,EndTime&#10;Phase 1,1,Basics,1,Task 1,Desc,08:00,09:00"></textarea>
 
           <div class="mt-4 flex justify-end gap-3">
             <button
               (click)="isPasting.set(false)"
-              class="px-5 py-2 border-2 border-black dark:border-concrete-300 bg-concrete-200 dark:bg-concrete-800 text-xs font-black uppercase dark:text-white">
+              class="px-5 py-2.5 bg-sand text-charcoal rounded-lg text-sm font-bold hover:bg-sand-dark transition-colors">
               Cancel
             </button>
             <button
               (click)="processPastedCsv()"
-              class="px-5 py-2 border-2 border-black bg-purple-500 text-white text-xs font-black uppercase">
+              class="px-5 py-2.5 bg-orange-500 text-white rounded-lg text-sm font-bold hover:bg-orange-400 transition-colors">
               Import
             </button>
           </div>
@@ -777,41 +768,41 @@ const SYSTEM_PRESETS: SystemPreset[] = [
     }
 
     @if (isGeneratingAI()) {
-      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
-        <div class="bg-white dark:bg-concrete-900 rigid-border border-[4px] border-black dark:border-concrete-100 p-6 brutalist-shadow-lg w-full max-w-lg">
-          <div class="flex justify-between items-center border-b-4 border-black dark:border-concrete-100 pb-3">
-            <h3 class="text-xl font-black uppercase font-arvo dark:text-white">AI Protocol Generator</h3>
-            <button (click)="isGeneratingAI.set(false)" [disabled]="isGeneratingAILoading()" class="text-black dark:text-white">
+      <div class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+        <div class="bg-white rounded-xl shadow-gentle-lg p-6 w-full max-w-lg border border-taupe/10">
+          <div class="flex justify-between items-center border-b border-taupe/10 pb-3">
+            <h3 class="text-xl font-bold font-heading text-charcoal">AI Protocol Generator</h3>
+            <button (click)="isGeneratingAI.set(false)" [disabled]="isGeneratingAILoading()" class="text-taupe hover:text-charcoal transition-colors">
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
 
           <div class="mt-4 space-y-3">
             <div>
-              <label class="text-[10px] font-black uppercase text-concrete-500 block mb-1">Topic / Goal</label>
+              <label class="text-xs font-bold uppercase tracking-wider text-taupe block mb-1">Topic / Goal</label>
               <input
                 [(ngModel)]="aiTopic"
                 [disabled]="isGeneratingAILoading()"
                 placeholder="Learn Angular for scalable frontend systems"
-                class="w-full border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-2 text-sm font-bold outline-none dark:text-white" />
+                class="w-full border border-taupe/20 bg-sand rounded-lg p-2.5 text-sm font-medium outline-none text-charcoal" />
             </div>
             <div>
-              <label class="text-[10px] font-black uppercase text-concrete-500 block mb-1">Duration (weeks)</label>
+              <label class="text-xs font-bold uppercase tracking-wider text-taupe block mb-1">Duration (weeks)</label>
               <input
                 type="number"
                 min="1"
                 max="12"
                 [(ngModel)]="aiWeeks"
                 [disabled]="isGeneratingAILoading()"
-                class="w-full border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-2 text-sm font-bold outline-none dark:text-white" />
+                class="w-full border border-taupe/20 bg-sand rounded-lg p-2.5 text-sm font-medium outline-none text-charcoal" />
             </div>
             <div>
-              <label class="text-[10px] font-black uppercase text-concrete-500 block mb-1">Description / constraints</label>
+              <label class="text-xs font-bold uppercase tracking-wider text-taupe block mb-1">Description / constraints</label>
               <textarea
                 [(ngModel)]="aiDescription"
                 [disabled]="isGeneratingAILoading()"
                 rows="4"
-                class="w-full resize-none border-2 border-black dark:border-concrete-300 bg-concrete-50 dark:bg-concrete-800 p-2 text-sm font-medium outline-none dark:text-white"
+                class="w-full resize-none border border-taupe/20 bg-sand rounded-lg p-2.5 text-sm font-medium outline-none text-charcoal"
                 placeholder="Include advanced routing, state strategy, and testing."></textarea>
             </div>
           </div>
@@ -820,13 +811,13 @@ const SYSTEM_PRESETS: SystemPreset[] = [
             <button
               (click)="isGeneratingAI.set(false)"
               [disabled]="isGeneratingAILoading()"
-              class="px-5 py-2 border-2 border-black dark:border-concrete-300 bg-concrete-200 dark:bg-concrete-800 text-xs font-black uppercase dark:text-white disabled:opacity-50">
+              class="px-5 py-2.5 bg-sand text-charcoal rounded-lg text-sm font-bold hover:bg-sand-dark transition-colors disabled:opacity-50">
               Cancel
             </button>
             <button
               (click)="generateWithAI()"
               [disabled]="isGeneratingAILoading() || !aiTopic.trim()"
-              class="px-5 py-2 border-2 border-black bg-green-500 text-white text-xs font-black uppercase disabled:opacity-50 inline-flex items-center gap-2">
+              class="px-5 py-2.5 bg-sage text-white rounded-lg text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50 inline-flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">{{ isGeneratingAILoading() ? 'hourglass_top' : 'auto_awesome' }}</span>
               {{ isGeneratingAILoading() ? 'Generating...' : 'Generate' }}
             </button>
@@ -836,11 +827,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
     }
   `,
   styles: [`
-    :host { display: block; height: 100%; }
-    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
-    :host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb { background: white; }
+    :host { display: block; }
   `]
 })
 export class SystemManagerComponent implements OnInit {
@@ -853,6 +840,7 @@ export class SystemManagerComponent implements OnInit {
   habits = signal<Habit[]>([]);
   selectedSystem = signal<LearningSystem | null>(null);
   isCreating = signal(false);
+  currentView = signal<ViewMode>('form');
 
   instantiateDate = new Date().toISOString().split('T')[0];
   selectedHabitId: string | null = null;

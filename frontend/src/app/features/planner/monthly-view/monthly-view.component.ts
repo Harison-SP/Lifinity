@@ -1,11 +1,11 @@
-﻿import { Component, signal, inject, OnInit, OnDestroy, computed, Injector, effect } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed, Injector, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlannerService, MonthlyReflection, HabitCompletions, HabitNote } from '../../../services/planner.service';
 import { HabitService } from '../../../services/habit.service';
 import { MultiSelectChipsComponent, MultiSelectOption } from '../../../shared/components/multi-select-chips/multi-select-chips.component';
-import { AngularTiptapEditorComponent } from '@flogeez/angular-tiptap-editor';
+import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil, take } from 'rxjs/operators';
 
@@ -19,302 +19,159 @@ interface MonthlyHabit {
 @Component({
   selector: 'app-monthly-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectChipsComponent, AngularTiptapEditorComponent],
+  imports: [CommonModule, FormsModule, MultiSelectChipsComponent, RouterModule],
   template: `
-    <div class="h-full flex flex-col font-manrope p-3 sm:p-4 gap-5 sm:gap-6 overflow-x-hidden">
+    <div class="h-full flex flex-col font-body p-4 sm:p-6 gap-6 overflow-x-hidden bg-white paper-texture transition-colors duration-300">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <button (click)="changeMonth(-1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors rigid-border-sm border-[2px] dark:border-concrete-100 dark:text-white">
+        <div class="flex flex-wrap items-center gap-3">
+          <button (click)="changeMonth(-1)" 
+                  class="p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
-          <h2 class="text-2xl font-black text-black dark:text-white uppercase font-arvo">
+          <h2 class="text-2xl font-bold text-charcoal font-heading px-2 min-w-[180px] text-center">
             {{ getMonthName(currentMonth()) }} {{ currentYear() }}
           </h2>
-          <button (click)="changeMonth(1)" class="p-2 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors rigid-border-sm border-[2px] dark:border-concrete-100 dark:text-white">
+          <button (click)="changeMonth(1)" 
+                  class="p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
             <span class="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
       </div>
 
       <!-- Monthly Grid -->
-      <div class="overflow-x-auto custom-scrollbar rigid-border-sm border-[2px] dark:border-concrete-500">
-        <div class="grid" [style.grid-template-columns]="'150px repeat(' + daysInMonth().length + ', 40px)'">
-          <!-- Header -->
-          <div class="sticky left-0 bg-white dark:bg-concrete-900 font-black text-xs uppercase text-black dark:text-white p-2 border-r-2 border-b-2 border-black dark:border-concrete-100 z-10">Habit</div>
-          @for(day of daysInMonth(); track day) {
-            <div class="font-bold text-xs text-center p-2 border-b-2 border-black dark:border-concrete-100 dark:text-white"
-                 [class.bg-yellow-100]="isToday(day)"
-                 [class.dark:bg-concrete-800]="isToday(day)"
-                 [class.font-black]="isToday(day)">{{ day }}</div>
-          }
-
-          <!-- Body -->
-          @for(habit of monthHabits(); track habit.id) {
-            <div class="sticky left-0 bg-white dark:bg-concrete-900 font-bold text-sm text-black dark:text-white p-2 border-r-2 border-b border-concrete-300 dark:border-concrete-700 z-10 truncate flex items-center gap-1 cursor-pointer hover:bg-concrete-100 dark:hover:bg-concrete-800 transition-colors group"
-                 [title]="habit.name"
-                 (click)="selectHabitForNotes(habit)">
-              <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100 transition-opacity text-concrete-400">edit_note</span>
-              <span class="truncate" [class.text-primary]="selectedHabitId() === habit.id">{{ habit.name }}</span>
-            </div>
+      <div class="bg-white rounded-xl shadow-gentle border border-taupe/10 overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+          <div class="grid" [style.grid-template-columns]="'180px repeat(' + daysInMonth().length + ', 44px)'">
+            <!-- Header -->
+            <div class="sticky left-0 bg-white font-bold text-xs uppercase tracking-widest text-taupe p-4 border-r border-b border-taupe/10 z-20 font-heading">Habit</div>
             @for(day of daysInMonth(); track day) {
-              <div class="flex items-center justify-center border-b border-r border-concrete-300 dark:border-concrete-700"
-                   [class.bg-yellow-50]="isToday(day)"
-                   [class.dark:bg-concrete-800]="isToday(day)">
-                <button (click)="toggleCompletion(habit, day)" 
-                        class="w-full h-full text-lg hover:bg-concrete-200 dark:hover:bg-concrete-700 transition-colors py-1"
-                        [class.cursor-not-allowed]="isFutureDay(day)"
-                        [disabled]="isFutureDay(day)">
-                  @if(habit.completions[day] === true) { <span class="text-green-500">âœ”</span> }
-                  @else if(habit.completions[day] === false) { <span class="text-red-500">âœ˜</span> }
-                  @else if(habit.type === 'measurable' && isNumber(habit.completions[day])) { 
-                    <span class="text-blue-500 text-[10px] font-bold">{{ habit.completions[day] }}</span> 
-                  }
-                  @else { <span class="text-concrete-300">Â·</span> }
-                </button>
+              <div class="font-bold text-xs text-center p-4 border-b border-taupe/10 text-taupe flex items-center justify-center min-h-[50px]"
+                   [class.bg-orange-50]="isToday(day)"
+                   [class.text-orange-600]="isToday(day)"
+                   [class.font-black]="isToday(day)">{{ day }}</div>
+            }
+
+            <!-- Body -->
+            @for(habit of monthHabits(); track habit.id) {
+              <a [routerLink]="['/notes', habit.id]"
+                 class="sticky left-0 bg-white font-bold text-sm text-charcoal p-4 border-r border-b border-taupe/5 z-20 truncate flex items-center gap-2 hover:bg-sand/30 transition-all group"
+                 [title]="habit.name">
+                <span class="material-symbols-outlined text-base text-orange-500 opacity-60 group-hover:opacity-100 transition-opacity">sticky_note_2</span>
+                <span class="truncate font-heading">{{ habit.name }}</span>
+              </a>
+              @for(day of daysInMonth(); track day) {
+                <div class="flex items-center justify-center border-b border-r border-taupe/5 min-h-[52px] group/cell"
+                     [class.bg-orange-50/30]="isToday(day)">
+                  <button (click)="toggleCompletion(habit, day)" 
+                          class="w-full h-full flex items-center justify-center transition-all py-1 hover:bg-sand/20"
+                          [class.cursor-not-allowed]="isFutureDay(day)"
+                          [disabled]="isFutureDay(day)">
+                    @if(habit.completions[day] === true) { 
+                      <div class="w-6 h-6 rounded-full bg-sage flex items-center justify-center shadow-sm">
+                        <span class="material-symbols-outlined text-white text-base">check</span> 
+                      </div>
+                    }
+                    @else if(habit.completions[day] === false) { 
+                      <div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
+                        <span class="material-symbols-outlined text-orange-500 text-base">close</span> 
+                      </div>
+                    }
+                    @else if(habit.type === 'measurable' && isNumber(habit.completions[day])) { 
+                      <span class="text-orange-600 text-xs font-bold font-mono">{{ habit.completions[day] }}</span> 
+                    }
+                    @else { 
+                      <div class="w-2 h-2 rounded-full bg-taupe/10 group-hover/cell:bg-taupe/20 transition-colors"></div>
+                    }
+                  </button>
+                </div>
+              }
+            } @empty {
+              <div class="p-12 text-center text-taupe italic font-body" [style.grid-column]="'1 / -1'">
+                No habits active for this period.
               </div>
             }
-          } @empty {
-            <div class="p-4 text-center text-concrete-500" [style.grid-column]="'1 / -1'">
-              No habits yet. Add habits from the Habits section.
-            </div>
-          }
+          </div>
         </div>
       </div>
 
-      <!-- Habit Notes Panel (Obsidian-like) -->
-      @if(selectedHabitId()) {
-        <div class="bg-white rigid-border border-[4px] brutalist-shadow-lg overflow-hidden note-panel-animate transition-all duration-300"
-             [class.fixed]="isFullScreen()"
-             [class.inset-0]="isFullScreen()"
-             [class.z-50]="isFullScreen()"
-             [class.h-full]="isFullScreen()"
-             [class.w-full]="isFullScreen()"
-             [class.rounded-none]="isFullScreen()">
-          <!-- Note Panel Header -->
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-black text-white px-4 sm:px-6 py-3">
-            <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-xl">edit_note</span>
-              <h3 class="text-lg font-black uppercase font-arvo tracking-wider">
-                {{ selectedHabitName() }} â€” Notes
-              </h3>
-              <span class="text-xs bg-white text-black px-2 py-0.5 font-bold">
-                {{ habitNotes().length }} {{ habitNotes().length === 1 ? 'NOTE' : 'NOTES' }}
-              </span>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <button (click)="createNewNote()" 
-                      class="flex items-center gap-1 px-3 py-1 bg-white text-black font-bold text-xs uppercase hover:bg-concrete-100 transition-colors rigid-border-sm border-white">
-                <span class="material-symbols-outlined text-sm">add</span>
-                New Note
-              </button>
-              <button (click)="toggleReadingMode()" 
-                      class="p-1 hover:bg-white/20 transition-colors"
-                      [title]="isReadingMode() ? 'Edit Mode' : 'Reading Mode'"
-                      [class.bg-concrete-200]="isReadingMode()">
-                <span class="material-symbols-outlined">{{ isReadingMode() ? 'visibility' : 'edit' }}</span>
-              </button>
-              <div class="relative">
-                <button (click)="toggleDownloadMenu()" 
-                        class="p-1 hover:bg-white/20 transition-colors"
-                        title="Download Note">
-                  <span class="material-symbols-outlined">download</span>
-                </button>
-                @if(isDownloadMenuOpen()) {
-                  <div class="absolute right-0 top-full mt-1 bg-white rigid-border border-[2px] z-50 min-w-[120px] brutalist-shadow-sm flex flex-col text-black">
-                      <button (click)="downloadNote('txt')" class="px-3 py-2 text-left hover:bg-concrete-100 font-bold text-xs uppercase border-b border-concrete-100 w-full">Text (.txt)</button>
-                      <button (click)="downloadNote('md')" class="px-3 py-2 text-left hover:bg-concrete-100 font-bold text-xs uppercase border-b border-concrete-100 w-full">Markdown (.md)</button>
-                      <button (click)="downloadNote('pdf')" class="px-3 py-2 text-left hover:bg-concrete-100 font-bold text-xs uppercase w-full">PDF</button>
-                  </div>
-                }
-              </div>
-              <button (click)="toggleFullScreen()" 
-                      class="p-1 hover:bg-white/20 transition-colors"
-                      [title]="isFullScreen() ? 'Exit Full Screen' : 'Full Screen'">
-                <span class="material-symbols-outlined">{{ isFullScreen() ? 'fullscreen_exit' : 'fullscreen' }}</span>
-              </button>
-              <button (click)="closeNotesPanel()" 
-                      class="p-1 hover:bg-white/20 transition-colors">
-                <span class="material-symbols-outlined">close</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="flex flex-col md:flex-row min-h-[420px] md:min-h-[500px] max-h-[80vh] md:max-h-[700px]">
-            <!-- Notes Sidebar -->
-            <div class="w-full md:w-[260px] max-h-[220px] md:max-h-none border-b-4 md:border-b-0 md:border-r-4 border-black bg-concrete-100 overflow-y-auto custom-scrollbar flex-shrink-0">
-              @if(habitNotes().length === 0) {
-                <div class="p-6 text-center">
-                  <span class="material-symbols-outlined text-4xl text-concrete-300 mb-2 block">note_add</span>
-                  <p class="text-xs font-bold text-concrete-400 uppercase">No notes yet</p>
-                  <p class="text-[10px] text-concrete-300 mt-1">Click "New Note" to start</p>
-                </div>
-              }
-              @for(note of habitNotes(); track note.id) {
-                <div class="px-4 py-3 border-b-2 border-black/10 cursor-pointer transition-all duration-150 hover:bg-white"
-                     [class.bg-white]="activeNoteId() === note.id"
-                     [class.border-l-4]="activeNoteId() === note.id"
-                     [class.border-l-primary]="activeNoteId() === note.id"
-                     [class.font-bold]="activeNoteId() === note.id"
-                     (click)="selectNote(note)">
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-bold text-black truncate">
-                        {{ note.title || 'Untitled Note' }}
-                      </p>
-                      <p class="text-[10px] text-concrete-400 mt-0.5 font-mono">
-                        {{ formatDate(note.updated_at) }}
-                      </p>
-                      @if(note.content) {
-                        <p class="text-[11px] text-concrete-400 mt-1 line-clamp-2 leading-tight">
-                          {{ stripHtml(note.content) }}
-                        </p>
-                      }
-                    </div>
-                    @if(note.is_pinned) {
-                      <span class="material-symbols-outlined text-sm text-primary flex-shrink-0 mt-0.5">push_pin</span>
-                    }
-                  </div>
-                  @if(note.tags && note.tags.length > 0) {
-                    <div class="flex flex-wrap gap-1 mt-1.5">
-                      @for(tag of note.tags.slice(0, 3); track tag) {
-                        <span class="text-[9px] px-1.5 py-0.5 bg-black text-white font-bold uppercase">{{ tag }}</span>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-
-            <!-- Editor Area -->
-            <div class="flex-1 flex flex-col overflow-hidden">
-              @if(activeNoteId()) {
-                <!-- Note Title -->
-                <div class="flex flex-wrap items-center gap-2 px-4 sm:px-6 py-3 border-b-2 border-black/10 bg-white">
-                  <input type="text"
-                         [ngModel]="activeNoteTitle()"
-                         (ngModelChange)="updateNoteTitle($event)"
-                         placeholder="Note title..."
-                         class="flex-1 text-xl font-black text-black uppercase font-arvo outline-none bg-transparent placeholder:text-concrete-300" />
-                  <div class="flex items-center gap-1">
-                    <button (click)="togglePinNote()" 
-                            class="p-1.5 hover:bg-concrete-100 transition-colors rigid-border-sm border-transparent hover:border-black"
-                            [class.text-primary]="activeNote()?.is_pinned"
-                            [title]="activeNote()?.is_pinned ? 'Unpin note' : 'Pin note'">
-                      <span class="material-symbols-outlined text-lg">push_pin</span>
-                    </button>
-                    <button (click)="deleteActiveNote()" 
-                            class="p-1.5 hover:bg-red-100 hover:text-red-600 transition-colors rigid-border-sm border-transparent hover:border-red-600"
-                            title="Delete note">
-                      <span class="material-symbols-outlined text-lg">delete</span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Tags -->
-                <div class="flex flex-wrap items-center gap-2 px-4 sm:px-6 py-2 border-b border-black/5 bg-concrete-100/50">
-                  <span class="material-symbols-outlined text-sm text-concrete-400">sell</span>
-                  <input type="text"
-                         [ngModel]="tagInput()"
-                         (ngModelChange)="tagInput.set($event)"
-                         (keydown.enter)="addTag()"
-                         placeholder="Add tags (press Enter)"
-                         class="flex-1 text-xs font-mono text-black outline-none bg-transparent placeholder:text-concrete-300" />
-                  @for(tag of activeNote()?.tags || []; track tag) {
-                    <span class="inline-flex items-center gap-0.5 text-[10px] px-2 py-0.5 bg-black text-white font-bold uppercase group">
-                      {{ tag }}
-                      <button (click)="removeTag(tag)" class="opacity-50 hover:opacity-100 ml-0.5">Ã—</button>
-                    </span>
-                  }
-                </div>
-
-                <!-- Tiptap Editor -->
-                <div class="flex-1 overflow-y-auto obsidian-editor">
-                  <angular-tiptap-editor
-                    [content]="activeNoteContent()"
-                    (contentChange)="onEditorContentChange($event)"
-                    [disabled]="isReadingMode()"
-                    [config]="editorConfig"
-                  />
-                </div>
-
-                <!-- Status Bar -->
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 px-4 sm:px-6 py-1.5 border-t-2 border-black/10 bg-concrete-100 text-[10px] font-mono text-concrete-400 uppercase">
-                  <span>{{ savingStatus() }}</span>
-                  <span>Last saved: {{ formatDate(activeNote()?.updated_at) }}</span>
-                </div>
-              } @else {
-                <div class="flex-1 flex items-center justify-center bg-concrete-100/30">
-                  <div class="text-center">
-                    <span class="material-symbols-outlined text-6xl text-concrete-200 mb-3 block">description</span>
-                    <p class="text-sm font-bold text-concrete-400 uppercase">Select a note or create a new one</p>
-                    <p class="text-xs text-concrete-300 mt-1 max-w-[300px]">
-                      Use the rich editor to write detailed notes about your habits â€” track progress, insights, and ideas.
-                    </p>
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      }
-
       <!-- Sections -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Focus Themes -->
-        <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg">
-          <h3 class="text-lg font-black text-black uppercase font-arvo border-b-4 border-black pb-2 mb-4">Focus Themes</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest block mb-2">Primary Focus</label>
-              <app-multi-select-chips
-                [options]="monthHabitOptions()"
-                [selectedIds]="reflection().primary_focus"
-                (selectedIdsChange)="updatePrimaryFocus($event)"
-                placeholder="Select primary focus habits"
-              ></app-multi-select-chips>
+        <div class="bg-white rounded-xl shadow-gentle p-8 border border-taupe/10">
+          <h3 class="text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-4 mb-8 flex items-center gap-2">
+            <span class="material-symbols-outlined text-orange-500">sparkles</span>
+            Monthly Intentions
+          </h3>
+          <div class="space-y-8">
+            <div class="group">
+              <label class="text-[11px] font-bold text-taupe uppercase tracking-[0.2em] block mb-4 ml-1 group-focus-within:text-orange-500 transition-colors">Primary Focus</label>
+              <div class="p-1 bg-alabaster rounded-xl border border-taupe/5 group-focus-within:border-orange-500/20 transition-all">
+                <app-multi-select-chips
+                  [options]="monthHabitOptions()"
+                  [selectedIds]="reflection().primary_focus"
+                  (selectedIdsChange)="updatePrimaryFocus($event)"
+                  placeholder="Select primary habits..."
+                ></app-multi-select-chips>
+              </div>
             </div>
-            <div>
-              <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest block mb-2">Secondary Focus</label>
-              <app-multi-select-chips
-                [options]="monthHabitOptions()"
-                [selectedIds]="reflection().secondary_focus"
-                (selectedIdsChange)="updateSecondaryFocus($event)"
-                placeholder="Select secondary focus habits"
-              ></app-multi-select-chips>
+            <div class="group">
+              <label class="text-[11px] font-bold text-taupe uppercase tracking-[0.2em] block mb-4 ml-1 group-focus-within:text-orange-500 transition-colors">Secondary Focus</label>
+              <div class="p-1 bg-alabaster rounded-xl border border-taupe/5 group-focus-within:border-orange-500/20 transition-all">
+                <app-multi-select-chips
+                  [options]="monthHabitOptions()"
+                  [selectedIds]="reflection().secondary_focus"
+                  (selectedIdsChange)="updateSecondaryFocus($event)"
+                  placeholder="Select supporting habits..."
+                ></app-multi-select-chips>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Progress Tracker -->
-        <div class="bg-white rigid-border border-[4px] p-6 brutalist-shadow-lg">
-          <h3 class="text-lg font-black text-black uppercase font-arvo border-b-4 border-black pb-2 mb-4">Progress Tracker</h3>
-           <div class="space-y-4">
+        <div class="bg-white rounded-xl shadow-gentle p-8 border border-taupe/10">
+          <h3 class="text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-4 mb-8 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sage">analytics</span>
+            Monthly Pulse
+          </h3>
+           <div class="space-y-8">
               <div>
-                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Monthly Completion</label>
-                  <div class="w-full bg-concrete-200 rigid-border-sm border-2 border-black h-6 mt-1">
-                      <div class="bg-green-500 h-full text-center text-xs font-bold text-white flex items-center justify-center transition-all duration-300" [style.width.%]="completionPercentage()">
-                          {{ completionPercentage() | number:'1.0-0' }}%
+                  <div class="flex justify-between items-baseline mb-4">
+                    <label class="text-[11px] font-bold text-taupe uppercase tracking-[0.2em] ml-1">Overall Consistency</label>
+                    <span class="text-2xl font-bold text-sage font-heading">{{ completionPercentage() | number:'1.0-0' }}%</span>
+                  </div>
+                  <div class="w-full bg-sand rounded-full h-3 overflow-hidden shadow-inner border border-taupe/5">
+                      <div class="bg-sage h-full rounded-full transition-all duration-1000 ease-out" [style.width.%]="completionPercentage()">
                       </div>
                   </div>
               </div>
-              <div>
-                  <label class="text-[10px] font-black text-concrete-900 uppercase tracking-widest">Study Hours (Auto-calculated)</label>
-                  <div class="w-full mt-1 px-3 py-2 bg-concrete-100 rigid-border-sm border-[2px] text-black font-mono text-sm">
-                    {{ reflection().study_hours | number:'1.1-1' }} hours
+              <div class="p-6 bg-alabaster rounded-xl border border-taupe/5 flex items-center justify-between group hover:border-taupe/20 transition-all">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                      <span class="material-symbols-outlined">auto_stories</span>
+                    </div>
+                    <div>
+                      <label class="text-[10px] font-bold text-taupe uppercase tracking-widest block">Study Commitment</label>
+                      <span class="text-lg font-bold text-charcoal font-heading leading-tight">Monthly Accumulation</span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-2xl font-bold text-orange-500 font-heading">{{ reflection().study_hours | number:'1.1-1' }}</span>
+                    <span class="text-xs font-bold text-taupe uppercase ml-1">HRS</span>
                   </div>
               </div>
           </div>
         </div>
-
       </div>
     </div>
   `,
   styles: [`
     :host { display: block; height: 100%; }
-    .custom-scrollbar::-webkit-scrollbar { height: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #e5e5e5; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: black; }
+    .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #dcd7d0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #c1bab0; }
 
     .line-clamp-2 {
       display: -webkit-box;
@@ -329,193 +186,6 @@ interface MonthlyHabit {
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-12px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Obsidian-like Editor Styling */
-    .obsidian-editor {
-      --ate-bg: #ffffff;
-      --ate-text: #1a1a1a;
-      --ate-border: #e5e5e5;
-      --ate-primary: #2b8cee;
-      --ate-border-radius: 0px;
-    }
-
-    :host-context(.dark) .obsidian-editor {
-      --ate-bg: #1a1a1a;
-      --ate-text: #ffffff;
-      --ate-border: #333;
-    }
-
-    :host-context(.dark) .bg-white { background-color: #1a1a1a !important; }
-    :host-context(.dark) .text-black { color: #ffffff !important; }
-    :host-context(.dark) .border-black { border-color: #ffffff !important; }
-    :host-context(.dark) .bg-concrete-100 { background-color: #262626 !important; }
-
-    /* Code Block Styling Fix */
-    :host ::ng-deep .obsidian-editor .ate-content pre {
-      background: #0d0d0d !important;
-      color: #e5e5e5 !important;
-      padding: 1rem !important;
-      border: 2px solid #000 !important;
-      border-radius: 4px !important;
-      font-family: 'Space Mono', monospace !important;
-    }
-    
-    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content pre {
-       border-color: #555 !important;
-    }
-    
-    :host ::ng-deep .obsidian-editor .ate-content pre code {
-      background: transparent !important;
-      color: inherit !important;
-      padding: 0 !important;
-      border: none !important;
-      font-size: 0.9em !important;
-    }
-
-    /* Table Styling Fix */
-    :host ::ng-deep .obsidian-editor .ate-content table {
-      border: 2px solid #000 !important;
-      border-collapse: collapse !important;
-      width: 100% !important;
-      margin: 1.5em 0 !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content th,
-    :host ::ng-deep .obsidian-editor .ate-content td {
-      border: 1px solid #000 !important;
-      padding: 8px 12px !important;
-      position: relative !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content th {
-      background: #f0f0f0 !important;
-      font-weight: 700 !important;
-      text-align: left !important;
-    }
-
-    /* Bubble Menu & Selection Fix */
-    :host ::ng-deep .tippy-box {
-      background-color: #000 !important;
-      color: #fff !important;
-      border-radius: 0 !important;
-      border: 2px solid #fff !important;
-      box-shadow: 4px 4px 0 rgba(0,0,0,0.2) !important;
-    }
-    
-    :host ::ng-deep .tippy-box .tippy-content {
-      padding: 4px !important;
-    }
-    :host ::ng-deep .tippy-box .tippy-content .bubble-menu {
-      display: flex !important;
-      flex-direction: row !important;
-    }
-    
-    :host ::ng-deep .tippy-arrow {
-      color: #000 !important;
-    }
-
-    :host ::ng-deep .obsidian-editor ::selection {
-      background-color: rgba(43, 140, 238, 0.3) !important;
-      color: inherit !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-editor {
-      border: none !important;
-      box-shadow: none !important;
-      border-radius: 0 !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-toolbar {
-      border-bottom: 2px solid #e5e5e5 !important;
-      border-radius: 0 !important;
-      background: #fafafa !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content {
-      font-family: 'Space Mono', 'JetBrains Mono', monospace !important;
-      font-size: 14px !important;
-      line-height: 1.8 !important;
-      padding: 24px 32px !important;
-      min-height: 350px !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content h1,
-    :host ::ng-deep .obsidian-editor .ate-content h2,
-    :host ::ng-deep .obsidian-editor .ate-content h3 {
-      font-family: 'Arvo', serif !important;
-      font-weight: 900 !important;
-      text-transform: uppercase !important;
-      letter-spacing: 0.05em !important;
-      border-bottom: 3px solid #000 !important;
-      padding-bottom: 6px !important;
-      margin-bottom: 16px !important;
-    }
-
-    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content h1,
-    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content h2,
-    :host-context(.dark) ::ng-deep .obsidian-editor .ate-content h3 {
-        border-bottom-color: #ffffff !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content h1 { font-size: 1.75em !important; }
-    :host ::ng-deep .obsidian-editor .ate-content h2 { font-size: 1.4em !important; }
-    :host ::ng-deep .obsidian-editor .ate-content h3 { font-size: 1.15em !important; border-bottom-width: 2px !important; }
-
-    :host ::ng-deep .obsidian-editor .ate-content blockquote {
-      border-left: 4px solid #000 !important;
-      background: #f5f5f5 !important;
-      padding: 12px 16px !important;
-      margin: 12px 0 !important;
-      font-style: italic !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content code {
-      background: #f0f0f0 !important;
-      padding: 2px 6px !important;
-      border: 1px solid #ccc !important;
-      font-family: 'Space Mono', monospace !important;
-      font-size: 0.9em !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content ul,
-    :host ::ng-deep .obsidian-editor .ate-content ol {
-      padding-left: 24px !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content li {
-      margin-bottom: 4px !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content hr {
-      border: none !important;
-      border-top: 3px solid #000 !important;
-      margin: 24px 0 !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content a {
-      color: #2b8cee !important;
-      text-decoration: underline !important;
-      font-weight: 700 !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-footer {
-      border-top: 2px solid #e5e5e5 !important;
-      border-radius: 0 !important;
-    }
-
-    /* Fix for Disabled/Reading Mode Visibility */
-    :host ::ng-deep .obsidian-editor .ate-content[contenteditable="false"],
-    :host ::ng-deep .obsidian-editor .ate-content [contenteditable="false"],
-    :host ::ng-deep .obsidian-editor .is-disabled .ate-editor .ate-content  {
-      opacity: 1 !important;
-      background-color: white !important;
-      color: black !important;
-    }
-
-    :host ::ng-deep .obsidian-editor .ate-content[contenteditable="false"] a {
-      pointer-events: auto !important;
-      cursor: pointer !important;
     }
   `],
   host: {
@@ -652,7 +322,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
           this.habitNotes.update(notes =>
             notes.map(n => n.id === id ? { ...n, updated_at: updated.updated_at, title: currentTitle, content: currentContent } : n)
           );
-          this.savingStatus.set('SAVED âœ“');
+          this.savingStatus.set('SAVED');
           setTimeout(() => this.savingStatus.set('READY'), 2000);
         },
         error: (err) => console.error('Failed to save note immediately', err)
@@ -745,7 +415,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
     return this.habitNotes().find(n => n.id === id) || null;
   });
 
-  // Editor config â€” Obsidian-like setup
+  // Editor config Obsidian-like setup
   editorConfig = {
     placeholder: 'Start writing your note... Type / for slash commands',
     showFooter: true,
@@ -1239,7 +909,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
       content: this.activeNoteContent()
     }).subscribe({
       next: (updated) => {
-        this.savingStatus.set('SAVED âœ“');
+        this.savingStatus.set('SAVED ');
         this.habitNotes.update(notes =>
           notes.map(n => n.id === noteId ? { ...n, updated_at: updated.updated_at } : n)
         );
@@ -1247,7 +917,7 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to save note', err);
-        this.savingStatus.set('SAVE FAILED âœ˜');
+        this.savingStatus.set('SAVE FAILED');
         setTimeout(() => this.savingStatus.set('READY'), 3000);
       }
     });

@@ -1,161 +1,143 @@
-﻿import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
 import { Location, CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { FrequencyType } from '../../models/habit.model';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatTimepickerModule } from '@angular/material/timepicker';
 
 @Component({
     selector: 'app-add-habit',
     standalone: true,
     imports: [
         CommonModule,
-        ReactiveFormsModule, 
-        MatDatepickerModule, 
-        MatTimepickerModule, 
-        MatFormFieldModule, 
-        MatInputModule, 
-        MatNativeDateModule
+        ReactiveFormsModule,
+        MatDatepickerModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatNativeDateModule,
+        MatTimepickerModule
     ],
     template: `
-    <div class="min-h-screen bg-concrete-200 dark:bg-concrete-900 px-4 py-5 sm:p-6 md:p-8 lg:p-12 font-manrope pb-24 transition-colors duration-300 overflow-x-hidden">
-        <header class="mb-10 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b-4 border-black dark:border-concrete-100 pb-4">
-            <div>
-                <button (click)="goBack()" class="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest hover:text-electric-red dark:text-concrete-400 dark:hover:text-white transition-colors">
-                    <span class="material-symbols-outlined text-sm">arrow_back</span>
-                    Return_To_Base
-                </button>
-                <h1 class="text-3xl sm:text-4xl md:text-6xl font-black text-black dark:text-white uppercase leading-none font-arvo">
-                    {{ isEditMode() ? 'System_Override' : 'Initialize_Protocol' }}
-                </h1>
-            </div>
-            <div class="hidden md:block text-right">
-                <div class="text-[10px] font-black uppercase tracking-[0.2em] bg-black dark:bg-concrete-100 text-white dark:text-black px-2 py-1 inline-block">
-                    Status: {{ isEditMode() ? 'Reconfiguration' : 'New_Entry' }}
-                </div>
-            </div>
+    <div class="min-h-screen bg-white px-4 py-6 md:py-8 lg:px-12 font-body pb-24 transition-colors duration-300 overflow-x-hidden paper-texture">
+        <header class="mb-8 md:mb-10">
+            <button (click)="goBack()" class="flex items-center gap-2 text-taupe hover:text-charcoal transition-colors font-body text-sm md:text-base group mb-4">
+                <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                Back
+            </button>
+            <h1 class="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-charcoal">
+                {{ isEditMode() ? 'Edit Habit' : 'Add Habit' }}
+            </h1>
         </header>
 
-        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-4xl mx-auto bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 brutalist-shadow-active dark:shadow-[8px_8px_0_0_white] p-4 sm:p-6 md:p-10 relative">
-            
-            <!-- Section 1: Identification -->
-            <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Protocol_Identity</label>
-                <input formControlName="name" class="w-full text-2xl md:text-3xl font-black font-arvo uppercase border-b-4 border-black dark:border-concrete-100 focus:border-electric-red outline-none py-2 placeholder:text-concrete-300 dark:placeholder:text-concrete-600 transition-colors bg-transparent text-black dark:text-white" placeholder="ENTER_DESIGNATION" type="text"/>
-            </div>
-
-            <!-- Section 2: Parameters -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12">
-                <!-- Type Selection -->
-                <div>
-                     <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">System_Type</label>
-                     <div class="flex flex-col gap-4">
-                        <button type="button" (click)="setHabitType('yes_no')"
-                            class="text-left p-4 rigid-border-sm border-[2px] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black dark:border-concrete-500 transition-all group"
-                            [class.bg-black]="habitType() === 'yes_no'"
-                            [class.dark:bg-white]="habitType() === 'yes_no'"
-                            [class.text-white]="habitType() === 'yes_no'"
-                            [class.dark:text-black]="habitType() === 'yes_no'"
-                            [class.bg-white]="habitType() !== 'yes_no'"
-                            [class.dark:bg-concrete-900]="habitType() !== 'yes_no'"
-                            [class.dark:text-white]="habitType() !== 'yes_no'">
-                            <span class="font-black uppercase tracking-wider block text-lg mb-1">Binary_State</span>
-                            <span class="text-[10px] mono-font block opacity-70 group-hover:opacity-100">Simple Completion Toggle (0/1)</span>
-                        </button>
-                        <button type="button" (click)="setHabitType('measurable')"
-                            class="text-left p-4 rigid-border-sm border-[2px] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black dark:border-concrete-500 transition-all group"
-                            [class.bg-black]="habitType() === 'measurable'"
-                            [class.dark:bg-white]="habitType() === 'measurable'"
-                            [class.text-white]="habitType() === 'measurable'"
-                            [class.dark:text-black]="habitType() === 'measurable'"
-                            [class.bg-white]="habitType() !== 'measurable'"
-                            [class.dark:bg-concrete-900]="habitType() !== 'measurable'"
-                            [class.dark:text-white]="habitType() !== 'measurable'">
-                            <span class="font-black uppercase tracking-wider block text-lg mb-1">Quantitative</span>
-                            <span class="text-[10px] mono-font block opacity-70 group-hover:opacity-100">Numeric Value Tracking</span>
-                        </button>
-                     </div>
-
-                     <!-- Spectra Code (Color) -->
-                     <div class="mt-8">
-                        <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Spectra_Code</label>
-                        <div class="flex gap-2 flex-wrap">
-                            @for (c of presetColors; track c) {
-                                <button type="button" (click)="color.set(c)"
-                                        class="w-8 h-8 rigid-border-sm border-[2px] transition-all hover:scale-110 flex items-center justify-center shadow-[2px_2px_0_0_black] dark:shadow-[2px_2px_0_0_white]"
-                                        [style.background-color]="c"
-                                        [class.border-black]="color() === c"
-                                        [class.dark:border-white]="color() === c"
-                                        [class.border-transparent]="color() !== c">
-                                    @if(color() === c) {
-                                        <div class="w-2 h-2 bg-black"></div>
-                                    }
-                                </button>
-                            }
-                        </div>
-                     </div>
-                </div>
-
-                <!-- Measurable Options -->
-                @if (habitType() === 'measurable') {
-                    <div class="bg-concrete-100 dark:bg-concrete-900 p-6 rigid-border-sm border-[2px] border-dashed dark:border-concrete-600">
-                        <label class="block text-xs font-black uppercase tracking-[0.2em] mb-6 text-concrete-900 dark:text-concrete-200">Metric_Config</label>
-                        <div class="space-y-4">
-                            <div>
-                                <span class="text-[10px] font-bold uppercase block mb-1 dark:text-concrete-400">Target_Value</span>
-                                <input formControlName="targetValue" type="number" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white dark:bg-concrete-800 dark:text-white dark:border-concrete-500 dark:focus:bg-black"/>
-                            </div>
-                            <div>
-                                <span class="text-[10px] font-bold uppercase block mb-1 dark:text-concrete-400">Unit_Label</span>
-                                <input formControlName="targetUnit" type="text" placeholder="UNITS" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white uppercase dark:bg-concrete-800 dark:text-white dark:border-concrete-500 dark:focus:bg-black dark:placeholder:text-concrete-600"/>
-                            </div>
-                            <div>
-                                <span class="text-[10px] font-bold uppercase block mb-1 dark:text-concrete-400">Logic_Gate</span>
-                                <select formControlName="targetComparator" class="w-full p-2 rigid-border-sm border-[2px] font-mono font-bold outline-none focus:bg-white bg-transparent dark:bg-concrete-800 dark:text-white dark:border-concrete-500 dark:focus:bg-black">
-                                    <option value=">=">AT_LEAST (>=)</option>
-                                    <option value="<=">AT_MOST (<=)</option>
-                                    <option value="==">EXACTLY (==)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-3xl mx-auto bg-alabaster rounded-lg shadow-gentle p-6 md:p-8 lg:p-10">
+            <!-- Habit Name -->
+            <div class="mb-10 relative">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-2">Habit Name</label>
+                <input formControlName="name" class="w-full text-xl border-b-2 border-taupe/30 focus:border-orange-500 outline-none py-2 bg-transparent text-charcoal transition-colors" placeholder="e.g., Morning meditation" type="text"/>
+                @if (habitForm.get('name')?.invalid && habitForm.get('name')?.touched) {
+                    <p class="text-orange-500 text-xs mt-1">Please enter a habit name</p>
                 }
             </div>
 
-            <!-- Section 3: Recurrence -->
-            <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Temporality_Matrix</label>
-                <div class="flex flex-wrap gap-2 mb-6">
-                    @for (type of ['daily', 'specific_days', 'interval']; track type) {
-                        <button type="button" (click)="setFrequencyType(type)" 
-                            class="px-4 py-2 text-xs font-black uppercase tracking-wider border-2 border-black dark:border-concrete-500 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all"
-                            [class.bg-black]="frequencyType() === type"
-                            [class.dark:bg-white]="frequencyType() === type"
-                            [class.text-white]="frequencyType() === type"
-                            [class.dark:text-black]="frequencyType() === type"
-                            [class.bg-white]="frequencyType() !== type"
-                            [class.dark:bg-concrete-900]="frequencyType() !== type"
-                            [class.dark:text-white]="frequencyType() !== type">
-                            {{ type === 'daily' ? 'DAILY_CYCLE' : type === 'specific_days' ? 'FIXED_DAYS' : 'INTERVAL_LOOP' }}
-                        </button>
-                    }
+            <!-- Habit Type -->
+            <div class="mb-10">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Habit Type</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button type="button" (click)="setHabitType('yes_no')"
+                            class="p-6 rounded-xl border-2 border-taupe/30 transition-all hover:border-primary hover:bg-primary/5 flex flex-col items-center text-center group"
+                            [class.bg-primary]="habitType() === 'yes_no'"
+                            [class.border-primary]="habitType() === 'yes_no'"
+                            [class.text-white]="habitType() === 'yes_no'"
+                            [class.hover:bg-primary/10]="habitType() !== 'yes_no'">
+                        <span class="material-symbols-outlined text-4xl mb-3 transition-transform group-hover:scale-110"
+                              [class.text-primary]="habitType() !== 'yes_no'"
+                              [class.text-white]="habitType() === 'yes_no'">check_circle</span>
+                        <span class="font-heading text-xl font-bold block mb-2">Yes/No Habit</span>
+                        <span class="text-sm text-taupe group-hover:text-charcoal transition-colors"
+                              [class.text-white/70]="habitType() === 'yes_no'">Simple completion check</span>
+                    </button>
+                    <button type="button" (click)="setHabitType('measurable')"
+                            class="p-6 rounded-xl border-2 border-taupe/30 transition-all hover:border-primary hover:bg-primary/5 flex flex-col items-center text-center group"
+                            [class.bg-primary]="habitType() === 'measurable'"
+                            [class.border-primary]="habitType() === 'measurable'"
+                            [class.text-white]="habitType() === 'measurable'"
+                            [class.hover:bg-primary/10]="habitType() !== 'measurable'">
+                        <span class="material-symbols-outlined text-4xl mb-3 transition-transform group-hover:scale-110"
+                              [class.text-primary]="habitType() !== 'measurable'"
+                              [class.text-white]="habitType() === 'measurable'">assessment</span>
+                        <span class="font-heading text-xl font-bold block mb-2">Measurable Habit</span>
+                        <span class="text-sm text-taupe group-hover:text-charcoal transition-colors"
+                              [class.text-white/70]="habitType() === 'measurable'">Track numbers, minutes, pages...</span>
+                    </button>
                 </div>
-                
+            </div>
+
+            <!-- Measurable Options (Conditional) -->
+            @if (habitType() === 'measurable') {
+                <div class="bg-sand/30 p-6 rounded-lg mb-10 border border-taupe/20">
+                    <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Target Settings</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-xs text-taupe mb-2 font-body">Goal Type</label>
+                            <select formControlName="targetComparator" class="w-full bg-transparent border-b border-taupe/50 py-2 focus:border-orange-500 outline-none text-charcoal font-body">
+                                <option value=">=">At least</option>
+                                <option value="<=">At most</option>
+                                <option value="==">Exactly</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-taupe mb-2 font-body">Target Value</label>
+                            <input formControlName="targetValue" type="number" class="w-full bg-transparent border-b border-taupe/50 py-2 focus:border-orange-500 outline-none text-charcoal font-body" placeholder="e.g., 20"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-taupe mb-2 font-body">Unit</label>
+                            <input formControlName="targetUnit" type="text" class="w-full bg-transparent border-b border-taupe/50 py-2 focus:border-orange-500 outline-none text-charcoal font-body" placeholder="e.g., minutes"/>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Frequency -->
+            <div class="mb-10">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Frequency</label>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button type="button" (click)="setFrequencyType('daily')"
+                            class="px-5 py-2 rounded-full border border-taupe/30 text-sm transition-all hover:bg-sand"
+                            [class.bg-charcoal]="frequencyType() === 'daily'"
+                            [class.text-white]="frequencyType() === 'daily'"
+                            [class.border-charcoal]="frequencyType() === 'daily'">
+                        Daily
+                    </button>
+                    <button type="button" (click)="setFrequencyType('interval')"
+                            class="px-5 py-2 rounded-full border border-taupe/30 text-sm transition-all hover:bg-sand"
+                            [class.bg-charcoal]="frequencyType() === 'interval'"
+                            [class.text-white]="frequencyType() === 'interval'"
+                            [class.border-charcoal]="frequencyType() === 'interval'">
+                        Every X Days
+                    </button>
+                    <button type="button" (click)="setFrequencyType('specific_days')"
+                            class="px-5 py-2 rounded-full border border-taupe/30 text-sm transition-all hover:bg-sand"
+                            [class.bg-charcoal]="frequencyType() === 'specific_days'"
+                            [class.text-white]="frequencyType() === 'specific_days'"
+                            [class.border-charcoal]="frequencyType() === 'specific_days'">
+                        Specific Days
+                    </button>
+                </div>
+
                 @if (frequencyType() === 'specific_days') {
                     <div class="flex flex-wrap gap-2">
                         @for (day of daysOfWeek; track day.value) {
                             <button type="button" (click)="toggleDay(day.value)"
-                                    class="w-10 h-10 flex items-center justify-center border-2 border-black dark:border-concrete-500 font-black text-xs transition-all hover:translate-y-[-2px] hover:shadow-[2px_2px_0_0_black] dark:hover:shadow-[2px_2px_0_0_white]"
-                                    [class.bg-electric-red]="selectedDays().includes(day.value)"
+                                    class="w-10 h-10 flex items-center justify-center rounded-full border border-taupe/30 text-sm font-medium transition-all hover:bg-sand"
+                                    [class.bg-sage]="selectedDays().includes(day.value)"
                                     [class.text-white]="selectedDays().includes(day.value)"
-                                    [class.bg-white]="!selectedDays().includes(day.value)"
-                                    [class.dark:bg-concrete-900]="!selectedDays().includes(day.value)"
-                                    [class.dark:text-white]="!selectedDays().includes(day.value)">
+                                    [class.border-sage]="selectedDays().includes(day.value)"
+                                    [class.bg-sand]="!selectedDays().includes(day.value)">
                                 {{ day.label.substring(0, 1) }}
                             </button>
                         }
@@ -163,56 +145,92 @@ import { MatNativeDateModule } from '@angular/material/core';
                 }
 
                 @if (frequencyType() === 'interval') {
-                    <div class="flex flex-wrap items-center gap-3 sm:gap-4 rigid-border-sm border-[2px] dark:border-concrete-500 p-4 sm:inline-flex bg-concrete-100 dark:bg-concrete-900">
-                        <span class="font-black text-xs uppercase dark:text-concrete-200">REPEAT_EVERY</span>
-                        <input formControlName="frequencyInterval" type="number" min="1" class="w-16 p-1 text-center font-black border-b-2 border-black dark:border-concrete-500 bg-transparent outline-none dark:text-white"/>
-                        <span class="font-black text-xs uppercase dark:text-concrete-200">DAYS</span>
+                    <div class="flex items-center gap-3 p-4 bg-sand/20 rounded-lg mt-4">
+                        <span class="text-sm text-taupe font-body">Repeat every</span>
+                        <input formControlName="frequencyInterval" type="number" min="1" class="w-16 p-2 border border-taupe/30 rounded text-center font-body text-charcoal bg-alabaster"/>
+                        <span class="text-sm text-taupe font-body">days</span>
                     </div>
                 }
             </div>
 
-            <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Timeframe_Constraints</label>
-                <div class="grid grid-cols-1 gap-6">
-                    <mat-form-field appearance="outline" class="brutalist-input w-full">
-                        <mat-label>Timeline_Range</mat-label>
-                        <mat-date-range-input [rangePicker]="rangePicker">
-                            <input matStartDate formControlName="startDate" placeholder="START">
-                            <input matEndDate formControlName="endDate" placeholder="END">
-                        </mat-date-range-input>
-                        <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
-                        <mat-date-range-picker #rangePicker panelClass="brutalist-datepicker"></mat-date-range-picker>
-                    </mat-form-field>
+            <!-- Date Range -->
+            <div class="mb-10">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Start and End Dates</label>
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <div class="flex-1 w-full">
+                        <mat-form-field appearance="outline" class="w-full soft-input">
+                            <mat-label>Start Date</mat-label>
+                            <input matInput formControlName="startDate" [matDatepicker]="startDatePicker" placeholder="Select start date">
+                            <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #startDatePicker panelClass="soft-datepicker"></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <span class="range-separator hidden md:flex">to</span>
+                    <div class="flex-1 w-full">
+                        <mat-form-field appearance="outline" class="w-full soft-input">
+                            <mat-label>End Date</mat-label>
+                            <input matInput formControlName="endDate" [matDatepicker]="endDatePicker" placeholder="Select end date">
+                            <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #endDatePicker panelClass="soft-datepicker"></mat-datepicker>
+                        </mat-form-field>
+                    </div>
                 </div>
             </div>
 
-            <!-- Section 4: Time Block -->
-            <div class="mb-12">
-                <label class="block text-xs font-black uppercase tracking-[0.2em] mb-4 border-l-4 border-electric-red pl-2 text-concrete-900 dark:text-concrete-200">Time_Block_Window</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <mat-form-field appearance="outline" class="brutalist-input w-full">
-                        <mat-label>Block_Start_Time</mat-label>
-                        <input matInput [matTimepicker]="startTimePicker" formControlName="timeBlockStart">
-                        <mat-timepicker-toggle matSuffix [for]="startTimePicker"></mat-timepicker-toggle>
-                        <mat-timepicker #startTimePicker></mat-timepicker>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="brutalist-input w-full">
-                        <mat-label>Block_End_Time</mat-label>
-                        <input matInput [matTimepicker]="endTimePicker" formControlName="timeBlockEnd">
-                        <mat-timepicker-toggle matSuffix [for]="endTimePicker"></mat-timepicker-toggle>
-                        <mat-timepicker #endTimePicker></mat-timepicker>
-                    </mat-form-field>
+            <!-- Time Block -->
+            <div class="mb-10">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Daily Reminder (Optional)</label>
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <div class="flex-1 w-full">
+                        <mat-form-field appearance="outline" class="w-full soft-input">
+                            <mat-label>From</mat-label>
+                            <input matInput formControlName="timeBlockStart" [matTimepicker]="timeStartPicker">
+                            <mat-timepicker-toggle matSuffix [for]="timeStartPicker"></mat-timepicker-toggle>
+                            <mat-timepicker #timeStartPicker panelClass="soft-datepicker"></mat-timepicker>
+                        </mat-form-field>
+                    </div>
+                    <span class="range-separator hidden md:flex">to</span>
+                    <div class="flex-1 w-full">
+                        <mat-form-field appearance="outline" class="w-full soft-input">
+                            <mat-label>To</mat-label>
+                            <input matInput formControlName="timeBlockEnd" [matTimepicker]="timeEndPicker">
+                            <mat-timepicker-toggle matSuffix [for]="timeEndPicker"></mat-timepicker-toggle>
+                            <mat-timepicker #timeEndPicker panelClass="soft-datepicker"></mat-timepicker>
+                        </mat-form-field>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Color -->
+            <div class="mb-10">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Color</label>
+                <div class="flex flex-wrap gap-3 items-center">
+                    @for (c of presetColors; track c) {
+                        <button type="button" (click)="color.set(c)"
+                                class="w-8 h-8 rounded-full border-2 transition-all hover:scale-110 shadow-gentle"
+                                [style.background-color]="c"
+                                [class.border-primary]="color() === c"
+                                [class.border-taupe]="color() !== c"
+                                [class.ring-2]="color() === c"
+                                [class.ring-primary/50]="color() === c">
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Problem Count / Description -->
+            <div class="mb-10">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-2">How many problems solved? (optional)</label>
+                <textarea formControlName="description" rows="4" class="w-full p-4 border border-taupe/30 rounded-lg bg-alabaster text-charcoal font-body focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors resize-none" placeholder="How many problems do you aim to solve? This will be used in daily reminders."></textarea>
             </div>
 
             <!-- Actions -->
-            <div class="flex flex-col md:flex-row gap-4 pt-8 border-t-4 border-black dark:border-concrete-100">
-                <button type="button" (click)="goBack()" class="flex-1 py-4 border-4 border-black dark:border-concrete-100 font-black uppercase tracking-widest hover:bg-concrete-200 dark:text-white dark:hover:bg-concrete-700 transition-colors">
-                    Abort_Sequence
+            <div class="flex flex-col-reverse md:flex-row gap-4 pt-6 border-t border-taupe/30">
+                <button type="button" (click)="goBack()" class="flex-1 py-4 border-2 border-taupe text-taupe font-bold uppercase tracking-wider hover:bg-sand hover:border-charcoal transition-colors rounded-lg">
+                    Cancel
                 </button>
-                <button type="submit" [disabled]="habitForm.invalid" class="flex-[2] py-4 bg-electric-red text-white font-black uppercase tracking-widest border-4 border-black dark:border-concrete-100 shadow-[4px_4px_0_0_black] dark:shadow-[4px_4px_0_0_white] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_0_black] dark:hover:shadow-[2px_2px_0_0_white] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                    {{ isEditMode() ? 'Commit_Changes' : 'Initialize_Objective' }}
+                <button type="submit" [disabled]="habitForm.invalid" class="flex-[2] py-4 bg-primary text-white font-bold uppercase tracking-wider border-2 border-transparent hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-lg shadow-gentle">
+                    {{ isEditMode() ? 'Update Habit' : 'Save Habit' }}
                 </button>
             </div>
         </form>
@@ -220,102 +238,186 @@ import { MatNativeDateModule } from '@angular/material/core';
     `,
     styles: [`
     :host { display: block; }
+
+    /* Soft Material Input Styling */
+    ::ng-deep .soft-input .mdc-notched-outline {
+        border-radius: 0.75rem !important;
+        transition: box-shadow 0.3s ease !important;
+    }
+
+    ::ng-deep .soft-input .mdc-notched-outline__leading {
+        border-top-left-radius: 0.75rem !important;
+        border-bottom-left-radius: 0.75rem !important;
+        border-top-color: var(--color-taupe) !important;
+        border-bottom-color: var(--color-taupe) !important;
+        border-left-color: var(--color-taupe) !important;
+        transition: border-color 0.3s ease !important;
+    }
     
-    /* Strong Overrides for Material to Brutalist */
-    ::ng-deep .brutalist-input .mat-mdc-form-field-flex {
-        background-color: transparent !important;
-        border: 2px solid black !important;
+    ::ng-deep .soft-input .mdc-notched-outline__trailing {
+        border-top-right-radius: 0.75rem !important;
+        border-bottom-right-radius: 0.75rem !important;
+        border-top-color: var(--color-taupe) !important;
+        border-bottom-color: var(--color-taupe) !important;
+        border-right-color: var(--color-taupe) !important;
+        transition: border-color 0.3s ease !important;
+    }
+    
+    ::ng-deep .soft-input .mdc-notched-outline__notch {
+        border-bottom-color: var(--color-taupe) !important;
+        transition: border-color 0.3s ease !important;
+    }
+
+    ::ng-deep .soft-input .mdc-notched-outline:not(.mdc-notched-outline--notched) .mdc-notched-outline__notch {
+        border-top-color: var(--color-taupe) !important;
+    }
+
+    ::ng-deep .soft-input .mat-mdc-form-field-flex {
         padding: 0 16px !important;
-        border-radius: 0 !important;
-    }
-    
-    ::ng-deep .brutalist-input .mat-mdc-form-field-infix {
-        padding-top: 16px !important;
-        padding-bottom: 16px !important;
-        min-height: unset !important;
-    }
-    
-    ::ng-deep .brutalist-input.mat-focused .mat-mdc-form-field-flex {
-        border-color: #ff3e3e !important; /* Electric Red */
-        box-shadow: 4px 4px 0 0 rgba(0,0,0,0.1) !important;
+        background-color: transparent !important;
     }
 
-    ::ng-deep .brutalist-input .mat-mdc-input-element {
-        font-family: 'Space Mono', monospace !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
+    ::ng-deep .soft-input.mat-focused .mdc-notched-outline__leading {
+        border-top-color: var(--color-primary) !important;
+        border-bottom-color: var(--color-primary) !important;
+        border-left-color: var(--color-primary) !important;
     }
-    
-    ::ng-deep .brutalist-input .mat-mdc-floating-label {
-        font-family: 'Manrope', sans-serif !important;
-        font-weight: 900 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.1em !important;
-        color: #808080 !important; 
+    ::ng-deep .soft-input.mat-focused .mdc-notched-outline__trailing {
+        border-top-color: var(--color-primary) !important;
+        border-bottom-color: var(--color-primary) !important;
+        border-right-color: var(--color-primary) !important;
     }
-    
-    /* Remove the default underline ripple */
-    ::ng-deep .brutalist-input .mdc-line-ripple { display: none !important; }
-    
-    /* Datepicker Customization */
-    ::ng-deep .brutalist-datepicker .mat-datepicker-content {
-        background-color: white !important;
-        border: 4px solid black !important;
-        box-shadow: 8px 8px 0 0 rgba(0,0,0,1) !important;
-        border-radius: 0 !important;
-    }
-    
-    ::ng-deep .brutalist-datepicker .mat-calendar-body-selected {
-        background-color: #ff3e3e !important;
-        border-radius: 0 !important;
-    }
-    
-    ::ng-deep .brutalist-datepicker .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
-        background-color: #e5e5e5 !important;
-        border-radius: 0 !important;
+    ::ng-deep .soft-input.mat-focused .mdc-notched-outline__notch {
+        border-bottom-color: var(--color-primary) !important;
+    }    
+    ::ng-deep .soft-input.mat-focused .mdc-notched-outline:not(.mdc-notched-outline--notched) .mdc-notched-outline__notch {
+        border-top-color: var(--color-primary) !important;
     }
 
-    /* Dark Mode Overrides */
-    :host-context(.dark) ::ng-deep .brutalist-input .mat-mdc-form-field-flex {
-        border-color: white !important;
+    ::ng-deep .soft-input.mat-focused .mdc-notched-outline {
+        box-shadow: 0 0 0 3px rgba(236, 70, 19, 0.1) !important;
     }
 
-    :host-context(.dark) ::ng-deep .brutalist-input.mat-focused .mat-mdc-form-field-flex {
-        border-color: #ff3e3e !important;
-        box-shadow: 4px 4px 0 0 rgba(255,255,255,0.4) !important;
+    ::ng-deep .soft-input .mat-mdc-input-element {
+        font-family: var(--font-body), sans-serif !important;
+        color: var(--color-charcoal) !important;
+        padding: 12px 0 !important;
     }
 
-    :host-context(.dark) ::ng-deep .brutalist-input .mat-mdc-input-element {
+    ::ng-deep .soft-input .mat-mdc-floating-label {
+        font-family: var(--font-body), sans-serif !important;
+        color: var(--color-taupe) !important;
+        font-size: 14px !important;
+    }
+
+    ::ng-deep .soft-input.mat-focused .mat-mdc-floating-label {
+        color: var(--color-primary) !important;
+    }
+
+    ::ng-deep .soft-input .mdc-line-ripple {
+        display: none !important;
+    }
+
+    /* Datepicker/Timepicker Soft Theme */
+    ::ng-deep .soft-datepicker .mat-datepicker-content {
+        background-color: var(--color-alabaster) !important;
+        border: 1px solid var(--color-taupe) !important;
+        border-radius: 0.75rem !important;
+        box-shadow: 0 8px 30px rgba(74, 68, 62, 0.15) !important;
+    }
+
+    ::ng-deep .soft-datepicker .mat-calendar-body-selected {
+        background-color: var(--color-primary) !important;
+        border-radius: 0.5rem !important;
         color: white !important;
     }
 
-    :host-context(.dark) ::ng-deep .brutalist-input .mat-mdc-floating-label {
-        color: #a3a3a3 !important;
+    ::ng-deep .soft-datepicker .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
+        background-color: var(--color-sand) !important;
+        border-radius: 0.5rem !important;
     }
 
-    :host-context(.dark) ::ng-deep .brutalist-datepicker .mat-datepicker-content {
+    /* Dark mode overrides */
+    :host-context(.dark) .soft-input .mat-mdc-form-field-flex {
         background-color: #262626 !important;
-        border-color: white !important;
-        box-shadow: 8px 8px 0 0 rgba(255,255,255,1) !important;
+    }
+    
+    :host-context(.dark) .soft-input .mdc-notched-outline__leading {
+        border-top-color: #666 !important;
+        border-bottom-color: #666 !important;
+        border-left-color: #666 !important;
+    }
+    :host-context(.dark) .soft-input .mdc-notched-outline__trailing {
+        border-top-color: #666 !important;
+        border-bottom-color: #666 !important;
+        border-right-color: #666 !important;
+    }
+    :host-context(.dark) .soft-input .mdc-notched-outline__notch {
+        border-bottom-color: #666 !important;
+    }
+    :host-context(.dark) .soft-input .mdc-notched-outline:not(.mdc-notched-outline--notched) .mdc-notched-outline__notch {
+        border-top-color: #666 !important;
     }
 
-    :host-context(.dark) ::ng-deep .mat-calendar-body-label,
-    :host-context(.dark) ::ng-deep .mat-calendar-table-header th {
-        color: white !important;
+    :host-context(.dark) .soft-input.mat-focused .mdc-notched-outline__leading {
+        border-top-color: var(--color-primary) !important;
+        border-bottom-color: var(--color-primary) !important;
+        border-left-color: var(--color-primary) !important;
+    }
+    :host-context(.dark) .soft-input.mat-focused .mdc-notched-outline__trailing {
+        border-top-color: var(--color-primary) !important;
+        border-bottom-color: var(--color-primary) !important;
+        border-right-color: var(--color-primary) !important;
+    }
+    :host-context(.dark) .soft-input.mat-focused .mdc-notched-outline__notch {
+        border-bottom-color: var(--color-primary) !important;
+    }
+    :host-context(.dark) .soft-input.mat-focused .mdc-notched-outline:not(.mdc-notched-outline--notched) .mdc-notched-outline__notch {
+        border-top-color: var(--color-primary) !important;
     }
 
-    :host-context(.dark) ::ng-deep .mat-calendar-body-cell-content {
-        color: white !important;
+    :host-context(.dark) .soft-input.mat-focused .mdc-notched-outline {
+        box-shadow: 0 0 0 3px rgba(236, 70, 19, 0.2) !important;
     }
 
-    :host-context(.dark) ::ng-deep .mat-day-picker .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
-        background-color: #525252 !important;
+    :host-context(.dark) .soft-input .mat-mdc-input-element {
+        color: #fcfaf8 !important;
+    }
+
+    :host-context(.dark) .soft-input .mat-mdc-floating-label {
+        color: #9a9086 !important;
+    }
+
+    :host-context(.dark) .soft-datepicker .mat-datepicker-content,
+    :host-context(.dark) .mat-timepicker-content {
+        background-color: #1a1a1a !important;
+        border-color: #666 !important;
+    }
+
+    :host-context(.dark) .soft-input,
+    :host-context(.dark) textarea,
+    :host-context(.dark) select,
+    :host-context(.dark) input[type="number"],
+    :host-context(.dark) input[type="time"] {
+        background-color: #262626 !important;
+        color: #fcfaf8 !important;
+        border-color: #666 !important;
+    }
+
+    :host-context(.dark) .soft-input:focus,
+    :host-context(.dark) textarea:focus,
+    :host-context(.dark) select:focus {
+        border-color: var(--color-primary) !important;
+    }
+
+    :host-context(.dark) select option {
+        background-color: #1a1a1a !important;
+        color: #fcfaf8 !important;
     }
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddHabitComponent implements OnInit {
-    // ... Logic remains largely the same, mapped to signals ...
     private fb = inject(FormBuilder);
     private habitService = inject(HabitService);
     private router = inject(Router);
@@ -326,7 +428,7 @@ export class AddHabitComponent implements OnInit {
     habitId = signal<string | null>(null);
 
     frequency = signal<FrequencyType>('Daily');
-    selectedDays = signal<number[]>([1, 2, 3, 4, 5]); 
+    selectedDays = signal<number[]>([1, 2, 3, 4, 5]);
 
     daysOfWeek = [
         { label: 'MON', value: 1 }, { label: 'TUE', value: 2 }, { label: 'WED', value: 3 },
@@ -337,24 +439,24 @@ export class AddHabitComponent implements OnInit {
     habitForm = this.fb.group({
         name: ['', Validators.required],
         description: [''],
-        type: ['yes_no'], 
+        type: ['yes_no'],
         targetValue: [0],
         targetUnit: [''],
-        targetComparator: ['>='], 
-        frequencyType: ['daily'], 
+        targetComparator: ['>='],
+        frequencyType: ['daily'],
         frequencyInterval: [1],
         frequencyCount: [1],
-        frequencyPeriod: [7], 
-        startDate: [new Date(), Validators.required],
-        endDate: [(() => { const d = new Date(); d.setDate(d.getDate() + 14); return d; })(), Validators.required],
-        timeBlockStart: [new Date()],
-        timeBlockEnd: [(() => { const d = new Date(); d.setHours(d.getHours() + 2); return d; })()]
+        frequencyPeriod: [7],
+        startDate: [this.getDefaultStartDate(), Validators.required],
+        endDate: [this.getDefaultEndDate(), Validators.required],
+        timeBlockStart: [this.getDefaultStartTime()],
+        timeBlockEnd: [this.getDefaultEndTime()]
     });
 
     habitType = signal<string>('yes_no');
     frequencyType = signal<string>('daily');
-    color = signal<string>('#ec5b13');
-    presetColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#64748b'];
+    color = signal<string>('#10b981');
+    presetColors = ['#10b981', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#eab308', '#64748b'];
 
     constructor() {
         effect(() => {
@@ -378,8 +480,8 @@ export class AddHabitComponent implements OnInit {
                         endDate: habit.endDate ? new Date(habit.endDate) : null,
                         timeBlockStart: habit.timeBlockStart ? this.timeStringToDate(habit.timeBlockStart) : null,
                         timeBlockEnd: habit.timeBlockEnd ? this.timeStringToDate(habit.timeBlockEnd) : null
-                    } as any, { emitEvent: false }); 
-                    
+                    } as any, { emitEvent: false });
+
                     this.habitType.set(habit.type || 'yes_no');
                     this.frequencyType.set(habit.frequencyType || 'daily');
                     this.selectedDays.set(habit.weekdays || []);
@@ -423,11 +525,11 @@ export class AddHabitComponent implements OnInit {
                 targetValue: formVal.targetValue || 0,
                 targetUnit: formVal.targetUnit || '',
                 targetComparator: formVal.targetComparator as any || '>=',
-                
-                frequency: 'Custom', 
+
+                frequency: 'Custom',
                 frequencyType: this.frequencyType(),
-                weekdays: this.frequencyType() === 'daily' ? [0, 1, 2, 3, 4, 5, 6] : 
-                         this.frequencyType() === 'specific_days' ? this.selectedDays() : [],
+                weekdays: this.frequencyType() === 'daily' ? [0, 1, 2, 3, 4, 5, 6] :
+                    this.frequencyType() === 'specific_days' ? this.selectedDays() : [],
                 frequencyInterval: formVal.frequencyInterval || 1,
                 frequencyCount: formVal.frequencyCount || 1,
                 frequencyPeriod: formVal.frequencyPeriod || 7,
@@ -442,7 +544,7 @@ export class AddHabitComponent implements OnInit {
                 category: 'General'
             };
 
-            const obs$ = (this.isEditMode() && this.habitId()) 
+            const obs$ = (this.isEditMode() && this.habitId())
                 ? this.habitService.updateHabit(this.habitId()!, habitData)
                 : this.habitService.addHabit(habitData);
 
@@ -475,9 +577,33 @@ export class AddHabitComponent implements OnInit {
     }
 
     private timeStringToDate(timeStr: string): Date {
+        if (!timeStr) return new Date();
         const [h, m] = timeStr.split(':').map(Number);
         const d = new Date();
         d.setHours(h, m, 0, 0);
+        return d;
+    }
+
+    private getDefaultStartTime(): Date {
+        const now = new Date();
+        now.setSeconds(0, 0);
+        return now;
+    }
+    
+    private getDefaultEndTime(): Date {
+        const now = new Date();
+        now.setHours(now.getHours() + 2);
+        now.setSeconds(0, 0);
+        return now;
+    }
+
+    private getDefaultStartDate(): Date {
+        return new Date();
+    }
+
+    private getDefaultEndDate(): Date {
+        const d = new Date();
+        d.setDate(d.getDate() + 14);
         return d;
     }
 }

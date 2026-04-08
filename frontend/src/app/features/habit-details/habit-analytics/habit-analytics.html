@@ -1,13 +1,13 @@
-﻿@if (analytics) {
-    <div class="space-y-8 animate-in fade-in duration-500 bg-transparent text-black dark:text-white">
+@if (analytics) {
+    <div class="space-y-8 animate-in fade-in duration-500 bg-transparent">
         
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b-4 border-black dark:border-concrete-100 pb-4">
-            <h3 class="text-2xl md:text-3xl font-black text-black dark:text-white uppercase font-arvo flex items-center gap-2">
-                <span class="material-symbols-outlined text-electric-red">analytics</span>
-                Advanced_Analytics
-            </h3>
-            <span class="px-3 py-1 bg-concrete-100 dark:bg-concrete-900 border-2 border-black dark:border-concrete-100 text-black dark:text-white text-[10px] font-black uppercase tracking-widest brutalist-shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-taupe/20 pb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-orange-500 text-3xl">analytics</span>
+                <h3 class="font-heading text-2xl font-bold text-charcoal">Advanced Analytics</h3>
+            </div>
+            <span class="px-4 py-1.5 bg-sand text-charcoal text-[10px] font-bold uppercase tracking-widest rounded-full border border-taupe/10">
                 Dataset: {{ analytics.period_days }} Days
             </span>
         </div>
@@ -19,26 +19,27 @@
                 <!-- 1. Consistency Score & Recovery -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Consistency Score -->
-                    <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative flex flex-col items-center justify-center text-center brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                        <span class="material-symbols-outlined text-4xl text-black dark:text-white mb-2">check_circle</span>
-                        <p class="text-[9px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400">Consistency_Score</p>
-                        <p class="text-4xl font-black font-arvo text-black dark:text-white tracking-tighter mt-1">{{ analytics.binary_stats.consistency_score | number:'1.0-1' }}</p>
+                    <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 flex flex-col items-center justify-center text-center hover:shadow-gentle-lg transition-all border-t-4 border-t-sage">
+                        <span class="material-symbols-outlined text-4xl text-sage mb-2">check_circle</span>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-taupe">Consistency Score</p>
+                        <p class="text-4xl font-bold font-heading text-charcoal tracking-tighter mt-1">{{ analytics.binary_stats.consistency_score | number:'1.0-1' }}</p>
                     </div>
 
                     <!-- Recovery Time -->
-                    <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative flex flex-col items-center justify-center text-center brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                        <span class="material-symbols-outlined text-4xl text-black dark:text-white mb-2">medical_services</span>
-                        <p class="text-[9px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400">Avg_Recovery_Time</p>
-                        <p class="text-4xl font-black font-arvo text-black dark:text-white tracking-tighter mt-1 flex items-baseline gap-1">
-                            {{ analytics.binary_stats.recovery_time | number:'1.0-1' }} <span class="text-xs font-bold font-mono">Days</span>
+                    <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 flex flex-col items-center justify-center text-center hover:shadow-gentle-lg transition-all border-t-4 border-t-orange-500">
+                        <span class="material-symbols-outlined text-4xl text-orange-500 mb-2">medical_services</span>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-taupe">Avg Recovery Time</p>
+                        <p class="text-4xl font-bold font-heading text-charcoal tracking-tighter mt-1 flex items-baseline gap-1">
+                            {{ analytics.binary_stats.recovery_time | number:'1.0-1' }} <span class="text-xs font-bold text-taupe opacity-60">Days</span>
                         </p>
                     </div>
                 </div>
 
                 <!-- 2. Success Ratio Pie Chart -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative flex flex-col min-h-[250px] brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-black dark:text-white mb-4 flex items-center gap-2 border-b-2 border-black dark:border-concrete-100 pb-1">
-                        Success_Ratio_Distribution
+                <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 min-h-[250px] flex flex-col">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-taupe mb-6 flex items-center gap-2 border-b border-taupe/10 pb-2">
+                        <span class="material-symbols-outlined text-sm text-orange-500">pie_chart</span>
+                        Success Ratio Distribution
                     </h4>
                     <div class="flex-1 overflow-hidden" #containerRef> 
                         <ngx-charts-advanced-pie-chart
@@ -52,9 +53,10 @@
                 </div>
 
                 <!-- 3. Missed Day Pattern Bar Chart -->
-                <div class="col-span-1 md:col-span-2 bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative flex flex-col min-h-[300px] brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-black dark:text-white mb-4 flex items-center gap-2 border-b-2 border-black dark:border-concrete-100 pb-1">
-                        Failure_Pattern_Analysis
+                <div class="col-span-1 md:col-span-2 bg-white rounded-2xl shadow-gentle p-8 border border-taupe/10 min-h-[300px] flex flex-col">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-taupe mb-8 flex items-center gap-2 border-b border-taupe/10 pb-3">
+                        <span class="material-symbols-outlined text-sm text-orange-500">bar_chart</span>
+                        Failure Pattern Analysis
                     </h4>
                     <div class="flex-1 overflow-hidden" #barContainerRef>
                         <ngx-charts-bar-vertical
@@ -83,24 +85,25 @@
                 <!-- 1. Key Metrics Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Average Value -->
-                    <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative flex flex-col items-center justify-center text-center brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                        <p class="text-[9px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400">Average_Output</p>
-                        <p class="text-4xl font-black font-arvo tracking-tighter mt-1">{{ analytics.measurable_stats.average_value | number:'1.1-2' }}</p>
-                        <span class="text-[10px] font-bold mt-1 text-electric-red uppercase">{{ habit.targetUnit }}</span>
+                    <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 flex flex-col items-center justify-center text-center border-t-4 border-t-sage">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-taupe">Average Output</p>
+                        <p class="text-4xl font-bold font-heading text-charcoal tracking-tighter mt-1">{{ analytics.measurable_stats.average_value | number:'1.1-2' }}</p>
+                        <span class="text-[10px] font-bold mt-1 text-sage uppercase">{{ habit.targetUnit }}</span>
                     </div>
 
                     <!-- Best Day -->
-                    <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative flex flex-col items-center justify-center text-center brutalist-shadow-sm dark:shadow-[4px_4px_0_0_white]">
-                        <p class="text-[9px] font-black uppercase tracking-widest text-concrete-500 dark:text-concrete-400">Peak_Performance</p>
-                        <p class="text-4xl font-black font-arvo tracking-tighter mt-1">{{ analytics.measurable_stats.best_day | number:'1.1-2' }}</p>
-                        <span class="text-[10px] font-bold mt-1 text-electric-red uppercase">{{ habit.targetUnit }}</span>
+                    <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 flex flex-col items-center justify-center text-center border-t-4 border-t-orange-500">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-taupe">Peak Performance</p>
+                        <p class="text-4xl font-bold font-heading text-charcoal tracking-tighter mt-1">{{ analytics.measurable_stats.best_day | number:'1.1-2' }}</p>
+                        <span class="text-[10px] font-bold mt-1 text-orange-500 uppercase">{{ habit.targetUnit }}</span>
                     </div>
                 </div>
 
                 <!-- 2. Achievement Rate -->
-                <div class="bg-white dark:bg-concrete-800 rigid-border border-[4px] dark:border-concrete-100 p-6 relative flex flex-col min-h-[250px] brutalist-shadow-sm dark:shadow-[8px_8px_0_0_white]">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-black dark:text-white mb-4 flex items-center gap-2 border-b-2 border-black dark:border-concrete-100 pb-1">
-                        Target_Achievement_Rate
+                <div class="bg-white rounded-xl shadow-gentle p-6 border border-taupe/10 min-h-[250px] flex flex-col">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-taupe mb-6 flex items-center gap-2 border-b border-taupe/10 pb-2">
+                        <span class="material-symbols-outlined text-sm text-sage">speed</span>
+                        Achievement Rate
                     </h4>
                     <div class="flex-1 overflow-hidden" #gaugeContainerRef>
                         <ngx-charts-pie-grid
@@ -112,19 +115,22 @@
                 </div>
                 
                 <!-- 3. Trend Direction -->
-                <div class="col-span-1 md:col-span-2 bg-yellow-400 dark:bg-yellow-600 rigid-border border-[4px] border-black dark:border-concrete-100 p-5 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 brutalist-shadow-md dark:shadow-[8px_8px_0_0_white]">
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-black/70 dark:text-white/80 border-b-2 border-black/20 pb-1 mb-2">Trend_Vector</p>
-                        <div class="flex items-center gap-4 text-black dark:text-white">
-                            <span class="text-5xl font-black font-arvo uppercase tracking-tighter">{{ analytics.measurable_stats.trend_direction }}</span>
+                <div class="col-span-1 md:col-span-2 bg-orange-500 text-white rounded-2xl shadow-gentle p-8 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-2">Trend Velocity Vector</p>
+                        <div class="flex items-center gap-6">
+                            <span class="text-5xl font-bold font-heading uppercase tracking-tighter">{{ analytics.measurable_stats.trend_direction }}</span>
                             @if (analytics.measurable_stats.trend_direction.toLowerCase() === 'up') {
-                                <span class="material-symbols-outlined text-5xl">trending_up</span>
+                                <span class="material-symbols-outlined text-6xl">trending_up</span>
                             } @else if (analytics.measurable_stats.trend_direction.toLowerCase() === 'down') {
-                                <span class="material-symbols-outlined text-5xl">trending_down</span>
+                                <span class="material-symbols-outlined text-6xl">trending_down</span>
                             } @else {
-                                <span class="material-symbols-outlined text-5xl">trending_flat</span>
+                                <span class="material-symbols-outlined text-6xl">trending_flat</span>
                             }
                         </div>
+                    </div>
+                    <div class="absolute -right-8 -bottom-8 opacity-10">
+                         <span class="material-symbols-outlined text-[200px]">insights</span>
                     </div>
                 </div>
 
