@@ -4,6 +4,7 @@ import { Habit, HabitLog } from '../models/habit.model';
 import { Observable, forkJoin, of } from 'rxjs';
 import { tap, map, switchMap } from 'rxjs/operators';
 import { SystemService } from './system.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,7 @@ import { SystemService } from './system.service';
 export class HabitService {
     private http = inject(HttpClient);
     private systemService = inject(SystemService);
-    private apiUrl = 'http://127.0.0.1:8000/habits';
+    private apiUrl = `${environment.apiUrl}/habits`;
 
     private readonly _habits = signal<Habit[]>([]);
     

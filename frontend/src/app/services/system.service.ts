@@ -5,13 +5,16 @@ import {
   LearningSystem, SystemInstantiate, SystemInstance,
   SystemInstanceTask, InstantiateResult
 } from '../models/system.model';
+import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class SystemService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/systems';
+  private apiUrl = `${environment.apiUrl}/systems`;
+
 
   // ── Learning System CRUD ──────────────────────────────────────────────────
 

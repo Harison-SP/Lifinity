@@ -14,13 +14,16 @@ import {
   WeeklyMetricsUpdate
 } from '../models/weekly-planner.model';
 import { Habit } from '../models/habit.model';
+import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class WeeklyPlannerService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/weekly-planner';
+  private apiUrl = `${environment.apiUrl}/weekly-planner`;
+
 
   // ============ TASKS ============
 
