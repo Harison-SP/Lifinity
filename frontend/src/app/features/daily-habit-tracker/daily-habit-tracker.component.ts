@@ -12,279 +12,283 @@ import { SystemInstanceTask } from '../../models/system.model';
     imports: [CommonModule, FormsModule, RouterLink],
     template: `
     <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body pb-24 relative transition-colors duration-300 overflow-x-hidden paper-texture">
-        <!-- Timer Overlay (Full Screen) -->
-        @if (timerRunning()) {
-            <div class="fixed inset-0 z-[100] bg-charcoal flex flex-col items-center justify-center text-white p-6 animate-in fade-in duration-500">
-                <div class="absolute top-6 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 w-[90%] md:max-w-2xl text-center md:text-left">
-                     <h2 class="text-primary font-heading text-[10px] md:text-xs font-black tracking-widest uppercase mb-1 md:mb-2 opacity-60">System Habit focus</h2>
-                     <h3 class="text-white text-2xl md:text-5xl font-black leading-tight mb-2 md:mb-4">{{ parentHabit()?.name || habit()?.name }}</h3>
-                     @if (todaySystemTask()?.title) {
-                         <p class="text-white/40 italic text-sm md:text-lg border-l-0 md:border-l-2 border-white/20 px-4 md:pl-4 line-clamp-2 md:line-clamp-none">Active Task: {{ todaySystemTask()?.title }}</p>
-                     }
-                </div>
-                
-                <div class="text-8xl md:text-[12rem] lg:text-[16rem] font-mono font-bold tracking-tighter mb-12 text-primary drop-shadow-[0_0_30px_rgba(249,115,22,0.3)]">
-                    {{ formattedTimer() }}
-                </div>
-
-                <div class="mt-20 flex flex-col items-center">
-                    <div class="flex items-center justify-center gap-4 h-24">
-                        <span class="material-symbols-outlined transition-all duration-1000 animate-pulse text-sage" [style.fontSize]="'4rem'">
-                            {{ getTreeIcon() }}
-                        </span>
-                    </div>
-                    <p class="text-white/60 uppercase tracking-widest text-sm mt-4">Focus Garden Growing...</p>
-                </div>
-            </div>
-        }
-
-        <!-- Header -->
-        <header class="mb-8 md:mb-10 bg-alabaster border-b border-taupe/20 p-4 sm:p-6 rounded-lg shadow-gentle">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div class="flex items-start gap-3 w-full md:w-auto">
-                    <button (click)="goBack()" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-taupe/30 bg-alabaster flex items-center justify-center hover:bg-sand transition-colors group shrink-0">
-                        <span class="material-symbols-outlined text-lg md:text-xl text-taupe group-hover:text-charcoal">arrow_back</span>
-                    </button>
-                    <div>
-                        <h1 class="font-heading text-2xl md:text-4xl font-bold text-charcoal leading-tight">
-                            {{ habit()?.name || 'Loading...' }}
-                        </h1>
-                        <p class="text-taupe text-sm md:text-base mt-1" *ngIf="habit()?.parentId">
-                            Part of: {{ parentHabit()?.name }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        @if (habit()) {
-            @if (inconsistentDaysCount() >= 2) {
-                <div class="bg-primary text-white p-4 font-bold tracking-wider mb-6 border border-primary rounded-lg flex items-center gap-3 shadow-gentle">
-                    <span class="material-symbols-outlined">warning</span>
-                    <span>We missed {{ inconsistentDaysCount() }} recent days. Let's get back on track!</span>
-                </div>
+      <!-- Timer Overlay (Full Screen) -->
+      @if (timerRunning()) {
+        <div class="fixed inset-0 z-[100] bg-charcoal flex flex-col items-center justify-center text-white p-6 animate-in fade-in duration-500">
+          <div class="absolute top-6 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 w-[90%] md:max-w-2xl text-center md:text-left">
+            <h2 class="text-primary font-heading text-[10px] md:text-xs font-black tracking-widest uppercase mb-1 md:mb-2 opacity-60">System Habit focus</h2>
+            <h3 class="text-white text-2xl md:text-5xl font-black leading-tight mb-2 md:mb-4">{{ parentHabit()?.name || habit()?.name }}</h3>
+            @if (todaySystemTask()?.title) {
+              <p class="text-white/40 italic text-sm md:text-lg border-l-0 md:border-l-2 border-white/20 px-4 md:pl-4 line-clamp-2 md:line-clamp-none">Active Task: {{ todaySystemTask()?.title }}</p>
             }
-
-            <!-- Primary Action Card (Merged Goal & Task) -->
-            <div class="bg-alabaster rounded-2xl shadow-gentle-lg p-6 md:p-10 mb-8 border-2 border-primary/20 overflow-hidden relative group">
-                <!-- Decorative background -->
-                <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-1000"></div>
-                
-                <div class="relative z-10">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-4">
-                                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Today's Focus</span>
-                                @if (todaySystemTask()?.timeBlockStart) {
-                                    <span class="bg-sand text-charcoal px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-sm">schedule</span>
-                                        {{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}
-                                    </span>
-                                }
-                            </div>
-                            
-                            <!-- Task/Habit Title -->
-                            <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-charcoal mb-4 leading-tight">
-                                {{ todaySystemTask()?.title || habit()?.name }}
-                            </h2>
-                            
-                            @if (todaySystemTask()?.description) {
-                                <p class="text-taupe italic text-lg mb-6 max-w-2xl border-l-4 border-taupe/20 pl-4">
-                                    "{{ todaySystemTask()?.description }}"
-                                </p>
-                            }
-
-                            <!-- Dynamic Goal Stats -->
-                            <div class="flex flex-wrap items-end gap-6 mt-8">
-                                @if (habit()?.type === 'measurable') {
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-xs font-bold text-taupe uppercase tracking-widest">Target</label>
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-3xl font-black text-charcoal">{{ habit()?.targetValue }}</span>
-                                            <span class="text-primary font-bold">{{ habit()?.targetUnit }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="h-12 w-px bg-taupe/20 hidden md:block"></div>
-
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-xs font-bold text-taupe uppercase tracking-widest">Add Progress</label>
-                                        <div class="flex items-center gap-3">
-                                            <input type="number" [(ngModel)]="logValue" 
-                                                   class="w-32 p-4 text-3xl font-black bg-white border-2 border-taupe/20 rounded-2xl text-center focus:border-primary outline-none transition-all shadow-inner focus:ring-4 focus:ring-primary/10"
-                                                   placeholder="0" />
-                                            <div class="flex flex-col">
-                                                <button (click)="logValue = (logValue || 0) + 1" class="p-1 hover:bg-sand rounded">
-                                                    <span class="material-symbols-outlined">expand_less</span>
-                                                </button>
-                                                <button (click)="decrementValue()" class="p-1 hover:bg-sand rounded">
-                                                    <span class="material-symbols-outlined">expand_more</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                } @else {
-                                    <div class="bg-sage/10 border border-sage/30 px-5 py-3 rounded-2xl flex items-center gap-3">
-                                        <span class="material-symbols-outlined text-sage text-3xl">task_alt</span>
-                                        <div>
-                                            <p class="text-charcoal font-bold">Standard Task</p>
-                                            <p class="text-xs text-taupe uppercase font-bold tracking-widest">Consistency is key</p>
-                                        </div>
-                                    </div>
-                                }
-
-                                @if (isCompletedToday()) {
-                                    <div class="bg-sage text-white px-4 py-2 rounded-lg flex items-center gap-2 animate-bounce-short">
-                                        <span class="material-symbols-outlined text-sm">check_circle</span>
-                                        <span class="text-xs font-bold uppercase">Already Logged</span>
-                                    </div>
-                                }
-                            </div>
+          </div>
+    
+          <div class="text-8xl md:text-[12rem] lg:text-[16rem] font-mono font-bold tracking-tighter mb-12 text-primary drop-shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+            {{ formattedTimer() }}
+          </div>
+    
+          <div class="mt-20 flex flex-col items-center">
+            <div class="flex items-center justify-center gap-4 h-24">
+              <span class="material-symbols-outlined transition-all duration-1000 animate-pulse text-sage" [style.fontSize]="'4rem'">
+                {{ getTreeIcon() }}
+              </span>
+            </div>
+            <p class="text-white/60 uppercase tracking-widest text-sm mt-4">Focus Garden Growing...</p>
+          </div>
+        </div>
+      }
+    
+      <!-- Header -->
+      <header class="mb-8 md:mb-10 bg-alabaster border-b border-taupe/20 p-4 sm:p-6 rounded-lg shadow-gentle">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="flex items-start gap-3 w-full md:w-auto">
+            <button (click)="goBack()" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-taupe/30 bg-alabaster flex items-center justify-center hover:bg-sand transition-colors group shrink-0">
+              <span class="material-symbols-outlined text-lg md:text-xl text-taupe group-hover:text-charcoal">arrow_back</span>
+            </button>
+            <div>
+              <h1 class="font-heading text-2xl md:text-4xl font-bold text-charcoal leading-tight">
+                {{ habit()?.name || 'Loading...' }}
+              </h1>
+              @if (habit()?.parentId) {
+                <p class="text-taupe text-sm md:text-base mt-1">
+                  Part of: {{ parentHabit()?.name }}
+                </p>
+              }
+            </div>
+          </div>
+        </div>
+      </header>
+    
+      @if (habit()) {
+        @if (inconsistentDaysCount() >= 2) {
+          <div class="bg-primary text-white p-4 font-bold tracking-wider mb-6 border border-primary rounded-lg flex items-center gap-3 shadow-gentle">
+            <span class="material-symbols-outlined">warning</span>
+            <span>We missed {{ inconsistentDaysCount() }} recent days. Let's get back on track!</span>
+          </div>
+        }
+    
+        <!-- Primary Action Card (Merged Goal & Task) -->
+        <div class="bg-alabaster rounded-2xl shadow-gentle-lg p-6 md:p-10 mb-8 border-2 border-primary/20 overflow-hidden relative group">
+          <!-- Decorative background -->
+          <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-1000"></div>
+    
+          <div class="relative z-10">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Today's Focus</span>
+                  @if (todaySystemTask()?.timeBlockStart) {
+                    <span class="bg-sand text-charcoal px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm">schedule</span>
+                      {{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}
+                    </span>
+                  }
+                </div>
+    
+                <!-- Task/Habit Title -->
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-charcoal mb-4 leading-tight">
+                  {{ todaySystemTask()?.title || habit()?.name }}
+                </h2>
+    
+                @if (todaySystemTask()?.description) {
+                  <p class="text-taupe italic text-lg mb-6 max-w-2xl border-l-4 border-taupe/20 pl-4">
+                    "{{ todaySystemTask()?.description }}"
+                  </p>
+                }
+    
+                <!-- Dynamic Goal Stats -->
+                <div class="flex flex-wrap items-end gap-6 mt-8">
+                  @if (habit()?.type === 'measurable') {
+                    <div class="flex flex-col gap-2">
+                      <label class="text-xs font-bold text-taupe uppercase tracking-widest">Target</label>
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-black text-charcoal">{{ habit()?.targetValue }}</span>
+                        <span class="text-primary font-bold">{{ habit()?.targetUnit }}</span>
+                      </div>
+                    </div>
+    
+                    <div class="h-12 w-px bg-taupe/20 hidden md:block"></div>
+    
+                    <div class="flex flex-col gap-2">
+                      <label class="text-xs font-bold text-taupe uppercase tracking-widest">Add Progress</label>
+                      <div class="flex items-center gap-3">
+                        <input type="number" [(ngModel)]="logValue"
+                          class="w-32 p-4 text-3xl font-black bg-white border-2 border-taupe/20 rounded-2xl text-center focus:border-primary outline-none transition-all shadow-inner focus:ring-4 focus:ring-primary/10"
+                          placeholder="0" />
+                        <div class="flex flex-col">
+                          <button (click)="logValue = (logValue || 0) + 1" class="p-1 hover:bg-sand rounded">
+                            <span class="material-symbols-outlined">expand_less</span>
+                          </button>
+                          <button (click)="decrementValue()" class="p-1 hover:bg-sand rounded">
+                            <span class="material-symbols-outlined">expand_more</span>
+                          </button>
                         </div>
-
-                        <!-- Huge Primary Action Button -->
-                        <div class="shrink-0 flex flex-col items-center gap-4">
-                            <button (click)="handlePrimaryAction()" 
-                                    class="relative group overflow-hidden w-full sm:w-64 h-64 rounded-3xl font-black text-2xl transition-all active:scale-95 shadow-gentle-lg flex flex-col items-center justify-center gap-4 border-b-8"
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="bg-sage/10 border border-sage/30 px-5 py-3 rounded-2xl flex items-center gap-3">
+                      <span class="material-symbols-outlined text-sage text-3xl">task_alt</span>
+                      <div>
+                        <p class="text-charcoal font-bold">Standard Task</p>
+                        <p class="text-xs text-taupe uppercase font-bold tracking-widest">Consistency is key</p>
+                      </div>
+                    </div>
+                  }
+    
+                  @if (isCompletedToday()) {
+                    <div class="bg-sage text-white px-4 py-2 rounded-lg flex items-center gap-2 animate-bounce-short">
+                      <span class="material-symbols-outlined text-sm">check_circle</span>
+                      <span class="text-xs font-bold uppercase">Already Logged</span>
+                    </div>
+                  }
+                </div>
+              </div>
+    
+              <!-- Huge Primary Action Button -->
+              <div class="shrink-0 flex flex-col items-center gap-4">
+                <button (click)="handlePrimaryAction()"
+                  class="relative group overflow-hidden w-full sm:w-64 h-64 rounded-3xl font-black text-2xl transition-all active:scale-95 shadow-gentle-lg flex flex-col items-center justify-center gap-4 border-b-8"
                                     [class]="(isCompletedToday() || todaySystemTask()?.completed) 
                                         ? 'bg-sage border-sage-dark text-white' 
                                         : 'bg-primary border-primary-dark text-white hover:brightness-110'">
-                                <span class="material-symbols-outlined text-7xl transition-transform group-hover:scale-110 duration-300">
-                                    {{ (isCompletedToday() || todaySystemTask()?.completed) ? 'verified' : 'bolt' }}
-                                </span>
-                                <span class="tracking-tighter">
-                                    {{ (isCompletedToday() || todaySystemTask()?.completed) ? 'COMPLETED' : 'MARK DONE' }}
-                                </span>
-                                
-                                <!-- Shine effect -->
-                                <div class="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 group-hover:animate-shine"></div>
-                            </button>
-                            <p class="text-taupe text-xs font-bold uppercase tracking-widest opacity-60">One click to rule them all</p>
-                        </div>
-                    </div>
-                </div>
+                  <span class="material-symbols-outlined text-7xl transition-transform group-hover:scale-110 duration-300">
+                    {{ (isCompletedToday() || todaySystemTask()?.completed) ? 'verified' : 'bolt' }}
+                  </span>
+                  <span class="tracking-tighter">
+                    {{ (isCompletedToday() || todaySystemTask()?.completed) ? 'COMPLETED' : 'MARK DONE' }}
+                  </span>
+    
+                  <!-- Shine effect -->
+                  <div class="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 group-hover:animate-shine"></div>
+                </button>
+                <p class="text-taupe text-xs font-bold uppercase tracking-widest opacity-60">One click to rule them all</p>
+              </div>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Focus Timer Card -->
-                <div class="bg-charcoal text-white rounded-2xl shadow-gentle p-8 relative overflow-hidden">
-                    <div class="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 class="font-heading text-xl font-bold flex items-center gap-2">
-                                <span class="material-symbols-outlined text-primary">timer</span> Deep Work Timer
-                            </h3>
-                            <p class="text-white/50 text-xs uppercase tracking-widest font-bold mt-1">Start a focus session</p>
-                        </div>
-                        <span class="text-xs bg-white/10 px-3 py-1.5 rounded-full text-white/80 border border-white/10">2-minute rule</span>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-8">
-                        <div class="text-6xl font-mono font-bold tracking-tighter text-primary">
-                            {{ formattedTimer() }}
-                        </div>
-                        
-                        <div class="flex items-center bg-white/10 border border-white/20 rounded-2xl overflow-hidden backdrop-blur-sm">
-                            <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="w-20 p-4 text-center font-bold text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
-                            <button (click)="startCustomTimer()" class="px-6 py-4 bg-primary text-white font-black text-sm hover:bg-primary-light transition-all">START FOCUS</button>
-                        </div>
-                    </div>
-
-                    <!-- Focus Garden Stats -->
-                    <div class="mt-10 pt-8 border-t border-white/10">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <span class="text-xs uppercase tracking-widest text-white/40 font-bold block mb-1">Session Progress</span>
-                                <span class="text-sm font-medium text-white/80">{{ totalFocusedMinutes() }} minutes focused today</span>
-                            </div>
-                            <span class="material-symbols-outlined transition-all duration-700 animate-pulse" [ngClass]="getTreeStyle()">
-                                {{ getTreeIcon() }}
-                            </span>
-                        </div>
-                        @if (totalFocusedMinutes() < 120) {
-                            <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
-                                <div class="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10 flex flex-col h-full">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="font-heading text-xl font-bold text-charcoal flex items-center gap-2">
-                            <span class="material-symbols-outlined text-taupe">notes</span> Personal Notes
-                        </h3>
-                        <a [routerLink]="['/notes', habitId()]" 
-                           [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
-                           class="flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary hover:text-white transition-all shadow-sm">
-                            <span class="material-symbols-outlined text-sm">edit_note</span> Dedicated Notes
-                        </a>
-                    </div>
-                    
-                    <div class="flex-1">
-                        <textarea [(ngModel)]="logNotes" placeholder="Quick log: how did it go? Any obstacles or breakthroughs?" rows="4" 
-                                  class="w-full p-4 border-2 border-taupe/10 rounded-xl bg-white text-charcoal focus:border-primary/50 outline-none transition-all resize-none shadow-inner text-sm"></textarea>
-                    </div>
-
-                    <div class="mt-4 flex justify-between items-center">
-                        @if (habit()?.parentId) {
-                            <div class="flex items-center gap-1.5 px-3 py-1 bg-charcoal text-white rounded-full text-[10px] font-black uppercase tracking-tighter">
-                                <span class="material-symbols-outlined text-xs">settings_input_component</span> System Habit
-                            </div>
-                        } @else {
-                            <div></div>
-                        }
-                        <button (click)="saveLog()" class="text-primary font-bold text-xs uppercase tracking-widest hover:text-primary-dark flex items-center gap-1 transition-colors">
-                            <span class="material-symbols-outlined text-sm">save</span> Save Progress
-                        </button>
-                    </div>
-                </div>
+          </div>
+        </div>
+    
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- Focus Timer Card -->
+          <div class="bg-charcoal text-white rounded-2xl shadow-gentle p-8 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-8">
+              <div>
+                <h3 class="font-heading text-xl font-bold flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary">timer</span> Deep Work Timer
+                </h3>
+                <p class="text-white/50 text-xs uppercase tracking-widest font-bold mt-1">Start a focus session</p>
+              </div>
+              <span class="text-xs bg-white/10 px-3 py-1.5 rounded-full text-white/80 border border-white/10">2-minute rule</span>
             </div>
-
-            <!-- Pending Past Tasks -->
-            <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-heading text-2xl font-bold text-charcoal flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary">history</span> Catch Up
-                    </h3>
-                    <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full" *ngIf="pendingPastTasks().length > 0">
-                        {{ pendingPastTasks().length }} MISSING
-                    </span>
+    
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-8">
+              <div class="text-6xl font-mono font-bold tracking-tighter text-primary">
+                {{ formattedTimer() }}
+              </div>
+    
+              <div class="flex items-center bg-white/10 border border-white/20 rounded-2xl overflow-hidden backdrop-blur-sm">
+                <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="w-20 p-4 text-center font-bold text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
+                <button (click)="startCustomTimer()" class="px-6 py-4 bg-primary text-white font-black text-sm hover:bg-primary-light transition-all">START FOCUS</button>
+              </div>
+            </div>
+    
+            <!-- Focus Garden Stats -->
+            <div class="mt-10 pt-8 border-t border-white/10">
+              <div class="flex justify-between items-end mb-4">
+                <div>
+                  <span class="text-xs uppercase tracking-widest text-white/40 font-bold block mb-1">Session Progress</span>
+                  <span class="text-sm font-medium text-white/80">{{ totalFocusedMinutes() }} minutes focused today</span>
                 </div>
-
-                @if (pendingPastTasks().length === 0) {
-                    <div class="flex flex-col items-center justify-center p-12 bg-sage/5 rounded-2xl border border-dashed border-sage/20">
-                        <span class="material-symbols-outlined text-sage text-5xl mb-4">verified</span>
-                        <p class="text-taupe font-bold text-center">You're all caught up! Amazing work.</p>
-                    </div>
-                } @else {
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                        @for (task of pendingPastTasks(); track task.date + task.title) {
-                            <div class="flex items-center justify-between p-4 bg-white border border-taupe/10 rounded-2xl hover:border-primary/30 transition-all group">
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-bold text-charcoal truncate">{{ task.title }}</p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span class="text-xs text-primary font-bold">{{ task.date }}</span>
-                                        <span class="text-[10px] text-taupe uppercase font-black opacity-40">Phase {{ task.phase }}</span>
-                                    </div>
-                                </div>
-                                <button (click)="toggleMission(task)" class="w-12 h-12 bg-sand hover:bg-sage hover:text-white rounded-xl transition-all flex items-center justify-center">
-                                    <span class="material-symbols-outlined">{{ task.completed ? 'check_circle' : 'circle' }}</span>
-                                </button>
-                            </div>
-                        }
-                    </div>
-                }
+                <span class="material-symbols-outlined transition-all duration-700 animate-pulse" [ngClass]="getTreeStyle()">
+                  {{ getTreeIcon() }}
+                </span>
+              </div>
+              @if (totalFocusedMinutes() < 120) {
+                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                  <div class="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
+                </div>
+              }
             </div>
-        }
-
-        <!-- Celebration Overlay -->
-        @if (celebrationMessage()) {
-            <div class="fixed inset-0 pointer-events-none z-[110] flex items-center justify-center p-4 backdrop-blur-sm bg-black/10">
-                 <div class="animate-bounce-slow text-4xl md:text-6xl lg:text-8xl font-black text-primary uppercase font-display bg-white px-10 py-8 border-8 border-charcoal shadow-2xl text-center rotate-[-2deg]">
-                      {{ celebrationMessage() }}
-                 </div>
+          </div>
+    
+          <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10 flex flex-col h-full">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="font-heading text-xl font-bold text-charcoal flex items-center gap-2">
+                <span class="material-symbols-outlined text-taupe">notes</span> Personal Notes
+              </h3>
+              <a [routerLink]="['/notes', habitId()]"
+                [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
+                class="flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary hover:text-white transition-all shadow-sm">
+                <span class="material-symbols-outlined text-sm">edit_note</span> Dedicated Notes
+              </a>
             </div>
-        }
+    
+            <div class="flex-1">
+              <textarea [(ngModel)]="logNotes" placeholder="Quick log: how did it go? Any obstacles or breakthroughs?" rows="4"
+              class="w-full p-4 border-2 border-taupe/10 rounded-xl bg-white text-charcoal focus:border-primary/50 outline-none transition-all resize-none shadow-inner text-sm"></textarea>
+            </div>
+    
+            <div class="mt-4 flex justify-between items-center">
+              @if (habit()?.parentId) {
+                <div class="flex items-center gap-1.5 px-3 py-1 bg-charcoal text-white rounded-full text-[10px] font-black uppercase tracking-tighter">
+                  <span class="material-symbols-outlined text-xs">settings_input_component</span> System Habit
+                </div>
+              } @else {
+                <div></div>
+              }
+              <button (click)="saveLog()" class="text-primary font-bold text-xs uppercase tracking-widest hover:text-primary-dark flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-sm">save</span> Save Progress
+              </button>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Pending Past Tasks -->
+        <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-heading text-2xl font-bold text-charcoal flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">history</span> Catch Up
+            </h3>
+            @if (pendingPastTasks().length > 0) {
+              <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">
+                {{ pendingPastTasks().length }} MISSING
+              </span>
+            }
+          </div>
+    
+          @if (pendingPastTasks().length === 0) {
+            <div class="flex flex-col items-center justify-center p-12 bg-sage/5 rounded-2xl border border-dashed border-sage/20">
+              <span class="material-symbols-outlined text-sage text-5xl mb-4">verified</span>
+              <p class="text-taupe font-bold text-center">You're all caught up! Amazing work.</p>
+            </div>
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              @for (task of pendingPastTasks(); track task.date + task.title) {
+                <div class="flex items-center justify-between p-4 bg-white border border-taupe/10 rounded-2xl hover:border-primary/30 transition-all group">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-charcoal truncate">{{ task.title }}</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs text-primary font-bold">{{ task.date }}</span>
+                      <span class="text-[10px] text-taupe uppercase font-black opacity-40">Phase {{ task.phase }}</span>
+                    </div>
+                  </div>
+                  <button (click)="toggleMission(task)" class="w-12 h-12 bg-sand hover:bg-sage hover:text-white rounded-xl transition-all flex items-center justify-center">
+                    <span class="material-symbols-outlined">{{ task.completed ? 'check_circle' : 'circle' }}</span>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    
+      <!-- Celebration Overlay -->
+      @if (celebrationMessage()) {
+        <div class="fixed inset-0 pointer-events-none z-[110] flex items-center justify-center p-4 backdrop-blur-sm bg-black/10">
+          <div class="animate-bounce-slow text-4xl md:text-6xl lg:text-8xl font-black text-primary uppercase font-display bg-white px-10 py-8 border-8 border-charcoal shadow-2xl text-center rotate-[-2deg]">
+            {{ celebrationMessage() }}
+          </div>
+        </div>
+      }
     </div>
     `,
     styles: [`

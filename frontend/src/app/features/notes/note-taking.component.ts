@@ -1,5 +1,5 @@
 import { Component, signal, inject, OnInit, OnDestroy, computed, effect, Injector } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlannerService, HabitNote } from '../../services/planner.service';
@@ -17,7 +17,7 @@ interface HabitSimple {
 @Component({
   selector: 'app-note-taking',
   standalone: true,
-  imports: [CommonModule, FormsModule, AngularTiptapEditorComponent],
+  imports: [FormsModule, AngularTiptapEditorComponent],
   template: `
     <div class="h-full flex flex-col font-manrope p-3 sm:p-4 gap-5 sm:gap-6 overflow-x-hidden bg-white dark:bg-white">
       <!-- Header -->

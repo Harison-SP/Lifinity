@@ -1,5 +1,5 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { YearlyViewComponent } from './yearly-view/yearly-view.component';
 import { MonthlyViewComponent } from './monthly-view/monthly-view.component';
@@ -9,7 +9,7 @@ import { DailyViewComponent } from './daily-view/daily-view.component';
 @Component({
     selector: 'app-planner',
     standalone: true,
-    imports: [CommonModule, YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent],
+    imports: [YearlyViewComponent, MonthlyViewComponent, WeeklyViewComponent, DailyViewComponent],
     template: `
     <div class="min-h-screen bg-white font-body transition-colors duration-300 paper-texture">
         <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 lg:py-10">

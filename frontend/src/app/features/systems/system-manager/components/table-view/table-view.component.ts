@@ -2,7 +2,7 @@ import {
   Component, Input, Output, EventEmitter, OnChanges, SimpleChanges,
   signal, computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { PhaseNode, WeekNode, TableRow } from '../../system-manager.types';
@@ -11,7 +11,7 @@ import { SystemItem } from '../../../../../models/system.model';
 @Component({
   selector: 'app-table-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [FormsModule, MatIconModule],
   template: `
     <div class="bg-white rounded-lg shadow-gentle border border-taupe/10 overflow-hidden">
       <!-- Toolbar -->

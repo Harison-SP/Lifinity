@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal, OnDestroy } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { SystemService } from '../../services/system.service';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [RouterLink, CommonModule, FormsModule],
+    imports: [RouterLink, FormsModule],
     template: `
     <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture">
         <!-- Dashboard Header -->

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
-import { Location, CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
@@ -14,14 +14,13 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
     selector: 'app-add-habit',
     standalone: true,
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatDatepickerModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatNativeDateModule,
-        MatTimepickerModule
-    ],
+    ReactiveFormsModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatNativeDateModule,
+    MatTimepickerModule
+],
     template: `
     <div class="min-h-screen bg-white px-4 py-6 md:py-8 lg:px-12 font-body pb-24 transition-colors duration-300 overflow-x-hidden paper-texture">
         <header class="mb-8 md:mb-10">

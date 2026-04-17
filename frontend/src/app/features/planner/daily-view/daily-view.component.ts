@@ -1,5 +1,5 @@
 import { Component, signal, inject, OnInit, NgZone, computed, OnDestroy, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,7 +26,6 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
   selector: 'app-daily-view',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatTimepickerModule,
     MatFormFieldModule,
@@ -34,7 +33,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
     MatNativeDateModule,
     MatDatepickerModule,
     FullCalendarModule
-  ],
+],
   template: `
     <div class="h-full min-h-0 flex flex-col bg-slate-50 dark:bg-neutral-950 font-manrope text-slate-900 dark:text-zinc-100 overflow-x-hidden transition-colors duration-500">
       <!-- Header Section -->

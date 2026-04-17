@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
     selector: 'app-settings',
     standalone: true,
-    imports: [CommonModule],
+    imports: [],
     template: `
     <div class="min-h-screen bg-white font-body transition-colors duration-300 paper-texture">
         <header class="px-4 py-6 sm:p-6 md:p-8 border-b border-taupe/20 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 bg-alabaster">

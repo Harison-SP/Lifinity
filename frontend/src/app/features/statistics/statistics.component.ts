@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HabitService } from '../../services/habit.service';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
     selector: 'app-statistics',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [RouterLink],
     template: `
     <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body pb-24 transition-colors duration-300 paper-texture">
         <!-- Header -->

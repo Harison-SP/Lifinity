@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatIconModule } from '@angular/material/icon';
 import { ViewMode } from '../../system-manager.types';
 
 @Component({
   selector: 'app-view-tabs',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [MatIconModule],
   template: `
     <div class="flex items-center gap-1 bg-sand rounded-xl p-1.5 shadow-gentle border border-taupe/10">
       @for (tab of tabs; track tab.mode) {

@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, signal, computed, HostListener, ElementRef, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 
 export interface MultiSelectOption {
@@ -10,7 +10,7 @@ export interface MultiSelectOption {
 @Component({
   selector: 'app-multi-select-chips',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="multi-select-chips">
       <!-- Dropdown Toggle -->

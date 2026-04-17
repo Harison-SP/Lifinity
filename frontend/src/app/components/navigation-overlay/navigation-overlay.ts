@@ -1,11 +1,11 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
     selector: 'app-navigation-overlay',
     standalone: true,
-    imports: [RouterLink, CommonModule],
+    imports: [RouterLink],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2 font-body">

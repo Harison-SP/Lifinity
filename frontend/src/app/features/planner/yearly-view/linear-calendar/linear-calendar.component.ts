@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { CalendarEvent } from '../../../../models/calendar-event.model';
 
 interface EventSegment {
@@ -36,7 +36,7 @@ interface DragState {
 @Component({
   selector: 'app-linear-calendar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="yearly-grid-container w-full h-full flex flex-col bg-white text-charcoal overflow-auto custom-scrollbar select-none font-body relative transition-colors duration-300 paper-texture" #container>

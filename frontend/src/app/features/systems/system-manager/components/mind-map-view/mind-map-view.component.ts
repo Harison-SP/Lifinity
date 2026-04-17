@@ -2,7 +2,7 @@ import {
   Component, Input, OnChanges, SimpleChanges,
   AfterViewInit, ElementRef, ViewChild, OnDestroy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatIconModule } from '@angular/material/icon';
 import { PhaseNode, MindMapNode } from '../../system-manager.types';
 import * as d3 from 'd3';
@@ -10,7 +10,7 @@ import * as d3 from 'd3';
 @Component({
   selector: 'app-mind-map-view',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [MatIconModule],
   template: `
     <div class="bg-white rounded-lg shadow-gentle border border-taupe/10 overflow-hidden">
       <!-- Toolbar -->

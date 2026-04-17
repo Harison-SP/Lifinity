@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { SystemService } from '../../../services/system.service';
 import { LearningSystem, SystemItem, InstantiateResult } from '../../../models/system.model';
@@ -116,7 +116,6 @@ const SYSTEM_PRESETS: SystemPreset[] = [
   selector: 'app-system-manager',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatIconModule,
     MatTimepickerModule,
@@ -126,7 +125,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
     ViewTabsComponent,
     TableViewComponent,
     MindMapViewComponent
-  ],
+],
   template: `
     <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture custom-scrollbar">
       <div class="mx-auto flex h-full max-w-[1700px] flex-col gap-6">
