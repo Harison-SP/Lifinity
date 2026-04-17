@@ -17,6 +17,7 @@ def get_allowed_origins() -> list[str]:
         "http://localhost:1234",  # Current running port
         "http://127.0.0.1:4200",
         "http://127.0.0.1:1234",
+        "https://lifinity-beta.vercel.app",
     ]
 
 allowed_origins = get_allowed_origins()
