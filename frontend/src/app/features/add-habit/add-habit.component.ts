@@ -554,8 +554,8 @@ export class AddHabitComponent implements OnInit {
                     } as any, { emitEvent: false });
 
                     this.habitType.set(habit.type || 'yes_no');
-                    this.updateValidators(habit.type || 'yes_no');
                     this.frequencyType.set(habit.frequencyType || 'daily');
+                    this.updateValidators();
                     this.selectedDays.set(habit.weekdays || []);
                     this.color.set(habit.color || '#ec5b13');
                 }
@@ -580,12 +580,14 @@ export class AddHabitComponent implements OnInit {
     setHabitType(type: string) {
         this.habitType.set(type);
         this.habitForm.patchValue({ type });
-        this.updateValidators(type);
+        this.updateValidators();
     }
 
-    private updateValidators(type: string) {
+    private updateValidators() {
+        const type = this.habitType();
         const targetValue = this.habitForm.get('targetValue');
         const targetUnit = this.habitForm.get('targetUnit');
+        const frequencyInterval = this.habitForm.get('frequencyInterval');
         
         if (type === 'measurable') {
             targetValue?.setValidators([Validators.required, Validators.min(1)]);
@@ -594,14 +596,23 @@ export class AddHabitComponent implements OnInit {
             targetValue?.clearValidators();
             targetUnit?.clearValidators();
         }
+
+        if (this.frequencyType() === 'interval') {
+            frequencyInterval?.setValidators([Validators.required, Validators.min(1)]);
+        } else {
+            frequencyInterval?.clearValidators();
+        }
         
         targetValue?.updateValueAndValidity();
         targetUnit?.updateValueAndValidity();
+        frequencyInterval?.updateValueAndValidity();
+        this.habitForm.updateValueAndValidity();
     }
 
     setFrequencyType(type: string) {
         this.frequencyType.set(type);
         this.habitForm.patchValue({ frequencyType: type });
+        this.updateValidators();
     }
 
     onSubmit() {
