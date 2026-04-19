@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, NgZone, computed, OnDestroy, ViewChild } from '@angular/core';
+import { Component, signal, inject, OnInit, NgZone, computed, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { MatTimepickerModule } from '@angular/material/timepicker';
@@ -25,6 +25,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
 @Component({
   selector: 'app-daily-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     MatTimepickerModule,

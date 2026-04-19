@@ -43,6 +43,10 @@
   --font-body: 'Cabin', sans-serif;
   --font-manrope: 'Manrope', sans-serif;
   --font-mono: 'Space Mono', monospace;
+
+  /* Textures */
+  --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  --noise-texture-dark: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* ================================================
@@ -373,11 +377,11 @@
    PAPER TEXTURE
    ================================================ */
 .paper-texture {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  background-image: var(--noise-texture);
 }
 
 .dark .paper-texture {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+  background-image: var(--noise-texture-dark);
 }
 
 /* ================================================
@@ -448,7 +452,7 @@
   body {
     font-family: var(--font-body), sans-serif;
     background-color: var(--color-background-light);
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+    background-image: var(--noise-texture);
     color: var(--color-charcoal);
     transition: background-color 0.3s ease, color 0.3s ease;
   }
@@ -673,22 +677,16 @@ html.dark {
   color-scheme: dark;
 }
 
-html {
-  transition: background-color 0.3s ease;
+/* Base body transition for theme switching */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Smooth transitions for dark mode toggle */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color, box-shadow;
-  transition-duration: 0.2s;
-  transition-timing-function: ease;
+/* Target specific components for transitions instead of global * */
+.planner-content, .card, button, a {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Exclude elements where transition causes visual issues */
-input, textarea, select, button, a, .animate-spin, .animate-bounce, .animate-pulse,
-[class*="animate-"], .transition-transform, .transition-all {
-  transition-property: all;
-}
 
 /* ================================================
    NGX-CHARTS DARK MODE
@@ -704,3 +702,140 @@ input, textarea, select, button, a, .animate-spin, .animate-bounce, .animate-pul
 .dark ::ng-deep .ngx-charts text {
   fill: var(--color-dark-text-secondary) !important;
 }
+
+/* ================================================
+   VIEW TRANSITION ANIMATIONS
+   This applies to route changes with withViewTransitions()
+   ================================================ */
+
+::view-transition-group(root) {
+  animation-duration: 350ms;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes fade-zoom-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.98); }
+}
+
+@keyframes fade-zoom-in {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+::view-transition-old(root) {
+  animation: 250ms cubic-bezier(0.4, 0, 1, 1) both fade-zoom-out;
+}
+
+::view-transition-new(root) {
+  animation: 350ms cubic-bezier(0, 0, 0.2, 1) both fade-zoom-in;
+}
+
+/* ================================================
+   PLANNER PAGINATION VIEW TRANSITIONS
+   Directional slide animations for period switching
+   ================================================ */
+
+/* Slide keyframes */
+@keyframes slide-out-to-left {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-out-to-right {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes slide-in-from-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scale-down {
+  from { transform: scale(1); }
+  to   { transform: scale(0.95); }
+}
+
+@keyframes scale-up {
+  from { transform: scale(0.95); }
+  to   { transform: scale(1); }
+}
+
+/* When a forwards or backwards pagination transition is active,
+   suppress root transition and only animate the content + pagination */
+html:active-view-transition-type(forwards, backwards) {
+  :root {
+    view-transition-name: none;
+  }
+
+  ::view-transition-group(planner-content) {
+    animation-duration: 350ms;
+    animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  ::view-transition-group(planner-pagination) {
+    animation-duration: 0s;
+  }
+  ::view-transition-group(planner-header) {
+    animation-duration: 0s;
+  }
+}
+
+/* Forwards: slide old content out-left, new content in-right */
+html:active-view-transition-type(forwards) {
+  &::view-transition-old(planner-content) {
+    animation-name: slide-out-to-left;
+  }
+  &::view-transition-new(planner-content) {
+    animation-name: slide-in-from-right;
+  }
+}
+
+/* Backwards: slide old content out-right, new content in-left */
+html:active-view-transition-type(backwards) {
+  &::view-transition-old(planner-content) {
+    animation-name: slide-out-to-right;
+  }
+  &::view-transition-new(planner-content) {
+    animation-name: slide-in-from-left;
+  }
+}
+
+/* ================================================
+   ANIMATION UTILITIES
+   ================================================ */
+.animate-in {
+  animation-duration: 200ms;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+
+.fade-in {
+  animation-name: fade-in;
+}
+
+.slide-in-from-bottom-2 {
+  animation-name: slide-in-from-bottom-2;
+}
+
+@keyframes slide-in-from-bottom-2 {
+  from { transform: translateY(5rem); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+

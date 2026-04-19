@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop';
@@ -27,9 +27,10 @@ interface WeekDay {
 @Component({
   selector: 'app-weekly-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, DragDropModule],
   template: `
-    <div class="h-full flex flex-col font-body p-4 sm:p-6 gap-6 bg-white transition-colors duration-300 overflow-x-hidden paper-texture">
+    <div class="h-full flex flex-col font-body p-4 sm:p-6 gap-6 bg-white overflow-x-hidden paper-texture">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div class="flex w-full md:w-auto items-center gap-4">

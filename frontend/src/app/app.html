@@ -1,5 +1,7 @@
 <div class="relative font-manrope min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
-    <router-outlet></router-outlet>
+    <main id="main-content">
+        <router-outlet></router-outlet>
+    </main>
     <app-navigation-overlay *ngIf="(isAuthenticated$ | async) && !(isLoginPage$ | async)"></app-navigation-overlay>
     <app-toast-container></app-toast-container>
 </div>

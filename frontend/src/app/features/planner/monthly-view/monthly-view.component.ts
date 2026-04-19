@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy, computed, Injector, effect } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed, Injector, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,9 +19,10 @@ interface MonthlyHabit {
 @Component({
   selector: 'app-monthly-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, MultiSelectChipsComponent, RouterModule],
   template: `
-    <div class="h-full flex flex-col font-body p-4 sm:p-6 gap-6 overflow-x-hidden bg-white paper-texture transition-colors duration-300">
+    <div class="h-full flex flex-col font-body p-4 sm:p-6 gap-6 overflow-x-hidden bg-white paper-texture">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div class="flex flex-wrap items-center gap-3">
