@@ -1,8 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { SystemService } from '../../../services/system.service';
-import { LearningSystem, SystemItem, InstantiateResult } from '../../../models/system.model';
+import { LearningSystem, SystemItem, InstantiateResult, SystemInstance } from '../../../models/system.model';
 import * as XLSX from 'xlsx';
 import { MatIconModule } from '@angular/material/icon';
 import { HabitService } from '../../../services/habit.service';
@@ -398,6 +398,87 @@ const SYSTEM_PRESETS: SystemPreset[] = [
               </section>
             }
 
+            <!-- Launched Systems -->
+            <div class="bg-white rounded-lg shadow-gentle p-5 border border-taupe/10 min-h-0 max-h-[400px]">
+              <div class="border-b border-taupe/10 pb-3 mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-taupe">Launched</span>
+                <h3 class="font-heading text-lg font-bold text-charcoal mt-1">Active Systems</h3>
+              </div>
+              <div class="space-y-2 overflow-y-auto custom-scrollbar pr-1 flex-1">
+                @for (inst of launchedInstances(); track inst.id) {
+                  <div
+                    (click)="selectInstance(inst)"
+                    class="rounded-lg p-3 cursor-pointer transition-all"
+                    [class.bg-sage]="selectedInstance()?.id === inst.id"
+                    [class.text-white]="selectedInstance()?.id === inst.id"
+                    [class.shadow-gentle]="selectedInstance()?.id === inst.id"
+                    [class.bg-sand]="selectedInstance()?.id !== inst.id"
+                    [class.text-charcoal]="selectedInstance()?.id !== inst.id"
+                    [class.hover:bg-sand-dark]="selectedInstance()?.id !== inst.id">
+                    <p class="text-sm font-bold truncate">{{ inst.systemTitle }}</p>
+                    <div class="mt-1 flex items-center gap-2 text-xs opacity-80">
+                      <span class="material-symbols-outlined text-xs">link</span>
+                      <span class="truncate">{{ inst.habitName || 'No habit' }}</span>
+                    </div>
+                    <div class="mt-1 text-[10px] opacity-60">
+                      {{ inst.startDate }} → {{ inst.endDate }}
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="rounded-lg border border-dashed border-taupe/30 p-4 text-center text-sm text-taupe">
+                    No launched systems yet
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Instance Detail / Update Panel -->
+            @if (selectedInstance()) {
+              <div class="bg-white rounded-lg shadow-gentle p-5 border border-taupe/10">
+                <span class="text-xs font-bold uppercase tracking-wider text-taupe">Instance Details</span>
+                <h3 class="mt-1 font-heading text-lg font-bold text-charcoal">{{ selectedInstance()!.systemTitle }}</h3>
+
+                <div class="mt-3 space-y-3">
+                  <div>
+                    <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Linked Habit</label>
+                    <select
+                      [(ngModel)]="instanceEditHabitId"
+                      class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal">
+                      <option [ngValue]="null">No habit</option>
+                      @for (habit of habits(); track habit.id) {
+                        <option [value]="habit.id">{{ habit.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Start Date</label>
+                    <input
+                      type="date"
+                      [(ngModel)]="instanceEditStartDate"
+                      class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
+                  </div>
+                  <div class="rounded-lg bg-sand/70 border border-taupe/10 p-2.5 text-[10px] font-medium text-taupe">
+                    {{ selectedInstance()!.endDate ? 'Ends: ' + selectedInstance()!.endDate : '' }}
+                    · Phases: {{ selectedInstance()!.phases?.length || 0 }}
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      (click)="updateInstance()"
+                      [disabled]="isUpdatingInstance()"
+                      class="flex-1 inline-flex items-center justify-center gap-1 bg-sage text-white rounded-lg py-2 text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50">
+                      <span class="material-symbols-outlined text-sm">{{ isUpdatingInstance() ? 'hourglass_top' : 'save' }}</span>
+                      {{ isUpdatingInstance() ? 'Saving...' : 'Update' }}
+                    </button>
+                    <button
+                      (click)="deleteInstance()"
+                      class="inline-flex items-center justify-center gap-1 bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-red-400 transition-all">
+                      <span class="material-symbols-outlined text-sm">delete</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+
             <!-- Starter Presets -->
             <div class="bg-white rounded-lg shadow-gentle p-5 border border-taupe/10">
               <span class="text-xs font-bold uppercase tracking-wider text-taupe mb-2 block">Starter Presets</span>
@@ -483,7 +564,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                               class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal">
                               <option [ngValue]="null" disabled>Select parent habit</option>
                               @for (habit of habits(); track habit.id) {
-                                <option [value]="habit.id">{{ habit.name }}</option>
+                                <option [value]="habit.id" [disabled]="isHabitAlreadyLaunched(habit.id)">{{ habit.name }}{{ isHabitAlreadyLaunched(habit.id) ? ' (launched)' : '' }}</option>
                               }
                             </select>
                           </div>
@@ -504,12 +585,18 @@ const SYSTEM_PRESETS: SystemPreset[] = [
 
                           <button
                             (click)="applySystem()"
-                            [disabled]="isRunning() || getValidationIssues().length > 0"
+                            [disabled]="isRunning() || getValidationIssues().length > 0 || isHabitAlreadyLaunched(selectedHabitId)"
                             class="whitespace-nowrap inline-flex items-center justify-center gap-2 bg-orange-500 text-white rounded-lg px-4 py-2.5 text-sm font-bold hover:bg-orange-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                             <span class="material-symbols-outlined text-sm">{{ isRunning() ? 'hourglass_top' : 'play_arrow' }}</span>
                             {{ isRunning() ? 'Launching...' : 'Launch' }}
                           </button>
                         </div>
+
+                        @if (isHabitAlreadyLaunched(selectedHabitId)) {
+                          <div class="rounded-lg border border-orange-200 bg-orange-50 p-2 text-[11px] font-bold text-orange-800">
+                            ⚠ This habit already has a launched system. Select a different habit or update the existing instance from the sidebar.
+                          </div>
+                        }
 
                         @if (lastResult()) {
                           <div class="rounded-lg border border-green-200 bg-green-50 p-2 text-[11px] font-bold text-green-800">
@@ -831,15 +918,25 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                 class="w-full border border-taupe/20 bg-sand rounded-lg p-2.5 text-sm font-medium outline-none text-charcoal" />
             </div>
             <div>
-              <label class="text-xs font-bold uppercase tracking-wider text-taupe block mb-1">Duration (weeks)</label>
-              <input
-                type="number"
-                min="1"
-                max="12"
-                [(ngModel)]="aiWeeks"
+              <label class="text-xs font-bold uppercase tracking-wider text-taupe block mb-1">Select Habit</label>
+              <select
+                [ngModel]="aiSelectedHabitId()"
+                (ngModelChange)="aiSelectedHabitId.set($event)"
                 [disabled]="isGeneratingAILoading()"
-                class="w-full border border-taupe/20 bg-sand rounded-lg p-2.5 text-sm font-medium outline-none text-charcoal" />
+                class="w-full border border-taupe/20 bg-sand rounded-lg p-2.5 text-sm font-medium outline-none text-charcoal">
+                <option [ngValue]="null">Choose a habit...</option>
+                @for (habit of habits(); track habit.id) {
+                  <option [value]="habit.id">{{ habit.name }}</option>
+                }
+              </select>
             </div>
+            @if (aiSelectedHabitId()) {
+              <div class="rounded-lg bg-sand/70 border border-taupe/10 p-2.5 text-xs font-medium text-taupe flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm text-sage">calendar_month</span>
+                Duration: <strong class="text-charcoal">{{ aiComputedWeeks() }} weeks</strong>
+                <span class="text-[10px] opacity-60">({{ aiHabitDateRange() }})</span>
+              </div>
+            }
             <div>
               <label class="text-xs font-bold uppercase tracking-wider text-taupe block mb-1">Description / constraints</label>
               <textarea
@@ -899,7 +996,14 @@ export class SystemManagerComponent implements OnInit {
   isGeneratingAILoading = signal(false);
   aiTopic = '';
   aiDescription = '';
-  aiWeeks = 4;
+  aiSelectedHabitId = signal<string | null>(null);
+
+  // Launched instances
+  launchedInstances = signal<SystemInstance[]>([]);
+  selectedInstance = signal<SystemInstance | null>(null);
+  isUpdatingInstance = signal(false);
+  instanceEditHabitId: string | null = null;
+  instanceEditStartDate = '';
 
   systemSearch = '';
   tagsInput = '';
@@ -920,6 +1024,7 @@ export class SystemManagerComponent implements OnInit {
   loadSystems() {
     this.systemService.getSystems().subscribe((systems) => this.systems.set(systems));
     this.habitService.getAllHabits().subscribe((habits) => this.habits.set(habits));
+    this.systemService.getAllInstances().subscribe((instances) => this.launchedInstances.set(instances));
   }
 
   filteredSystems(): LearningSystem[] {
@@ -1245,10 +1350,14 @@ export class SystemManagerComponent implements OnInit {
   }
 
   generateWithAI() {
-    if (!this.aiTopic.trim() || this.aiWeeks < 1 || this.aiWeeks > 12) return;
+    if (!this.aiTopic.trim()) return;
+
+    const weeks = this.aiComputedWeeks();
+    if (weeks < 1 || weeks > 52) return;
+
     this.isGeneratingAILoading.set(true);
 
-    this.systemService.generateSystem(this.aiTopic, this.aiWeeks, this.aiDescription).subscribe({
+    this.systemService.generateSystem(this.aiTopic, weeks, this.aiDescription).subscribe({
       next: (system) => {
         this.editForm = {
           ...system,
@@ -1261,6 +1370,7 @@ export class SystemManagerComponent implements OnInit {
         this.isGeneratingAI.set(false);
         this.isGeneratingAILoading.set(false);
         this.aiTopic = '';
+        this.aiSelectedHabitId.set(null);
       },
       error: (err) => {
         console.error('Failed to generate AI system:', err);
@@ -1409,6 +1519,92 @@ export class SystemManagerComponent implements OnInit {
       ]
     };
   }
+
+  // ── Feature 1: Prevent duplicate launch ──────────────────────────────────
+
+  isHabitAlreadyLaunched(habitId: string | null): boolean {
+    if (!habitId) return false;
+    return this.launchedInstances().some(inst => inst.habitId === habitId);
+  }
+
+  // ── Feature 2: Launched instances management ────────────────────────────
+
+  selectInstance(inst: SystemInstance) {
+    this.selectedInstance.set(inst);
+    this.instanceEditHabitId = inst.habitId || null;
+    this.instanceEditStartDate = inst.startDate;
+  }
+
+  updateInstance() {
+    const inst = this.selectedInstance();
+    if (!inst?.id) return;
+
+    this.isUpdatingInstance.set(true);
+    const data: { habitId?: string; startDate?: string } = {};
+
+    if (this.instanceEditHabitId !== (inst.habitId || null)) {
+      data.habitId = this.instanceEditHabitId || '';
+    }
+    if (this.instanceEditStartDate !== inst.startDate) {
+      data.startDate = this.instanceEditStartDate;
+    }
+
+    if (Object.keys(data).length === 0) {
+      this.isUpdatingInstance.set(false);
+      return;
+    }
+
+    this.systemService.updateInstance(inst.id, data).subscribe({
+      next: (updated) => {
+        this.selectedInstance.set(updated);
+        this.instanceEditHabitId = updated.habitId || null;
+        this.instanceEditStartDate = updated.startDate;
+        this.isUpdatingInstance.set(false);
+        this.loadSystems();
+      },
+      error: () => this.isUpdatingInstance.set(false)
+    });
+  }
+
+  deleteInstance() {
+    const inst = this.selectedInstance();
+    if (!inst?.id || !confirm('Delete this launched system instance?')) return;
+
+    this.systemService.deleteInstance(inst.id).subscribe({
+      next: () => {
+        this.selectedInstance.set(null);
+        this.loadSystems();
+      }
+    });
+  }
+
+  // ── Feature 3: AI habit dropdown ────────────────────────────────────────
+
+  aiComputedWeeks = computed(() => {
+    const habitId = this.aiSelectedHabitId();
+    if (!habitId) return 6;
+    const habit = this.habits().find(h => h.id === habitId);
+    if (!habit) return 6;
+
+    const start = habit.startDate ? new Date(habit.startDate) : null;
+    const end = habit.endDate ? new Date(habit.endDate) : null;
+
+    if (!start || !end) return 6;
+
+    const diffMs = end.getTime() - start.getTime();
+    const diffWeeks = Math.ceil(diffMs / (7 * 24 * 60 * 60 * 1000));
+    return Math.max(1, Math.min(diffWeeks, 52));
+  });
+
+  aiHabitDateRange = computed(() => {
+    const habitId = this.aiSelectedHabitId();
+    if (!habitId) return '';
+    const habit = this.habits().find(h => h.id === habitId);
+    if (!habit) return '';
+    const start = habit.startDate || 'no start';
+    const end = habit.endDate || 'no end (default 6w)';
+    return `${start} → ${end}`;
+  });
 }
 
 

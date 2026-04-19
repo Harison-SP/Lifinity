@@ -84,4 +84,14 @@ export class SystemService {
       .set('task_title', taskTitle);
     return this.http.patch(`${this.apiUrl}/instances/${instanceId}/task`, {}, { params });
   }
+
+  /** Delete a launched system instance */
+  deleteInstance(instanceId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/instances/${instanceId}`);
+  }
+
+  /** Update a launched system instance (habitId, startDate) */
+  updateInstance(instanceId: string, data: { habitId?: string; startDate?: string }): Observable<SystemInstance> {
+    return this.http.put<SystemInstance>(`${this.apiUrl}/instances/${instanceId}`, data);
+  }
 }

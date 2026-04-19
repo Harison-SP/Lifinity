@@ -344,3 +344,72 @@ async def toggle_instance_task(instance_id: str,
         {"$set": {"phases": inst["phases"]}}
     )
     return {"message": "Task toggled", "instance_id": instance_id}
+
+
+@router.delete("/instances/{instance_id}")
+async def delete_instance(instance_id: str):
+    """Delete a launched system instance."""
+    if not ObjectId.is_valid(instance_id):
+        raise HTTPException(status_code=400, detail="Invalid instance ID")
+    result = system_instance_collection.delete_one({"_id": ObjectId(instance_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Instance not found")
+    return {"message": "Instance deleted successfully"}
+
+
+@router.put("/instances/{instance_id}")
+async def update_instance(instance_id: str, data: dict):
+    """Update a launched system instance (habitId, startDate)."""
+    if not ObjectId.is_valid(instance_id):
+        raise HTTPException(status_code=400, detail="Invalid instance ID")
+
+    inst = system_instance_collection.find_one({"_id": ObjectId(instance_id)})
+    if not inst:
+        raise HTTPException(status_code=404, detail="Instance not found")
+
+    update_fields = {}
+
+    # Update habit link
+    new_habit_id = data.get("habitId")
+    if new_habit_id is not None:
+        if new_habit_id and ObjectId.is_valid(new_habit_id):
+            parent_habit = habit_collection.find_one({"_id": ObjectId(new_habit_id)})
+            if parent_habit:
+                update_fields["habitId"] = new_habit_id
+                update_fields["habitName"] = parent_habit.get("name")
+                update_fields["color"] = parent_habit.get("color", inst.get("color"))
+        elif new_habit_id == "":
+            update_fields["habitId"] = None
+            update_fields["habitName"] = None
+
+    # Update start date — recompute all dates in the hierarchy
+    new_start = data.get("startDate")
+    if new_start:
+        old_start = datetime.strptime(inst["startDate"], "%Y-%m-%d")
+        new_start_dt = datetime.strptime(new_start, "%Y-%m-%d")
+        delta = new_start_dt - old_start
+
+        phases = inst.get("phases", [])
+        for phase in phases:
+            phase["startDate"] = (datetime.strptime(phase["startDate"], "%Y-%m-%d") + delta).strftime("%Y-%m-%d")
+            phase["endDate"] = (datetime.strptime(phase["endDate"], "%Y-%m-%d") + delta).strftime("%Y-%m-%d")
+            for week in phase.get("weeks", []):
+                week["startDate"] = (datetime.strptime(week["startDate"], "%Y-%m-%d") + delta).strftime("%Y-%m-%d")
+                week["endDate"] = (datetime.strptime(week["endDate"], "%Y-%m-%d") + delta).strftime("%Y-%m-%d")
+                for item in week.get("items", []):
+                    item["date"] = (datetime.strptime(item["date"], "%Y-%m-%d") + delta).strftime("%Y-%m-%d")
+
+        update_fields["startDate"] = new_start
+        update_fields["endDate"] = (datetime.strptime(inst["endDate"], "%Y-%m-%d") + delta).strftime("%Y-%m-%d")
+        update_fields["phases"] = phases
+
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No update data provided")
+
+    system_instance_collection.update_one(
+        {"_id": ObjectId(instance_id)},
+        {"$set": update_fields}
+    )
+
+    updated = system_instance_collection.find_one({"_id": ObjectId(instance_id)})
+    return instance_helper(updated)
