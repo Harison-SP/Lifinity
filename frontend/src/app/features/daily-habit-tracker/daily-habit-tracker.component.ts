@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { SystemService } from '../../services/system.service';
 import { SystemInstanceTask } from '../../models/system.model';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
     selector: 'app-daily-habit-tracker',
@@ -15,6 +16,11 @@ import { SystemInstanceTask } from '../../models/system.model';
       <!-- Timer Overlay (Full Screen) -->
       @if (timerRunning()) {
         <div class="fixed inset-0 z-[100] bg-charcoal flex flex-col items-center justify-center text-white p-6 animate-in fade-in duration-500">
+          <button (click)="pauseTimer()" class="absolute top-6 right-6 md:right-12 text-white/60 hover:text-white flex items-center gap-2 px-6 py-3 border border-white/20 rounded-full transition-all group hover:bg-white/5">
+            <span class="material-symbols-outlined text-xl group-hover:rotate-90 transition-transform">close</span>
+            <span class="text-sm font-bold uppercase tracking-widest">Exit Focus</span>
+          </button>
+
           <div class="absolute top-6 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 w-[90%] md:max-w-2xl text-center md:text-left">
             <h2 class="text-primary font-heading text-[10px] md:text-xs font-black tracking-widest uppercase mb-1 md:mb-2 opacity-60">System Habit focus</h2>
             <h3 class="text-white text-2xl md:text-5xl font-black leading-tight mb-2 md:mb-4">{{ parentHabit()?.name || habit()?.name }}</h3>
@@ -161,6 +167,12 @@ import { SystemInstanceTask } from '../../models/system.model';
                   <!-- Shine effect -->
                   <div class="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 group-hover:animate-shine"></div>
                 </button>
+                
+                @if (isCompletedToday() || todaySystemTask()?.completed) {
+                  <button (click)="unmarkHabit()" class="text-taupe hover:text-red-500 text-xs font-bold uppercase tracking-widest flex items-center gap-1 transition-colors opacity-60 hover:opacity-100">
+                    <span class="material-symbols-outlined text-sm">undo</span> Unmark Completion
+                  </button>
+                }
                 <p class="text-taupe text-xs font-bold uppercase tracking-widest opacity-60">One click to rule them all</p>
               </div>
             </div>
@@ -187,7 +199,9 @@ import { SystemInstanceTask } from '../../models/system.model';
     
               <div class="flex items-center bg-white/10 border border-white/20 rounded-2xl overflow-hidden backdrop-blur-sm">
                 <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="w-20 p-4 text-center font-bold text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
-                <button (click)="startCustomTimer()" class="px-6 py-4 bg-primary text-white font-black text-sm hover:bg-primary-light transition-all">START FOCUS</button>
+                <div class="flex flex-col md:flex-row">
+                  <button (click)="startCustomTimer()" class="px-6 py-4 bg-primary text-white font-black text-sm hover:bg-primary-light transition-all">START FOCUS</button>
+                </div>
               </div>
             </div>
     
@@ -215,17 +229,14 @@ import { SystemInstanceTask } from '../../models/system.model';
               <h3 class="font-heading text-xl font-bold text-charcoal flex items-center gap-2">
                 <span class="material-symbols-outlined text-taupe">notes</span> Personal Notes
               </h3>
-              <a [routerLink]="['/notes', habitId()]"
+
+            </div>
+            <a [routerLink]="['/notes', habitId()]"
                 [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
-                class="flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary hover:text-white transition-all shadow-sm">
-                <span class="material-symbols-outlined text-sm">edit_note</span> Dedicated Notes
+                class="flex items-center gap-1.5 px-6 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary hover:text-white transition-all shadow-sm">
+                <span class="material-symbols-outlined text-xl">edit_note</span> Notes
               </a>
-            </div>
     
-            <div class="flex-1">
-              <textarea [(ngModel)]="logNotes" placeholder="Quick log: how did it go? Any obstacles or breakthroughs?" rows="4"
-              class="w-full p-4 border-2 border-taupe/10 rounded-xl bg-white text-charcoal focus:border-primary/50 outline-none transition-all resize-none shadow-inner text-sm"></textarea>
-            </div>
     
             <div class="mt-4 flex justify-between items-center">
               @if (habit()?.parentId) {
@@ -235,9 +246,6 @@ import { SystemInstanceTask } from '../../models/system.model';
               } @else {
                 <div></div>
               }
-              <button (click)="saveLog()" class="text-primary font-bold text-xs uppercase tracking-widest hover:text-primary-dark flex items-center gap-1 transition-colors">
-                <span class="material-symbols-outlined text-sm">save</span> Save Progress
-              </button>
             </div>
           </div>
         </div>
@@ -334,9 +342,18 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     route = inject(ActivatedRoute);
     habitService = inject(HabitService);
     systemService = inject(SystemService);
+    toastService = inject(ToastService);
+    today = new Date();
+
+    getLocalDateString(): string {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
 
     habitId = computed(() => Object.is(this.route.snapshot.paramMap.get('id'), null) ? null : this.route.snapshot.paramMap.get('id'));
     habit = computed(() => this.habitService.habits().find(h => h.id === this.habitId()));
+
+    dbFocusedMinutes = signal<number>(0);
 
     todaySystemTask = signal<SystemInstanceTask | null>(null);
     pendingPastTasks = signal<SystemInstanceTask[]>([]);
@@ -382,14 +399,25 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
 
     inconsistentDaysCount = computed(() => {
         const data = this.fullHeatmapData();
-        if (!data.length) return 0;
+        const habit = this.habit();
+        if (!data.length || !habit) return 0;
 
         let missed = 0;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+
+        const habitStartDate = habit.startDate ? new Date(habit.startDate) : null;
+        if (habitStartDate) habitStartDate.setHours(0, 0, 0, 0);
+
         for (let i = 0; i < 7; i++) {
             const checkDate = new Date(today);
             checkDate.setDate(today.getDate() - i);
+
+            // If checkDate is before habit start date, stop counting missed days
+            if (habitStartDate && checkDate < habitStartDate) {
+                break;
+            }
+
             const dateStr = checkDate.toISOString().split('T')[0];
             const dayData = data.find(d => d.date === dateStr);
             if (!dayData || dayData.level === 0) {
@@ -410,9 +438,10 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     customTimerMinutes: number | undefined;
 
     logValue: number | undefined;
-    logNotes = '';
-
-    totalFocusedMinutes = signal(0);
+    localSessionMinutes = signal(0);
+    totalFocusedMinutes = computed(() => {
+        return this.dbFocusedMinutes() + this.localSessionMinutes();
+    });
 
     formattedTimer = computed(() => {
         const t = this.timerValue();
@@ -422,17 +451,19 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     });
 
     ngOnInit() {
-        const h = this.habit();
-        if (h && h.latestLog && this.isCompletedToday()) {
-            this.logValue = h.latestLog.value;
-            this.logNotes = h.latestLog.notes || '';
-            this.totalFocusedMinutes.set((h.latestLog as any).focused_minutes || 0);
-        }
-
         const id = this.habitId();
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = this.getLocalDateString();
 
         if (id) {
+            this.habitService.getHabitLog(id, todayStr).subscribe(log => {
+                if (log) {
+                    this.logValue = log.value;
+                    this.dbFocusedMinutes.set(log.focused_minutes || 0);
+                } else {
+                    this.dbFocusedMinutes.set(0);
+                }
+            });
+
             this.habitService.getHabitStats(id).subscribe(stats => {
                 if (stats && stats.heatmap) {
                     this.fullHeatmapData.set(stats.heatmap);
@@ -462,9 +493,9 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     startCustomTimer() {
         if (this.customTimerMinutes && this.customTimerMinutes > 0) {
             this.startTimer(this.customTimerMinutes * 60);
-            this.customTimerMinutes = undefined;
         }
     }
+
 
     startTimer(seconds: number) {
         if (this.timerInterval) clearInterval(this.timerInterval);
@@ -497,14 +528,12 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         if (!id) return;
 
         const isCompletedNow = this.isCompletedToday();
-        const today = new Date().toISOString().split('T')[0];
+        const todayStr = this.getLocalDateString();
 
-        this.habitService.updateLog(id, today, {
+        this.habitService.updateLog(id, todayStr, {
             value: this.logValue,
-            notes: this.logNotes,
             focused_minutes: this.totalFocusedMinutes()
-        } as any).subscribe(() => {
-            this.habitService.loadHabits();
+        }).subscribe(() => {
             if (!isCompletedNow && this.logValue !== undefined && this.logValue > 0) {
                 this.showCelebration();
             }
@@ -514,11 +543,10 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     toggleDone() {
         const id = this.habitId();
         const isCompletedNow = this.isCompletedToday();
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = this.getLocalDateString();
 
         if (id) {
             this.habitService.toggleCompletion(id, todayStr).subscribe(() => {
-                this.habitService.loadHabits();
                 if (!isCompletedNow) {
                     this.showCelebration('Great job!');
                 }
@@ -526,23 +554,20 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         }
     }
 
-    updateFocusTime(mins: number) {
-        this.totalFocusedMinutes.set(mins);
-        this.saveFocusTime(0);
-    }
 
     saveFocusTime(addedMins: number) {
         const id = this.habitId();
         if (id) {
-            const today = new Date().toISOString().split('T')[0];
-            const payload: any = {
-                focused_minutes: this.totalFocusedMinutes()
+            const todayStr = this.getLocalDateString();
+            const newTotal = this.totalFocusedMinutes();
+            const payload = {
+                focused_minutes: newTotal
             };
-            if (this.logValue !== undefined && this.logValue !== null) payload.value = this.logValue;
-            if (this.logNotes) payload.notes = this.logNotes;
+            if (this.logValue !== undefined && this.logValue !== null) (payload as any).value = this.logValue;
 
-            this.habitService.updateLog(id, today, payload).subscribe(() => {
-                this.habitService.loadHabits();
+            this.habitService.updateLog(id, todayStr, payload).subscribe(() => {
+                this.dbFocusedMinutes.set(newTotal);
+                this.localSessionMinutes.set(0);
                 if (addedMins > 0) {
                     this.showCelebration(`+${addedMins} minutes of focus!`);
                 }
@@ -552,17 +577,18 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
 
     completeSession() {
         const minsCompleted = Math.round(this.initialTimerValue() / 60);
-        this.totalFocusedMinutes.update(m => m + minsCompleted);
+        this.localSessionMinutes.set(minsCompleted);
 
         const id = this.habitId();
         if (id) {
-            const today = new Date().toISOString().split('T')[0];
-            this.habitService.updateLog(id, today, {
+            const todayStr = this.getLocalDateString();
+            const newTotal = this.totalFocusedMinutes();
+            this.habitService.updateLog(id, todayStr, {
                 value: this.logValue !== undefined ? this.logValue : 1,
-                notes: this.logNotes,
-                focused_minutes: this.totalFocusedMinutes()
-            } as any).subscribe(() => {
-                this.habitService.loadHabits();
+                focused_minutes: newTotal
+            }).subscribe(() => {
+                this.dbFocusedMinutes.set(newTotal);
+                this.localSessionMinutes.set(0);
                 this.showCelebration(`+${minsCompleted} minute focus!`);
             });
         }
@@ -578,7 +604,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
             task.title
         ).subscribe(() => {
             const id = this.habitId();
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = this.getLocalDateString();
             if (id) {
                 this.systemService.getInstanceTasksByDate(todayStr).subscribe(tasks => {
                     const relatedTask = tasks.find(t => t.habitId === id);
@@ -588,7 +614,11 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
                     tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
                     this.pendingPastTasks.set(tasks);
                 });
-                this.showCelebration(task.completed ? 'Task unmarked' : 'Task completed!');
+                if (task.completed) {
+                    this.toastService.info('Task unmarked');
+                } else {
+                    this.showCelebration('Task completed!');
+                }
             }
         });
     }
@@ -622,23 +652,30 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         return ((mins - prevMilestone) / (target - prevMilestone)) * 100;
     }
 
-    showCelebration(msg?: string) {
+    showCelebration(msg?: string, confetti = true) {
         const messages = ['Great job!', 'Awesome!', 'Keep it up!', 'Another one!', 'On fire!', 'Well done!'];
         this.celebrationMessage.set(msg || messages[Math.floor(Math.random() * messages.length)]);
 
-        if (!(window as any).confetti) {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js';
-            script.onload = () => this.fireConfetti();
-            document.body.appendChild(script);
-        } else {
-            this.fireConfetti();
+        if (confetti) {
+            if (!(window as any).confetti) {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js';
+                script.onload = () => this.fireConfetti();
+                document.body.appendChild(script);
+            } else {
+                this.fireConfetti();
+            }
         }
 
         setTimeout(() => this.celebrationMessage.set(''), 3000);
     }
 
+    lastConfettiTime = 0;
     fireConfetti() {
+        const now = Date.now();
+        if (now - this.lastConfettiTime < 2000) return;
+        this.lastConfettiTime = now;
+
         if ((window as any).confetti) {
             (window as any).confetti({
                 particleCount: 150,
@@ -646,6 +683,25 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
                 origin: { y: 0.5 },
                 colors: ['#f97316', '#8c9a81', '#f8f6f6', '#4a443e'],
                 zIndex: 2147483647
+            });
+        }
+    }
+
+    unmarkHabit() {
+        const id = this.habitId();
+        const todayStr = this.getLocalDateString();
+        const task = this.todaySystemTask();
+
+        // If it's a system task, toggle it back
+        if (task && task.completed) {
+            this.toggleMission(task);
+            return;
+        }
+
+        // Otherwise toggle standard completion
+        if (id && this.isCompletedToday()) {
+            this.habitService.toggleCompletion(id, todayStr).subscribe(() => {
+                this.toastService.info('Completion removed');
             });
         }
     }

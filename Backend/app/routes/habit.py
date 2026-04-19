@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from app.database import habit_collection, habit_log_collection
-from app.models import Habit, HabitCreate, HabitUpdate, HabitLogCreate, HabitStats, AnalyticsResponse, BinaryHabitAnalytics, MeasurableHabitAnalytics, DayFrequency, TrendItem
+from app.models import Habit, HabitCreate, HabitUpdate, HabitLog, HabitLogCreate, HabitStats, AnalyticsResponse, BinaryHabitAnalytics, MeasurableHabitAnalytics, DayFrequency, TrendItem
 from app.serializers import habits_serializer, habit_serializer
 from bson import ObjectId
 from datetime import datetime, timezone, timedelta
@@ -76,7 +76,8 @@ async def get_habits(
                     "habit_name": log.get("habit_name"),
                     "value": log.get("value"),
                     "notes": log.get("notes"),
-                    "completed_at": log.get("completed_at")
+                    "completed_at": log.get("completed_at"),
+                    "focused_minutes": log.get("focused_minutes")
                 }
 
     return habits_serializer(habits)
@@ -470,8 +471,32 @@ async def get_habit(id: str, date: Optional[str] = None, timezone_offset: Option
             "completed_at": {"$gte": utc_start, "$lte": utc_end}
         })
         habit["completedToday"] = True if log else False
+        if log:
+            habit["latestLog"] = {
+                "id": str(log["_id"]),
+                "habit_name": log.get("habit_name"),
+                "value": log.get("value"),
+                "notes": log.get("notes"),
+                "completed_at": log.get("completed_at"),
+                "focused_minutes": log.get("focused_minutes")
+            }
 
     return habit_serializer(habit)
+
+@router.get("/{id}/log", response_model=Optional[HabitLog])
+async def get_habit_log(id: str, date: str, timezone_offset: Optional[int] = 0):
+    utc_start, utc_end = get_day_range_utc(date, timezone_offset)
+    log = habit_log_collection.find_one({
+        "habit_id": id,
+        "completed_at": {"$gte": utc_start, "$lte": utc_end}
+    })
+    
+    if not log:
+        return None
+        
+    log["id"] = str(log["_id"])
+    del log["_id"]
+    return log
 
 @router.post("", response_model=Habit)
 async def create_habit(habit: HabitCreate):

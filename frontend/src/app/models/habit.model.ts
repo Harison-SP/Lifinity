@@ -49,6 +49,7 @@ export interface Habit {
       value?: number;
       notes?: string;
       completed_at: any;
+      focused_minutes?: number;
   };
 }
 
@@ -59,6 +60,7 @@ export interface HabitLog {
   completed_at: string; // ISO UTC
   value?: number;
   notes?: string;
+  focused_minutes?: number;
 }
 
 export interface HistoryResponse {

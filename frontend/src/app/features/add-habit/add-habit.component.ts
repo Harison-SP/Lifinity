@@ -1,14 +1,19 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
+import { ToastService } from '../../services/toast.service';
 import { FrequencyType } from '../../models/habit.model';
+import { startWith } from 'rxjs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTimepickerModule } from '@angular/material/timepicker';
+import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
     selector: 'app-add-habit',
@@ -19,7 +24,9 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
     MatFormFieldModule,
     MatInputModule,
     MatNativeDateModule,
-    MatTimepickerModule
+    MatTimepickerModule,
+    MatSelectModule,
+    MatAutocompleteModule
 ],
     template: `
     <div class="min-h-screen bg-white px-4 py-6 md:py-8 lg:px-12 font-body pb-24 transition-colors duration-300 overflow-x-hidden paper-texture">
@@ -48,29 +55,27 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
                 <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Habit Type</label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button type="button" (click)="setHabitType('yes_no')"
-                            class="p-6 rounded-xl border-2 border-taupe/30 transition-all hover:border-primary hover:bg-primary/5 flex flex-col items-center text-center group"
+                            class="p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group"
                             [class.bg-primary]="habitType() === 'yes_no'"
                             [class.border-primary]="habitType() === 'yes_no'"
-                            [class.text-white]="habitType() === 'yes_no'"
-                            [class.hover:bg-primary/10]="habitType() !== 'yes_no'">
+                            [class.text-white]="habitType() === 'yes_no'">
                         <span class="material-symbols-outlined text-4xl mb-3 transition-transform group-hover:scale-110"
                               [class.text-primary]="habitType() !== 'yes_no'"
                               [class.text-white]="habitType() === 'yes_no'">check_circle</span>
                         <span class="font-heading text-xl font-bold block mb-2">Yes/No Habit</span>
-                        <span class="text-sm text-taupe group-hover:text-charcoal transition-colors"
-                              [class.text-white/70]="habitType() === 'yes_no'">Simple completion check</span>
+                        <span class="text-sm text-taupe transition-colors"
+                              [class.text-white]="habitType() === 'yes_no'">Simple completion check</span>
                     </button>
                     <button type="button" (click)="setHabitType('measurable')"
-                            class="p-6 rounded-xl border-2 border-taupe/30 transition-all hover:border-primary hover:bg-primary/5 flex flex-col items-center text-center group"
+                            class="p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group"
                             [class.bg-primary]="habitType() === 'measurable'"
                             [class.border-primary]="habitType() === 'measurable'"
-                            [class.text-white]="habitType() === 'measurable'"
-                            [class.hover:bg-primary/10]="habitType() !== 'measurable'">
+                            [class.text-white]="habitType() === 'measurable'">
                         <span class="material-symbols-outlined text-4xl mb-3 transition-transform group-hover:scale-110"
                               [class.text-primary]="habitType() !== 'measurable'"
                               [class.text-white]="habitType() === 'measurable'">assessment</span>
                         <span class="font-heading text-xl font-bold block mb-2">Measurable Habit</span>
-                        <span class="text-sm text-taupe group-hover:text-charcoal transition-colors"
+                        <span class="text-sm text-taupe transition-colors"
                               [class.text-white/70]="habitType() === 'measurable'">Track numbers, minutes, pages...</span>
                     </button>
                 </div>
@@ -80,22 +85,36 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
             @if (habitType() === 'measurable') {
                 <div class="bg-sand/30 p-6 rounded-lg mb-10 border border-taupe/20">
                     <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Target Settings</label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label class="block text-xs text-taupe mb-2 font-body">Goal Type</label>
-                            <select formControlName="targetComparator" class="w-full bg-transparent border-b border-taupe/50 py-2 focus:border-orange-500 outline-none text-charcoal font-body">
-                                <option value=">=">At least</option>
-                                <option value="<=">At most</option>
-                                <option value="==">Exactly</option>
-                            </select>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                        <div class="flex-1">
+                            <mat-form-field appearance="outline" class="w-full soft-input">
+                                <mat-label>Goal Type</mat-label>
+                                <mat-select formControlName="targetComparator">
+                                    <mat-option value=">=">At least</mat-option>
+                                    <mat-option value="<=">At most</mat-option>
+                                    <mat-option value="==">Exactly</mat-option>
+                                </mat-select>
+                            </mat-form-field>
                         </div>
-                        <div>
-                            <label class="block text-xs text-taupe mb-2 font-body">Target Value</label>
-                            <input formControlName="targetValue" type="number" class="w-full bg-transparent border-b border-taupe/50 py-2 focus:border-orange-500 outline-none text-charcoal font-body" placeholder="e.g., 20"/>
+                        <div class="flex-1">
+                            <mat-form-field appearance="outline" class="w-full soft-input">
+                                <mat-label>Target Value</mat-label>
+                                <input matInput formControlName="targetValue" type="number" placeholder="e.g., 20">
+                            </mat-form-field>
                         </div>
-                        <div>
-                            <label class="block text-xs text-taupe mb-2 font-body">Unit</label>
-                            <input formControlName="targetUnit" type="text" class="w-full bg-transparent border-b border-taupe/50 py-2 focus:border-orange-500 outline-none text-charcoal font-body" placeholder="e.g., minutes"/>
+                        <div class="flex-1">
+                            <mat-form-field appearance="outline" class="w-full soft-input">
+                                <mat-label>Unit</mat-label>
+                                <input matInput 
+                                       formControlName="targetUnit" 
+                                       [matAutocomplete]="autoUnit"
+                                       placeholder="e.g., minutes">
+                                <mat-autocomplete #autoUnit="matAutocomplete" panelClass="soft-datepicker">
+                                    @for (option of filteredUnits(); track option) {
+                                        <mat-option [value]="option">{{option}}</mat-option>
+                                    }
+                                </mat-autocomplete>
+                            </mat-form-field>
                         </div>
                     </div>
                 </div>
@@ -154,49 +173,30 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
 
             <!-- Date Range -->
             <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Start and End Dates</label>
-                <div class="flex flex-col md:flex-row gap-4 items-center">
-                    <div class="flex-1 w-full">
-                        <mat-form-field appearance="outline" class="w-full soft-input">
-                            <mat-label>Start Date</mat-label>
-                            <input matInput formControlName="startDate" [matDatepicker]="startDatePicker" placeholder="Select start date">
-                            <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
-                            <mat-datepicker #startDatePicker panelClass="soft-datepicker"></mat-datepicker>
-                        </mat-form-field>
-                    </div>
-                    <span class="range-separator hidden md:flex">to</span>
-                    <div class="flex-1 w-full">
-                        <mat-form-field appearance="outline" class="w-full soft-input">
-                            <mat-label>End Date</mat-label>
-                            <input matInput formControlName="endDate" [matDatepicker]="endDatePicker" placeholder="Select end date">
-                            <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
-                            <mat-datepicker #endDatePicker panelClass="soft-datepicker"></mat-datepicker>
-                        </mat-form-field>
-                    </div>
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Habit Duration</label>
+                <div class="w-full">
+                    <mat-form-field appearance="outline" class="w-full soft-input">
+                        <mat-label>Select Date Range</mat-label>
+                        <mat-date-range-input [rangePicker]="rangePicker">
+                            <input matStartDate formControlName="startDate" placeholder="Start date">
+                            <input matEndDate formControlName="endDate" placeholder="End date">
+                        </mat-date-range-input>
+                        <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
+                        <mat-date-range-picker #rangePicker panelClass="soft-datepicker"></mat-date-range-picker>
+                    </mat-form-field>
                 </div>
             </div>
 
             <!-- Time Block -->
             <div class="mb-10">
                 <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Daily Reminder (Optional)</label>
-                <div class="flex flex-col md:flex-row gap-4 items-center">
-                    <div class="flex-1 w-full">
-                        <mat-form-field appearance="outline" class="w-full soft-input">
-                            <mat-label>From</mat-label>
-                            <input matInput formControlName="timeBlockStart" [matTimepicker]="timeStartPicker">
-                            <mat-timepicker-toggle matSuffix [for]="timeStartPicker"></mat-timepicker-toggle>
-                            <mat-timepicker #timeStartPicker panelClass="soft-datepicker"></mat-timepicker>
-                        </mat-form-field>
-                    </div>
-                    <span class="range-separator hidden md:flex">to</span>
-                    <div class="flex-1 w-full">
-                        <mat-form-field appearance="outline" class="w-full soft-input">
-                            <mat-label>To</mat-label>
-                            <input matInput formControlName="timeBlockEnd" [matTimepicker]="timeEndPicker">
-                            <mat-timepicker-toggle matSuffix [for]="timeEndPicker"></mat-timepicker-toggle>
-                            <mat-timepicker #timeEndPicker panelClass="soft-datepicker"></mat-timepicker>
-                        </mat-form-field>
-                    </div>
+                <div class="w-full">
+                    <mat-form-field appearance="outline" class="w-full soft-input">
+                        <mat-label>Reminder Time</mat-label>
+                        <input matInput formControlName="timeBlockStart" [matTimepicker]="reminderPicker">
+                        <mat-timepicker-toggle matSuffix [for]="reminderPicker"></mat-timepicker-toggle>
+                        <mat-timepicker #reminderPicker panelClass="soft-datepicker"></mat-timepicker>
+                    </mat-form-field>
                 </div>
             </div>
 
@@ -250,6 +250,7 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
         border-top-color: var(--color-taupe) !important;
         border-bottom-color: var(--color-taupe) !important;
         border-left-color: var(--color-taupe) !important;
+        border-right: none !important;
         transition: border-color 0.3s ease !important;
     }
     
@@ -259,11 +260,14 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
         border-top-color: var(--color-taupe) !important;
         border-bottom-color: var(--color-taupe) !important;
         border-right-color: var(--color-taupe) !important;
+        border-left: none !important;
         transition: border-color 0.3s ease !important;
     }
     
     ::ng-deep .soft-input .mdc-notched-outline__notch {
         border-bottom-color: var(--color-taupe) !important;
+        border-left: none !important;
+        border-right: none !important;
         transition: border-color 0.3s ease !important;
     }
 
@@ -315,6 +319,36 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
 
     ::ng-deep .soft-input .mdc-line-ripple {
         display: none !important;
+    }
+
+    /* mat-select styling */
+    ::ng-deep .soft-input .mat-mdc-select {
+        font-family: var(--font-body), sans-serif !important;
+        color: var(--color-charcoal) !important;
+        padding: 12px 0 !important;
+    }
+
+    ::ng-deep .soft-input .mat-mdc-select-value {
+        color: var(--color-charcoal) !important;
+    }
+
+    ::ng-deep .soft-input .mat-mdc-select-arrow svg {
+        fill: var(--color-taupe) !important;
+    }
+
+    ::ng-deep .soft-input.mat-focused .mat-mdc-select-arrow svg {
+        fill: var(--color-primary) !important;
+    }
+
+    ::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+        font-family: var(--font-body), sans-serif !important;
+        color: var(--color-charcoal) !important;
+    }
+
+    ::ng-deep .mat-mdc-select-panel {
+        background-color: var(--color-alabaster) !important;
+        border: 1px solid var(--color-taupe) !important;
+        border-radius: 0.75rem !important;
     }
 
     /* Datepicker/Timepicker Soft Theme */
@@ -409,16 +443,35 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
         border-color: var(--color-primary) !important;
     }
 
-    :host-context(.dark) select option {
-        background-color: #1a1a1a !important;
+    /* Dark mode mat-select */
+    :host-context(.dark) .soft-input .mat-mdc-select-value {
         color: #fcfaf8 !important;
     }
+
+    :host-context(.dark) .soft-input .mat-mdc-select-arrow svg {
+        fill: #9a9086 !important;
+    }
+
+    :host-context(.dark) .mat-mdc-select-panel {
+        background-color: #1a1a1a !important;
+        border-color: #666 !important;
+    }
+
+    :host-context(.dark) .mat-mdc-option .mdc-list-item__primary-text {
+        color: #fcfaf8 !important;
+    }
+
+    :host-context(.dark) .mat-mdc-option:hover {
+        background-color: #333 !important;
+    }
+    
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddHabitComponent implements OnInit {
     private fb = inject(FormBuilder);
     private habitService = inject(HabitService);
+    private toastService = inject(ToastService);
     private router = inject(Router);
     private location = inject(Location);
     private route = inject(ActivatedRoute);
@@ -428,6 +481,12 @@ export class AddHabitComponent implements OnInit {
 
     frequency = signal<FrequencyType>('Daily');
     selectedDays = signal<number[]>([1, 2, 3, 4, 5]);
+
+    unitOptions = signal([
+        'Liters', 'Milliliters', 'Glasses', 'Cups', 'Hours', 'Minutes', 'Seconds', 
+        'Pages', 'Words', 'Steps', 'Kilometers', 'Miles', 'Meters', 'Calories', 
+        'Portions', 'Tasks', 'Repetitions', 'Sets', 'Percent', 'Times', 'Chapters'
+    ]);
 
     daysOfWeek = [
         { label: 'MON', value: 1 }, { label: 'TUE', value: 2 }, { label: 'WED', value: 3 },
@@ -439,7 +498,7 @@ export class AddHabitComponent implements OnInit {
         name: ['', Validators.required],
         description: [''],
         type: ['yes_no'],
-        targetValue: [0],
+        targetValue: [1, [Validators.min(1)]],
         targetUnit: [''],
         targetComparator: ['>='],
         frequencyType: ['daily'],
@@ -456,6 +515,12 @@ export class AddHabitComponent implements OnInit {
     frequencyType = signal<string>('daily');
     color = signal<string>('#10b981');
     presetColors = ['#10b981', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#eab308', '#64748b'];
+
+    targetUnitValue = toSignal(this.habitForm.get('targetUnit')!.valueChanges.pipe(startWith('')));
+    filteredUnits = computed(() => {
+        const val = (this.targetUnitValue() || '').toLowerCase();
+        return this.unitOptions().filter(u => u.toLowerCase().includes(val));
+    });
 
     constructor() {
         effect(() => {
@@ -482,6 +547,7 @@ export class AddHabitComponent implements OnInit {
                     } as any, { emitEvent: false });
 
                     this.habitType.set(habit.type || 'yes_no');
+                    this.updateValidators(habit.type || 'yes_no');
                     this.frequencyType.set(habit.frequencyType || 'daily');
                     this.selectedDays.set(habit.weekdays || []);
                     this.color.set(habit.color || '#ec5b13');
@@ -507,6 +573,23 @@ export class AddHabitComponent implements OnInit {
     setHabitType(type: string) {
         this.habitType.set(type);
         this.habitForm.patchValue({ type });
+        this.updateValidators(type);
+    }
+
+    private updateValidators(type: string) {
+        const targetValue = this.habitForm.get('targetValue');
+        const targetUnit = this.habitForm.get('targetUnit');
+        
+        if (type === 'measurable') {
+            targetValue?.setValidators([Validators.required, Validators.min(1)]);
+            targetUnit?.setValidators([Validators.required]);
+        } else {
+            targetValue?.setValidators([Validators.min(1)]);
+            targetUnit?.clearValidators();
+        }
+        
+        targetValue?.updateValueAndValidity();
+        targetUnit?.updateValueAndValidity();
     }
 
     setFrequencyType(type: string) {
@@ -536,7 +619,7 @@ export class AddHabitComponent implements OnInit {
                 startDate: this.dateToString(formVal.startDate as any),
                 endDate: this.dateToString(formVal.endDate as any),
                 timeBlockStart: this.timeToString(formVal.timeBlockStart as any),
-                timeBlockEnd: this.timeToString(formVal.timeBlockEnd as any),
+                timeBlockEnd: this.timeToString(formVal.timeBlockStart as any), // Set end time same as start for single point reminder
 
                 icon: 'star',
                 color: this.color(),
@@ -548,8 +631,14 @@ export class AddHabitComponent implements OnInit {
                 : this.habitService.addHabit(habitData);
 
             obs$.subscribe({
-                next: () => this.router.navigate(['/']),
-                error: (error) => console.error('Error saving habit:', error)
+                next: () => {
+                    this.toastService.success(`Habit ${this.isEditMode() ? 'updated' : 'created'} successfully!`);
+                    this.router.navigate(['/']);
+                },
+                error: (error) => {
+                    console.error('Error saving habit:', error);
+                    this.toastService.error('Failed to save habit. Please try again.');
+                }
             });
         }
     }

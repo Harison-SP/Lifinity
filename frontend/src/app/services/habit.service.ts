@@ -148,6 +148,13 @@ export class HabitService {
          
          return this.http.post<Habit>(`${this.apiUrl}/${habitId}/toggle`, payload).pipe(
              tap({
+                 next: (updatedHabit) => {
+                     if (updatedHabit) {
+                         this._habits.update(habits =>
+                             habits.map(h => h.id === habitId ? updatedHabit : h)
+                         );
+                     }
+                 },
                  error: (error) => console.error('Failed to update log', error)
              })
          );
@@ -166,6 +173,10 @@ export class HabitService {
         const params = new HttpParams()
             .set('timezone_offset', this.getTimezoneOffset().toString());
         return this.http.get<import('../models/habit.model').HabitStats>(`${this.apiUrl}/${habitId}/stats`, { params });
+    }
+
+    getHabitLog(habitId: string, _date: string): Observable<HabitLog | null> {
+        return this.http.get<HabitLog | null>(`${this.apiUrl}/${habitId}/log?date=${_date}`);
     }
 
     getHabitAnalytics(habitId: string): Observable<import('../models/habit.model').AnalyticsResponse> {
