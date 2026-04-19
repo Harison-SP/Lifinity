@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-
+import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-settings',
     standalone: true,
-    imports: [],
+    imports: [CommonModule],
     template: `
     <div class="min-h-screen bg-white font-body transition-colors duration-300 paper-texture">
         <header class="px-4 py-6 sm:p-6 md:p-8 border-b border-taupe/20 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 bg-alabaster">
@@ -15,9 +16,42 @@ import { ThemeService } from '../../services/theme.service';
                 </h1>
                 <p class="text-taupe text-sm mt-1">Customize your experience</p>
             </div>
+            
+            <button *ngIf="authService.isAuthenticated$ | async" 
+                    (click)="authService.logout()"
+                    class="px-5 py-2.5 bg-white border border-red-200 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2 text-sm">
+                <span class="material-symbols-outlined text-base">logout</span>
+                Sign Out
+            </button>
         </header>
 
         <div class="px-4 py-6 sm:p-6 md:p-8 max-w-3xl mx-auto space-y-8">
+            <!-- Account Section -->
+            <section class="space-y-4" *ngIf="authService.currentUser$ | async as user">
+                <div class="flex items-center gap-3 border-b border-taupe/20 pb-2">
+                    <span class="material-symbols-outlined text-terracotta text-2xl">account_circle</span>
+                    <h2 class="font-heading text-xl font-bold text-charcoal">Account</h2>
+                </div>
+
+                <div class="bg-alabaster p-6 rounded-lg shadow-gentle border border-taupe/10">
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <div class="w-24 h-24 rounded-full bg-sand flex items-center justify-center overflow-hidden border-4 border-white shadow-soft shrink-0">
+                            <img *ngIf="user.profile_picture" [src]="user.profile_picture" class="w-full h-full object-cover">
+                            <span *ngIf="!user.profile_picture" class="material-symbols-outlined text-5xl text-taupe/40">person</span>
+                        </div>
+                        <div class="flex-1 text-center sm:text-left">
+                            <h3 class="font-heading text-2xl font-bold text-charcoal">{{ user.name }}</h3>
+                            <p class="text-taupe text-lg">{{ user.email }}</p>
+                            <div class="flex items-center justify-center sm:justify-start gap-2 mt-2">
+                                <span class="px-2.5 py-0.5 rounded-full bg-sand text-taupe text-xs font-medium uppercase tracking-wider border border-taupe/10">
+                                    {{ user.auth_provider }} account
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Appearance Section -->
             <section class="space-y-4">
                 <div class="flex items-center gap-3 border-b border-taupe/20 pb-2">
@@ -142,6 +176,7 @@ import { ThemeService } from '../../services/theme.service';
 })
 export class SettingsComponent {
     themeService = inject(ThemeService);
+    authService = inject(AuthService);
 
     toggleDarkMode() {
         this.themeService.toggleTheme();

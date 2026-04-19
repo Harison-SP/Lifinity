@@ -2,18 +2,21 @@ from fastapi import APIRouter, HTTPException
 from app.database import habit_collection, habit_log_collection
 from bson import ObjectId
 from datetime import datetime
+from fastapi import Depends
 from typing import List, Dict
+
+from app.auth_utils import get_current_user
 
 router = APIRouter(prefix="/maintenance", tags=["maintenance"])
 
 @router.post("/remove-duplicate-habits")
-async def remove_duplicate_habits():
+async def remove_duplicate_habits(user_id: str = Depends(get_current_user)):
     """
     Remove duplicate habits based on name, frequency, and other key fields.
     Keeps the most recent habit and deletes older duplicates.
     """
     # Find all habits
-    all_habits = list(habit_collection.find())
+    all_habits = list(habit_collection.find({"user_id": user_id}))
     
     # Group habits by identifying fields (name + frequencyType + startDate + endDate)
     habit_groups: Dict[str, List] = {}
@@ -57,7 +60,7 @@ async def remove_duplicate_habits():
                 
                 # Optionally, you might want to keep the logs or transfer them
                 # For now, we'll delete them as well
-                habit_log_collection.delete_many({"habit_id": habit_id})
+                habit_log_collection.delete_many({"habit_id": habit_id, "user_id": user_id})
                 
                 duplicates_removed += 1
                 duplicate_report.append({
@@ -75,12 +78,12 @@ async def remove_duplicate_habits():
 
 
 @router.get("/find-duplicate-habits")
-async def find_duplicate_habits():
+async def find_duplicate_habits(user_id: str = Depends(get_current_user)):
     """
     Find potential duplicate habits without removing them.
     Returns a report of duplicates for review.
     """
-    all_habits = list(habit_collection.find())
+    all_habits = list(habit_collection.find({"user_id": user_id}))
     
     # Group habits by identifying fields
     habit_groups: Dict[str, List] = {}

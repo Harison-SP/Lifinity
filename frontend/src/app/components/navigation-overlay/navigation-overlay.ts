@@ -1,14 +1,16 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
     selector: 'app-navigation-overlay',
     standalone: true,
-    imports: [RouterLink],
+    imports: [RouterLink, CommonModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-    <div class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2 font-body">
+    <div *ngIf="user$ | async" class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2 font-body">
         @if (isOpen()) {
             <div class="bg-charcoal text-white p-4 rounded-xl shadow-gentle mb-3 flex flex-col gap-2 min-w-[200px] transition-all">
                 @for (link of links; track link.path) {
@@ -20,6 +22,14 @@ import { RouterLink, Router } from '@angular/router';
                         {{link.label}}
                     </a>
                 }
+                
+                <div class="h-px bg-white/10 my-1"></div>
+                
+                <a (click)="logout()"
+                   class="flex items-center gap-3 p-2 hover:bg-red-500/20 text-red-100 transition-colors font-medium cursor-pointer group text-sm rounded">
+                    <span class="material-symbols-outlined text-red-400 group-hover:text-red-300 transition-colors">logout</span>
+                    Logout
+                </a>
             </div>
         }
         <button
@@ -45,7 +55,12 @@ export class NavigationOverlayComponent {
         { path: '/settings', label: 'Settings', icon: 'settings' },
     ];
 
-    constructor(private router: Router) {
+    private router = inject(Router);
+    private authService = inject(AuthService);
+
+    user$ = this.authService.currentUser$;
+
+    constructor() {
         this.router.events.subscribe(() => {
             this.currentRoute.set(this.router.url);
         });
@@ -53,5 +68,10 @@ export class NavigationOverlayComponent {
 
     toggleOpen() {
         this.isOpen.update(v => !v);
+    }
+
+    logout() {
+        this.toggleOpen();
+        this.authService.logout();
     }
 }

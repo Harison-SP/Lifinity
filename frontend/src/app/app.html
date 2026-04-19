@@ -1,4 +1,4 @@
 <div class="relative font-manrope min-h-screen">
     <router-outlet></router-outlet>
-    <app-navigation-overlay></app-navigation-overlay>
+    <app-navigation-overlay *ngIf="(isAuthenticated$ | async) && !(isLoginPage$ | async)"></app-navigation-overlay>
 </div>

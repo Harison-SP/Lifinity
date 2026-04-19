@@ -1,6 +1,40 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime
+
+
+# ── Auth / User Models ──────────────────────────────────────────────────────
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class GoogleAuthRequest(BaseModel):
+    id_token: str
+
+class UserResponse(BaseModel):
+    id: str
+    name: str
+    email: str
+    profile_picture: Optional[str] = None
+    auth_provider: str = "email"  # "email" or "google"
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
+# ── Habit Models ────────────────────────────────────────────────────────────
 
 class HabitBase(BaseModel):
     name: str

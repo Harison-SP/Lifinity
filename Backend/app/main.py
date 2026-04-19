@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import habit, planner, habit_maintenance, weekly_planner, system, ai
+from app.routes import habit, planner, habit_maintenance, weekly_planner, system, ai, auth
+from app.auth_utils import get_current_user
 
 app = FastAPI()
 
@@ -30,12 +31,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(habit.router, prefix="/habits", tags=["habits"])
-app.include_router(planner.router)
-app.include_router(habit_maintenance.router)
-app.include_router(weekly_planner.router, prefix="/weekly-planner", tags=["weekly-planner"])
-app.include_router(system.router)
-app.include_router(ai.router)
+app.include_router(habit.router, prefix="/habits", tags=["habits"], dependencies=[Depends(get_current_user)])
+app.include_router(planner.router, dependencies=[Depends(get_current_user)])
+app.include_router(habit_maintenance.router, dependencies=[Depends(get_current_user)])
+app.include_router(weekly_planner.router, prefix="/weekly-planner", tags=["weekly-planner"], dependencies=[Depends(get_current_user)])
+app.include_router(system.router, dependencies=[Depends(get_current_user)])
+app.include_router(ai.router, dependencies=[Depends(get_current_user)])
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 
 @app.get("/")
