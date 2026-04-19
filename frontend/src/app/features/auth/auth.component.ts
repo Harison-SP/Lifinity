@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { ToastService } from '../../services/toast.service';
 import { environment } from '../../../environments/environment';
 
 declare const google: any;
@@ -20,6 +21,7 @@ export class AuthComponent implements AfterViewInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private ngZone = inject(NgZone);
+  private toast = inject(ToastService);
 
   isLoginMode = true;
   isLoading = false;
@@ -100,7 +102,9 @@ export class AuthComponent implements AfterViewInit, OnDestroy {
         },
         error: (err) => {
           this.isLoading = false;
-          this.error = err.error?.detail || 'Google sign-in failed. Please try again.';
+          const errorMsg = err.error?.detail || 'Google sign-in failed. Please try again.';
+          this.error = errorMsg;
+          this.toast.error(errorMsg);
         }
       });
     });
@@ -157,11 +161,14 @@ export class AuthComponent implements AfterViewInit, OnDestroy {
 
     authObservable.subscribe({
       next: () => {
+        this.toast.success(this.isLoginMode ? 'Welcome back!' : 'Account created successfully!');
         this.router.navigateByUrl(this.returnUrl);
       },
       error: (err) => {
         this.isLoading = false;
-        this.error = err.error?.detail || 'An error occurred during authentication.';
+        const errorMsg = err.error?.detail || 'An error occurred during authentication.';
+        this.error = errorMsg;
+        this.toast.error(errorMsg);
       }
     });
   }

@@ -1,0 +1,35 @@
+<div 
+  class="toast-card relative overflow-hidden flex items-start gap-4 p-4 mb-3 rounded-xl border bg-charcoal/95 shadow-gentle-lg backdrop-blur-md min-w-[320px] max-w-md transition-all duration-300 group"
+  [ngClass]="getTypeClasses()"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  role="alert"
+  aria-live="polite"
+>
+  <div class="flex-shrink-0 mt-0.5">
+    <span class="material-symbols-outlined text-2xl" [ngClass]="getIconClass()">
+      {{ getIcon() }}
+    </span>
+  </div>
+  
+  <div class="flex-1">
+    <p class="text-sm font-medium text-white/90 font-body leading-relaxed">
+      {{ toast.message }}
+    </p>
+  </div>
+
+  <button 
+    (click)="onClose()"
+    class="flex-shrink-0 text-white/40 hover:text-white transition-colors p-1 -mt-1 -mr-1 rounded-lg hover:bg-white/5 focus:outline-none"
+    aria-label="Close"
+  >
+    <span class="material-symbols-outlined text-xl">close</span>
+  </button>
+
+  <!-- Progress bar -->
+  <div 
+    *ngIf="toast.autoDismiss" 
+    class="absolute bottom-0 left-0 h-[3px] bg-primary transition-all duration-[16ms]" 
+    [style.width.%]="progressWidth"
+  ></div>
+</div>

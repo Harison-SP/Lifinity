@@ -2,13 +2,14 @@ import { Component, inject } from '@angular/core';
 import { ThemeService } from './services/theme.service';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { NavigationOverlayComponent } from "./components/navigation-overlay/navigation-overlay";
+import { ToastContainerComponent } from './components/toast-container/toast-container.component';
 import { AuthService } from './core/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { filter, map } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavigationOverlayComponent, CommonModule],
+  imports: [RouterOutlet, NavigationOverlayComponent, ToastContainerComponent, CommonModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

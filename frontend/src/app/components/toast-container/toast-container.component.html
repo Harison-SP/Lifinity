@@ -1,0 +1,9 @@
+<div class="fixed top-6 right-6 z-[1000] flex flex-col items-end pointer-events-none overflow-hidden p-2" [@listAnimation]="toasts().length">
+  @for (toast of toasts(); track toast.id) {
+    <app-toast 
+      [toast]="toast" 
+      (dismiss)="dismiss($event)"
+      class="pointer-events-auto"
+    ></app-toast>
+  }
+</div>
