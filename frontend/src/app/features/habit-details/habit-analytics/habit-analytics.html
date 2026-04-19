@@ -41,9 +41,8 @@
                         <span class="material-symbols-outlined text-sm text-orange-500">pie_chart</span>
                         Success Ratio Distribution
                     </h4>
-                    <div class="flex-1 overflow-hidden" #containerRef> 
+                    <div class="flex-1 w-full h-full min-h-[200px]" #containerRef> 
                         <ngx-charts-advanced-pie-chart
-                            [view]="[containerRef.offsetWidth || 300, 200]"
                             [scheme]="successColorScheme"
                             [results]="successRatioData()"
                             [gradient]="true"
@@ -58,9 +57,8 @@
                         <span class="material-symbols-outlined text-sm text-orange-500">bar_chart</span>
                         Failure Pattern Analysis
                     </h4>
-                    <div class="flex-1 overflow-hidden" #barContainerRef>
+                    <div class="flex-1 w-full h-full min-h-[250px]" #barContainerRef>
                         <ngx-charts-bar-vertical
-                            [view]="[barContainerRef.offsetWidth || 600, 250]"
                             [scheme]="colorScheme"
                             [results]="missedDayPatternData()"
                             [gradient]="true"
@@ -105,9 +103,8 @@
                         <span class="material-symbols-outlined text-sm text-sage">speed</span>
                         Achievement Rate
                     </h4>
-                    <div class="flex-1 overflow-hidden" #gaugeContainerRef>
+                    <div class="flex-1 w-full h-full min-h-[200px]" #gaugeContainerRef>
                         <ngx-charts-pie-grid
-                            [view]="[gaugeContainerRef.offsetWidth || 300, 200]"
                             [scheme]="successColorScheme"
                             [results]="successRatioData()">
                         </ngx-charts-pie-grid>

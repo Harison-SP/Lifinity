@@ -459,7 +459,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                   </div>
                   <div class="rounded-lg bg-sand/70 border border-taupe/10 p-2.5 text-[10px] font-medium text-taupe">
                     {{ selectedInstance()!.endDate ? 'Ends: ' + selectedInstance()!.endDate : '' }}
-                    · Phases: {{ selectedInstance()!.phases?.length || 0 }}
+                    · Phases: {{ selectedInstance()!.phases.length || 0 }}
                   </div>
                   <div class="flex gap-2">
                     <button

@@ -505,7 +505,7 @@ export class AddHabitComponent implements OnInit {
         name: ['', Validators.required],
         description: [''],
         type: ['yes_no'],
-        targetValue: [1, [Validators.min(1)]],
+        targetValue: [1],
         targetUnit: [''],
         targetComparator: ['>='],
         frequencyType: ['daily'],
@@ -591,7 +591,7 @@ export class AddHabitComponent implements OnInit {
             targetValue?.setValidators([Validators.required, Validators.min(1)]);
             targetUnit?.setValidators([Validators.required]);
         } else {
-            targetValue?.setValidators([Validators.min(1)]);
+            targetValue?.clearValidators();
             targetUnit?.clearValidators();
         }
         

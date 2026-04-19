@@ -6,6 +6,7 @@ import { HabitService } from '../../services/habit.service';
 import { SystemService } from '../../services/system.service';
 import { SystemInstanceTask } from '../../models/system.model';
 import { ToastService } from '../../services/toast.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 
 @Component({
     selector: 'app-daily-habit-tracker',
@@ -337,6 +338,7 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     habitService = inject(HabitService);
     systemService = inject(SystemService);
     toastService = inject(ToastService);
+    settingsService = inject(UserSettingsService);
     today = new Date();
 
     getLocalDateString(): string {
@@ -423,8 +425,8 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
         return missed;
     });
 
-    timerValue = signal(120);
-    initialTimerValue = signal(120);
+    timerValue = signal(this.settingsService.settings().focusSessionLength * 60);
+    initialTimerValue = signal(this.settingsService.settings().focusSessionLength * 60);
     timerRunning = signal(false);
     timerInterval: any;
     celebrationMessage = signal('');
@@ -502,9 +504,17 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
             } else {
                 clearInterval(this.timerInterval);
                 this.timerRunning.set(false);
+                this.playTimerSound();
                 this.completeSession();
             }
         }, 1000);
+    }
+
+    private playTimerSound() {
+        if (this.settingsService.settings().soundEnabled) {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play().catch(e => console.log('Audio play failed', e));
+        }
     }
 
     pauseTimer() {

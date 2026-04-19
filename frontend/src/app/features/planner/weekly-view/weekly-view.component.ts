@@ -6,6 +6,7 @@ import { WeeklyPlannerService } from '../../../services/weekly-planner.service';
 import { HabitService } from '../../../services/habit.service';
 import { SystemService } from '../../../services/system.service';
 import { SystemInstanceTask } from '../../../models/system.model';
+import { UserSettingsService } from '../../../services/user-settings.service';
 import { 
   WeeklyTask, 
   WeeklyTarget, 
@@ -317,6 +318,7 @@ export class WeeklyViewComponent implements OnInit {
   private weeklyPlannerService = inject(WeeklyPlannerService);
   private habitService = inject(HabitService);
   private systemService = inject(SystemService);
+  private settingsService = inject(UserSettingsService);
 
   currentDate = signal(new Date());
   weekStart = signal('');
@@ -457,7 +459,16 @@ export class WeeklyViewComponent implements OnInit {
   getStartOfWeek(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to make Monday the first day
+    const weekStartSetting = this.settingsService.settings().weekStartDay;
+    
+    let diff;
+    if (weekStartSetting === 'Monday') {
+      diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    } else {
+      // Sunday
+      diff = d.getDate() - day;
+    }
+    
     return new Date(d.setDate(diff));
   }
   

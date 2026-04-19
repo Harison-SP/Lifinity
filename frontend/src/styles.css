@@ -1,4 +1,4 @@
-﻿@import 'tailwindcss';
+@import 'tailwindcss';
 @import "@angular/material/prebuilt-themes/deeppurple-amber.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -27,61 +27,29 @@
   --color-accent: var(--color-primary);
   --color-success: var(--color-sage);
 
+  /* Dark Mode Colors */
+  --color-dark-bg: #1a1714;
+  --color-dark-surface: #242220;
+  --color-dark-card: #2c2a27;
+  --color-dark-elevated: #353330;
+  --color-dark-text: #f5f0eb;
+  --color-dark-text-secondary: #a8a095;
+  --color-dark-border: #3d3834;
+  --color-dark-border-subtle: #33302d;
+
   /* Font Families */
   --font-display: 'Newsreader', serif;
   --font-heading: 'Libre Baskerville', serif;
   --font-body: 'Cabin', sans-serif;
   --font-manrope: 'Manrope', sans-serif;
-  /* Fallback/reserved */
   --font-mono: 'Space Mono', monospace;
 }
 
-/* Dark Mode Color Overrides */
-:host-context(.dark) {
-  /* Primary colors (stay consistent) */
-  --color-primary: #f97316;
-  --color-primary-light: #fb923c;
+/* ================================================
+   MATERIAL 3 TOKEN OVERRIDES
+   ================================================ */
 
-  /* Backgrounds - Dark palette */
-  --color-background-light: #1c1917;
-  /* Dark warm gray */
-  --color-alabaster: #272623;
-  /* Dark surface */
-  --color-cream: #272623;
-
-  /* Text colors - Light text on dark background */
-  --color-charcoal: #fcfaf8;
-  /* Off-white for primary text */
-  --color-taupe: #a8a095;
-  /* Muted taupe for secondary text */
-
-  /* Neutrals - Dark palette */
-  --color-sand: #3d3834;
-  /* Dark sand */
-  --color-sand-dark: #56524f;
-  /* Darker sand */
-
-  /* Semantic aliases - Dark Mode */
-  --color-background: var(--color-background-light);
-  --color-surface: var(--color-alabaster);
-  --color-text-primary: var(--color-charcoal);
-  --color-text-secondary: var(--color-taupe);
-
-  /* Material 3 Component Token Overrides - Dark Mode */
-  --mat-sys-primary: #f97316;
-  --mat-sys-on-primary: #ffffff;
-  --mat-sys-primary-container: #431407;
-  --mat-sys-on-primary-container: #ffdbcf;
-  
-  --mat-sys-secondary: #a8a095;
-  --mat-sys-on-secondary: #1c1917;
-  --mat-sys-surface: #1c1917;
-  --mat-sys-on-surface: #fcfaf8;
-  --mat-sys-surface-container-highest: #3d3834;
-  --mat-sys-outline: #56524f;
-}
-
-/* Material 3 Global Component Token Overrides - Light Mode */
+/* Light Mode */
 :root {
   --mat-sys-primary: #f97316;
   --mat-sys-on-primary: #ffffff;
@@ -103,65 +71,318 @@
   --mdc-outlined-text-field-container-shape: 12px;
 }
 
-/* Dark mode overrides for Tailwind default colors (non-variable based) */
-:host-context(.dark) .bg-white {
-  background-color: var(--color-alabaster) !important;
+/* Dark Mode */
+.dark {
+  --mat-sys-primary: #f97316;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #431407;
+  --mat-sys-on-primary-container: #ffdbcf;
+  
+  --mat-sys-secondary: #a8a095;
+  --mat-sys-on-secondary: #1a1714;
+  --mat-sys-surface: #1a1714;
+  --mat-sys-on-surface: #f5f0eb;
+  --mat-sys-surface-container-highest: #3d3834;
+  --mat-sys-outline: #56524f;
+
+  --mdc-outlined-text-field-outline-color: rgba(168, 160, 149, 0.3);
+  --mdc-outlined-text-field-label-text-color: #a8a095;
 }
 
-:host-context(.dark) .text-white {
-  color: #ffffff !important;
-  /* Keep white for high contrast elements */
+/* ================================================
+   GLOBAL DARK MODE AUTO-OVERRIDES
+   These use .dark on <html> to swap Tailwind utility colors.
+   ================================================ */
+
+/* Background overrides */
+.dark .bg-white {
+  background-color: var(--color-dark-bg) !important;
 }
 
-:host-context(.dark) .bg-orange-500 {
-  background-color: #f97316 !important;
+.dark .bg-alabaster {
+  background-color: var(--color-dark-surface) !important;
 }
 
-:host-context(.dark) .text-orange-500,
-:host-context(.dark) .text-orange-400 {
-  color: #fb923c !important;
+.dark .bg-sand {
+  background-color: var(--color-dark-border) !important;
 }
 
-:host-context(.dark) .text-orange-600 {
-  color: #fb923c !important;
+.dark .bg-sand\/30 {
+  background-color: rgba(61, 56, 52, 0.3) !important;
 }
 
-:host-context(.dark) .bg-sage\/10 {
-  background-color: rgba(168, 176, 154, 0.1) !important;
-  /* Dark mode sage at 10% */
+.dark .bg-sand\/50 {
+  background-color: rgba(61, 56, 52, 0.5) !important;
 }
 
-:host-context(.dark) .text-sage {
+.dark .bg-sand\/20 {
+  background-color: rgba(61, 56, 52, 0.2) !important;
+}
+
+.dark .bg-sand-dark {
+  background-color: #56524f !important;
+}
+
+/* Text overrides */
+.dark .text-charcoal {
+  color: var(--color-dark-text) !important;
+}
+
+.dark .text-taupe {
+  color: var(--color-dark-text-secondary) !important;
+}
+
+.dark .text-sage {
   color: #a8b09a !important;
-  /* Dark mode sage text */
 }
 
-:host-context(.dark) .bg-primary\/5 {
-  background-color: rgba(249, 115, 22, 0.05) !important;
+.dark .text-orange-500 {
+  color: #fb923c !important;
 }
 
-:host-context(.dark) .bg-primary\/10 {
-  background-color: rgba(249, 115, 22, 0.1) !important;
+.dark .text-orange-400 {
+  color: #fb923c !important;
 }
 
-:host-context(.dark) .border-taupe\/10 {
+.dark .text-orange-600 {
+  color: #fb923c !important;
+}
+
+/* Border overrides */
+.dark .border-taupe\/10 {
   border-color: rgba(168, 160, 149, 0.1) !important;
 }
 
-:host-context(.dark) .border-taupe\/20 {
+.dark .border-taupe\/20 {
+  border-color: rgba(168, 160, 149, 0.15) !important;
+}
+
+.dark .border-taupe\/30 {
   border-color: rgba(168, 160, 149, 0.2) !important;
 }
 
-:host-context(.dark) .border-taupe\/30 {
+.dark .border-taupe {
+  border-color: #56524f !important;
+}
+
+.dark .border-white\/10 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark .border-sage\/20 {
+  border-color: rgba(140, 154, 129, 0.2) !important;
+}
+
+/* Background alpha overrides */
+.dark .bg-sage\/10 {
+  background-color: rgba(140, 154, 129, 0.1) !important;
+}
+
+.dark .bg-sage\/5 {
+  background-color: rgba(140, 154, 129, 0.05) !important;
+}
+
+.dark .bg-primary\/5 {
+  background-color: rgba(249, 115, 22, 0.05) !important;
+}
+
+.dark .bg-primary\/10 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dark .bg-primary\/20 {
+  background-color: rgba(249, 115, 22, 0.2) !important;
+}
+
+.dark .bg-charcoal\/5 {
+  background-color: rgba(245, 240, 235, 0.05) !important;
+}
+
+.dark .bg-charcoal\/10 {
+  background-color: rgba(245, 240, 235, 0.1) !important;
+}
+
+.dark .border-charcoal\/20 {
+  border-color: rgba(245, 240, 235, 0.2) !important;
+}
+
+/* Hover state overrides */
+.dark .hover\:bg-sand:hover {
+  background-color: var(--color-dark-elevated) !important;
+}
+
+.dark .hover\:bg-sand-dark:hover {
+  background-color: #66625f !important;
+}
+
+/* Red/Danger overrides for dark */
+.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.dark .border-red-200 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.dark .hover\:bg-red-100:hover {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .hover\:bg-red-50:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Auth page amber overrides */
+.dark .bg-\[#fdfaf6\] {
+  background-color: var(--color-dark-bg) !important;
+}
+
+.dark .bg-white\/80 {
+  background-color: rgba(44, 42, 39, 0.9) !important;
+}
+
+.dark .border-amber-100\/50 {
+  border-color: rgba(249, 115, 22, 0.2) !important;
+}
+
+.dark .bg-amber-50\/50 {
+  background-color: rgba(61, 56, 52, 0.5) !important;
+}
+
+.dark .border-amber-200\/60 {
   border-color: rgba(168, 160, 149, 0.3) !important;
 }
 
-/* Paper grain texture for backgrounds */
+.dark .text-amber-950 {
+  color: var(--color-dark-text) !important;
+}
+
+.dark .text-amber-900 {
+  color: var(--color-dark-text) !important;
+}
+
+.dark .text-amber-900\/30 {
+  color: rgba(168, 160, 149, 0.4) !important;
+}
+
+.dark .text-amber-900\/50 {
+  color: rgba(168, 160, 149, 0.6) !important;
+}
+
+.dark .text-amber-700\/80 {
+  color: var(--color-dark-text-secondary) !important;
+}
+
+.dark .text-amber-600 {
+  color: #fb923c !important;
+}
+
+.dark .text-amber-600\/50 {
+  color: rgba(251, 146, 60, 0.5) !important;
+}
+
+.dark .text-amber-600\/40 {
+  color: rgba(251, 146, 60, 0.4) !important;
+}
+
+.dark .border-amber-900\/10 {
+  border-color: rgba(168, 160, 149, 0.15) !important;
+}
+
+.dark .placeholder-amber-900\/30::placeholder {
+  color: rgba(168, 160, 149, 0.4) !important;
+}
+
+.dark .bg-amber-100 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dark .bg-orange-100 {
+  background-color: rgba(249, 115, 22, 0.1) !important;
+}
+
+.dark .bg-yellow-100 {
+  background-color: rgba(249, 115, 22, 0.06) !important;
+}
+
+.dark .focus\:bg-white:focus {
+  background-color: var(--color-dark-card) !important;
+}
+
+/* Table overrides */
+.dark table thead {
+  background-color: var(--color-dark-border) !important;
+}
+
+.dark .divide-taupe\/10 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(168, 160, 149, 0.1) !important;
+}
+
+.dark .hover\:bg-sand\/30:hover {
+  background-color: rgba(61, 56, 52, 0.3) !important;
+}
+
+/* Dashed border */
+.dark .border-dashed {
+  border-color: rgba(168, 160, 149, 0.25) !important;
+}
+
+/* shadow overrides */
+.dark .shadow-gentle {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .shadow-gentle-lg {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Input overrides */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.mat-mdc-input-element) {
+  background-color: var(--color-dark-card) !important;
+  color: var(--color-dark-text) !important;
+  border-color: var(--color-dark-border) !important;
+}
+
+.dark textarea {
+  background-color: var(--color-dark-card) !important;
+  color: var(--color-dark-text) !important;
+  border-color: var(--color-dark-border) !important;
+}
+
+.dark select {
+  background-color: var(--color-dark-card) !important;
+  color: var(--color-dark-text) !important;
+  border-color: var(--color-dark-border) !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--color-primary) !important;
+}
+
+/* ================================================
+   PAPER TEXTURE
+   ================================================ */
 .paper-texture {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
 }
 
-/* Gentle shadow utilities */
+.dark .paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* ================================================
+   SHADOW UTILITIES
+   ================================================ */
 @layer utilities {
   .shadow-gentle {
     box-shadow: 0 4px 20px rgba(74, 68, 62, 0.05);
@@ -212,6 +433,9 @@
   }
 }
 
+/* ================================================
+   BASE STYLES
+   ================================================ */
 @layer base {
 
   html,
@@ -229,6 +453,11 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  .dark body {
+    background-color: var(--color-dark-bg);
+    color: var(--color-dark-text);
+  }
+
   h1,
   h2,
   h3,
@@ -240,6 +469,15 @@
     color: var(--color-charcoal);
   }
 
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    color: var(--color-dark-text);
+  }
+
   .display-text {
     font-family: var(--font-display), serif;
   }
@@ -249,7 +487,9 @@
   }
 }
 
-/* Global Scrollbar - taupe colored */
+/* ================================================
+   GLOBAL SCROLLBAR
+   ================================================ */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -268,7 +508,21 @@
   background: var(--color-charcoal);
 }
 
-/* Material Input Overrides - Soft Style */
+.dark ::-webkit-scrollbar-track {
+  background: #2a2927;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #666;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* ================================================
+   MATERIAL INPUT OVERRIDES
+   ================================================ */
 .soft-input.mat-mdc-form-field {
   --mdc-outlined-text-field-container-shape: 16px !important;
   margin-bottom: 8px;
@@ -345,133 +599,108 @@
   border-radius: 0.5rem !important;
 }
 
+/* Dark mode Material overrides */
+.dark ::ng-deep .soft-input .mat-mdc-form-field-flex {
+  background-color: var(--color-dark-card) !important;
+}
+
+.dark ::ng-deep .soft-input .mdc-notched-outline__leading,
+.dark ::ng-deep .soft-input .mdc-notched-outline__notch,
+.dark ::ng-deep .soft-input .mdc-notched-outline__trailing {
+  border-color: rgba(168, 160, 149, 0.25) !important;
+}
+
+.dark ::ng-deep .soft-input .mat-mdc-input-element {
+  color: var(--color-dark-text) !important;
+}
+
+.dark ::ng-deep .soft-input .mat-mdc-floating-label {
+  color: var(--color-dark-text-secondary) !important;
+}
+
+.dark ::ng-deep .soft-input .mat-mdc-select-value {
+  color: var(--color-dark-text) !important;
+}
+
+.dark ::ng-deep .soft-input .mat-mdc-select-arrow svg {
+  fill: var(--color-dark-text-secondary) !important;
+}
+
+.dark ::ng-deep .mat-mdc-select-panel {
+  background-color: var(--color-dark-card) !important;
+  border-color: var(--color-dark-border) !important;
+}
+
+.dark ::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+  color: var(--color-dark-text) !important;
+}
+
+.dark ::ng-deep .mat-mdc-option:hover {
+  background-color: var(--color-dark-elevated) !important;
+}
+
+.dark ::ng-deep .soft-datepicker .mat-datepicker-content,
+.dark ::ng-deep .mat-timepicker-content {
+  background-color: var(--color-dark-card) !important;
+  border-color: var(--color-dark-border) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark ::ng-deep .soft-datepicker .mat-calendar-body-cell:hover .mat-calendar-body-cell-content,
+.dark ::ng-deep .mat-timepicker-cell:hover {
+  background-color: var(--color-dark-elevated) !important;
+}
+
+.dark ::ng-deep .mat-datepicker-toggle button {
+  color: var(--color-dark-text-secondary) !important;
+}
+
 /* Fix for range label 'to' alignment */
 .range-separator {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  height: 56px !important; /* height of standard mat-form-field */
+  height: 56px !important;
   color: var(--color-taupe) !important;
   font-family: var(--font-body) !important;
   font-weight: 500 !important;
 }
 
-/* Dark mode soft adaptation */
-:host-context(.dark) body {
-  background-color: #1c1917;
-  color: #fcfaf8;
+/* ================================================
+   DARK MODE TRANSITION
+   ================================================ */
+html.dark {
+  color-scheme: dark;
 }
 
-:host-context(.dark) .paper-texture {
-  opacity: 0.05;
+html {
+  transition: background-color 0.3s ease;
 }
 
-:host-context(.dark) .shadow-gentle {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+/* Smooth transitions for dark mode toggle */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
 }
 
-:host-context(.dark) .shadow-gentle-lg {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+/* Exclude elements where transition causes visual issues */
+input, textarea, select, button, a, .animate-spin, .animate-bounce, .animate-pulse,
+[class*="animate-"], .transition-transform, .transition-all {
+  transition-property: all;
 }
 
-:host-context(.dark) .text-orange-600 {
-  color: #fb923c !important;
+/* ================================================
+   NGX-CHARTS DARK MODE
+   ================================================ */
+.dark ::ng-deep .ngx-charts {
+  fill: var(--color-dark-text) !important;
 }
 
-:host-context(.dark) .custom-scrollbar::-webkit-scrollbar-track {
-  background: #2a2927;
+.dark ::ng-deep .ngx-charts .gridline-path {
+  stroke: var(--color-dark-border) !important;
 }
 
-:host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #666;
-}
-
-:host-context(.dark) h1,
-:host-context(.dark) h2,
-:host-context(.dark) h3,
-:host-context(.dark) h4,
-:host-context(.dark) h5,
-:host-context(.dark) h6 {
-  color: #fcfaf8;
-}
-
-/* Dark mode overrides for Tailwind default colors */
-:host-context(.dark) .bg-white {
-  background-color: var(--color-alabaster) !important;
-}
-
-:host-context(.dark) .text-white {
-  color: var(--color-charcoal) !important;
-}
-
-:host-context(.dark) .border-white\/10 {
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-:host-context(.dark) .border-white\/20 {
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-:host-context(.dark) .bg-orange-500 {
-  background-color: #f97316 !important;
-}
-
-:host-context(.dark) .text-orange-500 {
-  color: #fb923c !important;
-}
-
-:host-context(.dark) .text-orange-400 {
-  color: #fb923c !important;
-}
-
-:host-context(.dark) .bg-sage\/10 {
-  background-color: rgba(140, 154, 129, 0.1) !important;
-}
-
-:host-context(.dark) .text-sage {
-  color: #a8b09a !important;
-}
-
-:host-context(.dark) .bg-sand {
-  background-color: var(--color-sand) !important;
-}
-
-:host-context(.dark) .text-charcoal {
-  color: var(--color-text-primary) !important;
-}
-
-:host-context(.dark) .text-taupe {
-  color: var(--color-text-secondary) !important;
-}
-
-:host-context(.dark) .border-taupe\/10 {
-  border-color: rgba(154, 144, 134, 0.1) !important;
-}
-
-:host-context(.dark) .border-taupe\/20 {
-  border-color: rgba(154, 144, 134, 0.2) !important;
-}
-
-:host-context(.dark) .border-taupe\/30 {
-  border-color: rgba(154, 144, 134, 0.3) !important;
-}
-
-:host-context(.dark) .bg-sage\/10 {
-  background-color: rgba(140, 154, 129, 0.1) !important;
-}
-
-:host-context(.dark) .bg-primary\/5 {
-  background-color: rgba(249, 115, 22, 0.05) !important;
-}
-
-:host-context(.dark) .bg-primary\/10 {
-  background-color: rgba(249, 115, 22, 0.1) !important;
-}
-
-:host-context(.dark) .bg-white {
-  background-color: var(--color-background-light) !important;
-}
-
-:host-context(.dark) .bg-alabaster {
-  background-color: var(--color-alabaster) !important;
+.dark ::ng-deep .ngx-charts text {
+  fill: var(--color-dark-text-secondary) !important;
 }

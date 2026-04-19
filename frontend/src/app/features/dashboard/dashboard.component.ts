@@ -1,22 +1,25 @@
 import { Component, ChangeDetectionStrategy, inject, computed, signal, OnDestroy } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, Router } from '@angular/router';
 
 import { FormsModule } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { SystemService } from '../../services/system.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { UserSettingsService } from '../../services/user-settings.service';
 
 @Component({
     selector: 'app-dashboard',
     imports: [RouterLink, FormsModule],
     template: `
-    <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture">
+    <div class="min-h-screen bg-white dark:bg-dark-bg px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture">
         <!-- Dashboard Header -->
         <header class="flex flex-col md:flex-row items-start justify-between gap-4 mb-8">
             <div class="space-y-2">
-                <h1 class="font-heading text-3xl md:text-5xl font-bold text-charcoal">
-                    {{ getGreeting() }}, Habit Tracker
+                <h1 class="font-heading text-3xl md:text-5xl font-bold text-charcoal dark:text-dark-text">
+                    {{ getGreeting() }}, {{ user()?.name || 'Habit Tracker' }}
                 </h1>
-                <p class="text-taupe text-base">
+                <p class="text-taupe dark:text-dark-text-secondary text-base">
                     {{ getDateMessage() }}
                 </p>
             </div>
@@ -25,7 +28,7 @@ import { SystemService } from '../../services/system.service';
                     <span class="material-symbols-outlined">bar_chart</span>
                     Statistics
                 </a>
-                <a routerLink="/systems" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-charcoal/5 text-charcoal font-bold py-3 px-6 rounded-lg border border-charcoal/20 hover:bg-charcoal/10 transition-all">
+                <a routerLink="/systems" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-charcoal/5 dark:bg-white/5 text-charcoal dark:text-dark-text font-bold py-3 px-6 rounded-lg border border-charcoal/20 dark:border-white/10 hover:bg-charcoal/10 dark:hover:bg-white/10 transition-all">
                     <span class="material-symbols-outlined">hub</span>
                     Systems
                 </a>
@@ -39,16 +42,16 @@ import { SystemService } from '../../services/system.service';
         <!-- Stats Grid -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
             <!-- Completion Rate -->
-            <div class="bg-alabaster rounded-lg shadow-gentle p-6 border border-taupe/10">
+            <div class="bg-alabaster dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-6 border border-taupe/10 dark:border-dark-border">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-bold uppercase tracking-wider text-taupe">Completion Rate</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-taupe dark:text-dark-text-secondary">Completion Rate</span>
                     <span class="material-symbols-outlined text-orange-500 text-xl">trending_up</span>
                 </div>
                 <div class="flex items-baseline gap-2 mb-3">
-                    <span class="text-4xl font-bold text-charcoal">{{ completionPercent() }}%</span>
-                    <span class="text-sm text-taupe">today</span>
+                    <span class="text-4xl font-bold text-charcoal dark:text-dark-text">{{ completionPercent() }}%</span>
+                    <span class="text-sm text-taupe dark:text-dark-text-secondary">today</span>
                 </div>
-                <div class="w-full h-2 bg-sand rounded-full overflow-hidden">
+                <div class="w-full h-2 bg-sand dark:bg-dark-border rounded-full overflow-hidden">
                     <div class="h-full bg-orange-500 rounded-full transition-all duration-1000" [style.width.%]="completionPercent()"></div>
                 </div>
             </div>
@@ -67,16 +70,16 @@ import { SystemService } from '../../services/system.service';
             </div>
 
             <!-- Active Habits -->
-            <div class="bg-alabaster rounded-lg shadow-gentle p-6 border border-taupe/10">
+            <div class="bg-alabaster dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-6 border border-taupe/10 dark:border-dark-border">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-bold uppercase tracking-wider text-taupe">Active Habits</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-taupe dark:text-dark-text-secondary">Active Habits</span>
                     <span class="material-symbols-outlined text-sage text-xl">check_circle</span>
                 </div>
                 <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-bold text-charcoal">{{ habitService.habits().length }}</span>
-                    <span class="text-sm text-taupe">habits</span>
+                    <span class="text-4xl font-bold text-charcoal dark:text-dark-text">{{ habitService.habits().length }}</span>
+                    <span class="text-sm text-taupe dark:text-dark-text-secondary">habits</span>
                 </div>
-                <p class="text-sm text-taupe mt-2">You're building {{ habitService.habits().length }} new habits</p>
+                <p class="text-sm text-taupe dark:text-dark-text-secondary mt-2">You're building {{ habitService.habits().length }} new habits</p>
             </div>
         </section>
 
@@ -85,8 +88,8 @@ import { SystemService } from '../../services/system.service';
             <section class="lg:col-span-8">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
-                        <h2 class="font-heading text-2xl md:text-3xl font-bold text-charcoal">Today's Habits</h2>
-                        <p class="text-sm text-taupe mt-1">{{ remainingHabits() }} remaining, {{ completedCount() }} completed</p>
+                        <h2 class="font-heading text-2xl md:text-3xl font-bold text-charcoal dark:text-dark-text">Today's Habits</h2>
+                        <p class="text-sm text-taupe dark:text-dark-text-secondary mt-1">{{ remainingHabits() }} remaining, {{ completedCount() }} completed</p>
                     </div>
                     <a routerLink="/planner" class="text-sm font-bold text-orange-500 hover:text-orange-400 transition-colors flex items-center gap-1">
                         View Planner
@@ -96,7 +99,7 @@ import { SystemService } from '../../services/system.service';
 
                 <div class="space-y-3">
                     @for (habit of todaysHabits(); track habit.id) {
-                        <div class="bg-white rounded-lg shadow-gentle p-4 flex items-center gap-4 cursor-pointer transition-all hover:shadow-gentle-lg border border-taupe/10"
+                        <div class="bg-white dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-4 flex items-center gap-4 cursor-pointer transition-all hover:shadow-gentle-lg dark:hover:shadow-dark-gentle-lg border border-taupe/10 dark:border-dark-border"
                              (click)="navigateToTrack(habit.id)">
                             <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all shrink-0"
                                   [class.bg-sage]="habit.completedToday"
@@ -112,7 +115,7 @@ import { SystemService } from '../../services/system.service';
                             </div>
 
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-heading text-lg font-bold text-charcoal truncate"
+                                <h3 class="font-heading text-lg font-bold text-charcoal dark:text-dark-text truncate"
                                     [class.line-through]="habit.completedToday"
                                     [class.text-taupe]="habit.completedToday">
                                     {{ habit.name }}
@@ -121,14 +124,14 @@ import { SystemService } from '../../services/system.service';
                                     <p class="text-xs text-orange-500 font-medium mt-1">{{ habit.systemTaskTitle }}</p>
                                 }
                                 <div class="flex items-center gap-2 mt-2 flex-wrap">
-                                    <span class="text-xs px-2 py-1 rounded-full bg-sand text-charcoal font-medium">
+                                    <span class="text-xs px-2 py-1 rounded-full bg-sand dark:bg-dark-border text-charcoal dark:text-dark-text font-medium">
                                         {{ habit.category || 'General' }}
                                     </span>
-                                    <span class="text-xs px-2 py-1 rounded-full bg-sand/50 text-taupe">
+                                    <span class="text-xs px-2 py-1 rounded-full bg-sand/50 dark:bg-dark-border/50 text-taupe dark:text-dark-text-secondary">
                                         {{ habit.frequencyType || 'Daily' }}
                                     </span>
                                     @if (habit.bestStreak > 0) {
-                                        <span class="text-xs flex items-center gap-1 text-orange-600">
+                                        <span class="text-xs flex items-center gap-1 text-orange-600 dark:text-orange-400">
                                             <span class="material-symbols-outlined text-[14px]">local_fire_department</span>
                                             {{ habit.bestStreak }} day streak
                                         </span>
@@ -140,18 +143,18 @@ import { SystemService } from '../../services/system.service';
                                 @if (habit.completedToday) {
                                     <span class="text-sm font-bold text-sage">Completed</span>
                                 } @else {
-                                    <span class="text-sm text-taupe">Tap to track</span>
+                                    <span class="text-sm text-taupe dark:text-dark-text-secondary">Tap to track</span>
                                 }
-                                <span class="material-symbols-outlined text-taupe">arrow_forward</span>
+                                <span class="material-symbols-outlined text-taupe dark:text-dark-text-secondary">arrow_forward</span>
                             </div>
                         </div>
                     }
                 </div>
 
                 @if (todaysHabits().length === 0) {
-                    <div class="p-8 text-center bg-alabaster rounded-lg border border-dashed border-taupe/30">
-                        <span class="material-symbols-outlined text-5xl text-taupe mb-4">checklist</span>
-                        <p class="text-taupe font-medium">No habits scheduled for today.</p>
+                    <div class="p-8 text-center bg-alabaster dark:bg-dark-surface rounded-lg border border-dashed border-taupe/30 dark:border-dark-border">
+                        <span class="material-symbols-outlined text-5xl text-taupe dark:text-dark-text-secondary mb-4">checklist</span>
+                        <p class="text-taupe dark:text-dark-text-secondary font-medium">No habits scheduled for today.</p>
                         <a routerLink="/add" class="inline-flex items-center gap-2 text-orange-500 font-bold mt-4 hover:text-orange-400">
                             Create your first habit
                             <span class="material-symbols-outlined text-sm">arrow_forward</span>
@@ -162,23 +165,23 @@ import { SystemService } from '../../services/system.service';
 
             <!-- Inspiration / Quote Panel -->
             <section class="lg:col-span-4 space-y-6">
-                <div class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                <div class="bg-white dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-6 border border-taupe/10 dark:border-dark-border">
                     <div class="flex items-center gap-2 mb-4">
-                        <span class="material-symbols-outlined text-orange-600">format_quote</span>
-                        <h3 class="font-heading text-lg font-bold text-charcoal">Inspiration</h3>
+                        <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">format_quote</span>
+                        <h3 class="font-heading text-lg font-bold text-charcoal dark:text-dark-text">Inspiration</h3>
                     </div>
-                    <blockquote class="text-base text-charcoal leading-relaxed italic mb-4">
+                    <blockquote class="text-base text-charcoal dark:text-dark-text leading-relaxed italic mb-4">
                         "{{ currentQuote() }}"
                     </blockquote>
-                    <div class="h-1 w-full bg-sand rounded-full overflow-hidden">
+                    <div class="h-1 w-full bg-sand dark:bg-dark-border rounded-full overflow-hidden">
                         <div class="h-full bg-orange-500 w-1/3 rounded-full"></div>
                     </div>
                 </div>
 
                 <!-- Quick Tips -->
                 <div class="bg-sage/10 rounded-lg p-6 border border-sage/20">
-                    <h3 class="font-heading text-lg font-bold text-charcoal mb-4">Tips for Success</h3>
-                    <ul class="space-y-3 text-sm text-charcoal">
+                    <h3 class="font-heading text-lg font-bold text-charcoal dark:text-dark-text mb-4">Tips for Success</h3>
+                    <ul class="space-y-3 text-sm text-charcoal dark:text-dark-text">
                         <li class="flex items-start gap-2">
                             <span class="material-symbols-outlined text-sage text-lg shrink-0">check_circle</span>
                             <span>Start small—tiny habits are easier to maintain</span>
@@ -209,7 +212,11 @@ import { SystemService } from '../../services/system.service';
 export class DashboardComponent implements OnDestroy {
     habitService = inject(HabitService);
     systemService = inject(SystemService);
+    authService = inject(AuthService);
     router = inject(Router);
+    settingsService = inject(UserSettingsService);
+
+    user = toSignal(this.authService.currentUser$);
 
     todaySystemTasks = signal<any[]>([]);
 
@@ -255,6 +262,11 @@ export class DashboardComponent implements OnDestroy {
                 if (todayStr < h.startDate || todayStr > h.endDate) {
                     return false;
                 }
+            }
+
+            // Respect showCompletedHabits setting
+            if (!this.settingsService.settings().showCompletedHabits && h.completedToday) {
+                return false;
             }
 
             const weekdays = h.weekdays || (h as any).frequencyDays || (h as any).targetDays;

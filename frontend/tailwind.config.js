@@ -17,6 +17,12 @@ module.exports = {
         terracotta: '#c27a65',
         sand: '#f4efea',
         'sand-dark': '#e8e0d8',
+        // Dark mode surface colors
+        'dark-bg': '#1a1714',
+        'dark-surface': '#242220',
+        'dark-card': '#2c2a27',
+        'dark-elevated': '#353330',
+        'dark-border': '#3d3834',
       },
       fontFamily: {
         display: ['Newsreader', 'serif'],
@@ -35,6 +41,8 @@ module.exports = {
         gentle: '0 4px 20px rgba(74, 68, 62, 0.05)',
         'gentle-lg': '0 8px 30px rgba(74, 68, 62, 0.08)',
         'soft': '0 2px 8px rgba(74, 68, 62, 0.08)',
+        'dark-gentle': '0 4px 20px rgba(0, 0, 0, 0.4)',
+        'dark-gentle-lg': '0 8px 30px rgba(0, 0, 0, 0.5)',
       },
     },
   },
