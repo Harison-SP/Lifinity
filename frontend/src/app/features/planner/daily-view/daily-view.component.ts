@@ -143,10 +143,6 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
                  <h3 class="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-[0.2em]">Temporal Architecture</h3>
                </div>
                <div class="hidden sm:flex items-center gap-4">
-                 <div class="flex items-center gap-2">
-                   <span class="material-symbols-outlined text-indigo-500 text-lg">bolt</span>
-                   <span class="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest">System Habits Exclusive Mode</span>
-                 </div>
                </div>
           </div>
           
@@ -336,21 +332,8 @@ export class DailyViewComponent implements OnInit, OnDestroy {
     }));
 
     // System instance tasks (explicitly generated from systems)
-    const sysEvents = this.systemTasks()
-      .filter(t => t.timeBlockStart && t.timeBlockEnd)
-      .map(t => ({
-        id: `sys-${t.instanceId}-${t.date}-${t.title}`,
-        title: t.title,
-        start: `${t.date}T${t.timeBlockStart}`,
-        end: `${t.date}T${t.timeBlockEnd}`,
-        backgroundColor: t.completed ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.15)',
-        borderColor: t.color || '#6366f1',
-        textColor: t.color || '#6366f1',
-        extendedProps: {
-          type: 'system_task',
-          systemTask: t
-        }
-      }));
+    // Removed from temporal calendar view as they no longer have time blocks
+    const sysEvents: EventInput[] = [];
 
     // We exclude generic taskEvents to keep the view focused on systems
     return [...habitEvents, ...sysEvents];
@@ -401,7 +384,6 @@ export class DailyViewComponent implements OnInit, OnDestroy {
                 ${t.weekFocus ? `<div class="text-[8px] font-bold opacity-40 uppercase tracking-widest mt-0.5">${t.weekFocus}</div>` : ''}
               </div>
               <div class="flex items-center justify-between mt-1">
-                <span class="text-[8px] font-mono font-bold opacity-40">${t.timeBlockStart} - ${t.timeBlockEnd}</span>
                 ${t.completed ? '<span class="material-symbols-outlined text-emerald-500 text-xs">verified</span>' : ''}
               </div>
             </div>

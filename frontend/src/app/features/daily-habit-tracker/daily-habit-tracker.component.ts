@@ -83,12 +83,6 @@ import { ToastService } from '../../services/toast.service';
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-4">
                   <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Today's Focus</span>
-                  @if (todaySystemTask()?.timeBlockStart) {
-                    <span class="bg-sand text-charcoal px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1">
-                      <span class="material-symbols-outlined text-sm">schedule</span>
-                      {{ todaySystemTask()?.timeBlockStart }} - {{ todaySystemTask()?.timeBlockEnd }}
-                    </span>
-                  }
                 </div>
     
                 <!-- Task/Habit Title -->

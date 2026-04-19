@@ -9,8 +9,6 @@ export interface WeekNode {
   outcome: string;
   items: SystemItem[];
   isExpanded: boolean;
-  time_block_start: string | null;
-  time_block_end: string | null;
 }
 
 export interface PhaseNode {
@@ -43,7 +41,6 @@ export interface SystemPreset {
   id: string;
   label: string;
   description: string;
-  category: string;
   tags: string[];
   phases: PresetPhase[];
 }
@@ -59,8 +56,6 @@ export interface TableRow {
   dayNumber: number;
   title: string;
   description: string;
-  timeBlockStart: string;
-  timeBlockEnd: string;
   resourceLink: string;
 }
 

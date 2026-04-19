@@ -19,50 +19,133 @@ import { ViewMode, WeekNode, PhaseNode, SystemPreset } from './system-manager.ty
 
 const SYSTEM_PRESETS: SystemPreset[] = [
   {
-    id: 'skill-bootcamp',
-    label: 'Skill Bootcamp',
-    description: 'Learn -> Practice -> Project in a structured flow.',
-    category: 'Learning',
-    tags: ['learning', 'practice', 'project'],
+    id: 'dsa-12-week',
+    label: 'DSA Master (12 Weeks)',
+    description: 'Complete data structures and algorithms curriculum for interview readiness.',
+    tags: ['coding', 'dsa', 'interview'],
     phases: [
       {
-        name: 'Foundation',
-        objective: 'Build fundamentals and base confidence.',
+        name: 'Phase 1: Linear Structures',
+        objective: 'Master foundational data structures and their operations.',
         weeks: [
           {
-            focus: 'Core concepts',
-            goal: 'Understand essentials and setup workflow.',
-            outcome: 'Can explain basics and execute guided tasks.',
+            focus: 'Arrays & Strings',
+            goal: 'Master two-pointer and sliding window techniques.',
+            outcome: 'Can solve most array manipulation problems.',
             tasks: [
-              { day: 1, title: 'Read fundamentals', description: 'Cover terminology and first principles.' },
-              { day: 2, title: 'Guided walkthrough', description: 'Replicate one complete example.' },
-              { day: 3, title: 'Summary notes', description: 'Write key learnings and open questions.' }
+              { day: 1, title: 'Complexity & Memory', description: 'Review memory layout and Big O.' },
+              { day: 3, title: 'Two Pointer Drills', description: 'Solve 15-sum, valid palindrome, reverse string.' },
+              { day: 5, title: 'Sliding Window', description: 'Longest substring without repeating characters.' }
             ]
           },
           {
-            focus: 'Repetition',
-            goal: 'Convert understanding into routine action.',
-            outcome: 'Can solve small tasks without external help.',
+            focus: 'Linked Lists',
+            goal: 'Implement and manipulate singly and doubly linked lists.',
+            outcome: 'Master pointer manipulation and slow/fast pointer logic.',
             tasks: [
-              { day: 1, title: 'Practice drills', description: 'Complete 3 focused exercises.' },
-              { day: 2, title: 'Fix common mistakes', description: 'Document 3 errors and corrections.' },
-              { day: 3, title: 'Checkpoint', description: 'Run a mini self-test and review.' }
+              { day: 2, title: 'Reversal logic', description: 'Implement iterative and recursive reversal.' },
+              { day: 4, title: 'Cycle Detection', description: 'Floyd\'s cycle finding algorithm.' }
+            ]
+          },
+          {
+            focus: 'Stacks & Queues',
+            goal: 'Solve problems involving monotonic stacks and BFS foundations.',
+            outcome: 'Understand LIFO/FIFO patterns and queue implementation.',
+            tasks: [
+              { day: 1, title: 'Valid Parentheses', description: 'Use stack for bracket matching problems.' },
+              { day: 4, title: 'Min Stack', description: 'Implement a stack that returns minimum in O(1).' }
+            ]
+          },
+          {
+            focus: 'Hashing',
+            goal: 'Master hash map and hash set applications.',
+            outcome: 'Reduce O(n^2) problems to O(n) using frequency maps.',
+            tasks: [
+              { day: 2, title: 'Frequency counting', description: 'Two sum and top k frequent elements.' },
+              { day: 5, title: 'Collision Handling', description: 'Understand chaining and open addressing.' }
             ]
           }
         ]
       },
       {
-        name: 'Application',
-        objective: 'Turn learning into output.',
+        name: 'Phase 2: Algorithm Patterns',
+        objective: 'Apply recursive and iterative strategies to solve complex problems.',
         weeks: [
           {
-            focus: 'Mini project',
-            goal: 'Deliver a small but complete project.',
-            outcome: 'A real artifact that proves progress.',
+            focus: 'Recursion & Backtracking',
+            goal: 'Understand decision trees and state space exploration.',
+            outcome: 'Solve permutations, combinations, and N-Queens.',
             tasks: [
-              { day: 1, title: 'Project scope', description: 'Define clear scope and acceptance criteria.' },
-              { day: 2, title: 'Build v1', description: 'Implement the first shippable version.' },
-              { day: 3, title: 'Review and improve', description: 'Fix issues and note lessons learned.' }
+              { day: 1, title: 'Decision Trees', description: 'Visualize recursion calls as trees.' },
+              { day: 4, title: 'Subset generation', description: 'Generate all possible subsets of a set.' }
+            ]
+          },
+          {
+            focus: 'Binary Search',
+            goal: 'Master searching in sorted/search-space arrays.',
+            outcome: 'Recognize hidden binary search patterns.',
+            tasks: [
+              { day: 2, title: 'Standard Search', description: 'First and last position of element in sorted array.' },
+              { day: 5, title: 'Search Space', description: 'Aggressive cows and capacity to ship packages.' }
+            ]
+          },
+          {
+            focus: 'Sorting Algorithms',
+            goal: 'Deep dive into Quicksort, Mergesort, and Heapsort.',
+            outcome: 'Analyze stability and space-time complexity variations.',
+            tasks: [
+              { day: 1, title: 'Divide & Conquer', description: 'Implement Merge Sort from scratch.' },
+              { day: 4, title: 'QuickSelect', description: 'Find Kth largest element in O(n).' }
+            ]
+          },
+          {
+            focus: 'Bit Manipulation',
+            goal: 'Master bitwise operations for optimization.',
+            outcome: 'Understand XOR tricks and power-of-two checks.',
+            tasks: [
+              { day: 3, title: 'Bitwise Basics', description: 'Number of 1 bits, single number problems.' }
+            ]
+          }
+        ]
+      },
+      {
+        name: 'Phase 3: Nonlinear & DP',
+        objective: 'Solve graph, tree, and dynamic programming challenges.',
+        weeks: [
+          {
+            focus: 'Trees',
+            goal: 'Master Binary Search Trees and traversals.',
+            outcome: 'Understand DFS (Pre/In/Post) and BFS in trees.',
+            tasks: [
+              { day: 1, title: 'Tree traversal', description: 'Level order and vertical order traversal.' },
+              { day: 4, title: 'Balanced Trees', description: 'Diameter of tree and height balancing.' }
+            ]
+          },
+          {
+            focus: 'Graphs',
+            goal: 'Master BFS, DFS, and topological sorting.',
+            outcome: 'Detect cycles and find shortest paths in graphs.',
+            tasks: [
+              { day: 2, title: 'Adjacency Lists', description: 'Build and traverse graph representations.' },
+              { day: 5, title: 'Dijkstra', description: 'Shortest path in weighted graphs.' }
+            ]
+          },
+          {
+            focus: 'Dynamic Programming I',
+            goal: 'Master 1D DP and memoization patterns.',
+            outcome: 'Convert recursive solutions to top-down/bottom-up.',
+            tasks: [
+              { day: 1, title: 'Knapsack 0/1', description: 'Standard knapsack logic and variations.' },
+              { day: 4, title: 'Coins & Stairs', description: 'Climbing stairs and coin change problems.' }
+            ]
+          },
+          {
+            focus: 'Final Revision',
+            goal: 'Simulate mock interviews under time pressure.',
+            outcome: 'Confidence in solving unseen medium-hard problems.',
+            tasks: [
+              { day: 1, title: 'Mock Interview 1', description: 'Solve 2 medium problems in 45 mins.' },
+              { day: 6, title: 'System Design Overview', description: 'Basics of scalability for senior roles.' }
             ]
           }
         ]
@@ -70,40 +153,81 @@ const SYSTEM_PRESETS: SystemPreset[] = [
     ]
   },
   {
-    id: 'project-delivery',
-    label: 'Project Delivery',
-    description: 'From planning to shipping with clear milestones.',
-    category: 'Execution',
-    tags: ['project', 'delivery', 'execution'],
+    id: 'workout-6-week',
+    label: 'Home Athlete (6 Weeks)',
+    description: 'Transform your physique with bodyweight strength and conditioning.',
+    tags: ['fitness', 'workout', 'health'],
     phases: [
       {
-        name: 'Plan',
-        objective: 'Clarify scope, timeline, risks.',
+        name: 'Form & Volume',
+        objective: 'Build movement mechanics and muscle endurance.',
         weeks: [
           {
-            focus: 'Scope and milestones',
-            goal: 'Build a realistic delivery plan.',
-            outcome: 'Prioritized roadmap and defined milestones.',
+            focus: 'Adaptation',
+            goal: 'Zero ego, perfect form on push-ups/squats.',
+            outcome: 'Pain-free movement and mental commitment.',
             tasks: [
-              { day: 1, title: 'Write project brief', description: 'Define goals, constraints, success metrics.' },
-              { day: 2, title: 'Break into milestones', description: 'Split work into logical deliverables.' },
-              { day: 3, title: 'Risk review', description: 'List blockers and fallback plan.' }
+              { day: 1, title: 'Upper Body A', description: 'Push-ups, dips, diamond push-ups (3x12).' },
+              { day: 3, title: 'Lower Body A', description: 'Air squats, reverse lunges, calf raises (4x15).' },
+              { day: 5, title: 'Core & Cardio', description: 'Planks, mountain climbers, 20 min brisk walk.' }
+            ]
+          },
+          {
+            focus: 'Volume Accumulation',
+            goal: 'Increase total reps per session by 10%.',
+            outcome: 'Visual improvement in muscle tone.',
+            tasks: [
+              { day: 2, title: 'Upper Body B', description: 'Wide push-ups, Pike push-ups, Floor pull-ins.' },
+              { day: 4, title: 'Lower Body B', description: 'Bulgarian split squats, Glute bridges.' },
+              { day: 6, title: 'Active Recovery', description: 'Full body stretching and light yoga flow.' }
             ]
           }
         ]
       },
       {
-        name: 'Ship',
-        objective: 'Execute with consistency.',
+        name: 'Strength & Hypertrophy',
+        objective: 'Introduce progressive overload through tempo and complexity.',
         weeks: [
           {
-            focus: 'Build and review',
-            goal: 'Deliver value each cycle.',
-            outcome: 'Shippable increments and regular feedback.',
+            focus: 'Tempo Training',
+            goal: 'Implement 3-second eccentric (lowering) phase.',
+            outcome: 'Increased time under tension and strength gains.',
             tasks: [
-              { day: 1, title: 'Build sprint output', description: 'Complete the highest-priority slice.' },
-              { day: 2, title: 'Gather feedback', description: 'Review with stakeholder/peer.' },
-              { day: 3, title: 'Retrospective', description: 'Capture wins, misses, and next actions.' }
+              { day: 1, title: 'Push Focus', description: 'Slow tempo push-ups and Archer push-ups.' },
+              { day: 4, title: 'Leg Strength', description: 'Single leg squats (pistol progression).' }
+            ]
+          },
+          {
+            focus: 'Failure Sets',
+            goal: 'Push last set of every exercise to technical failure.',
+            outcome: 'Maximum metabolic stress and muscle growth.',
+            tasks: [
+              { day: 2, title: 'Pull & Core', description: 'Superman holds, Bicycle crunches to failure.' },
+              { day: 5, title: 'Full Body Blast', description: 'Burpees and mountain climbers circuit.' }
+            ]
+          }
+        ]
+      },
+      {
+        name: 'Peaking & Conditioning',
+        objective: 'Maximize fat burning and explosive power.',
+        weeks: [
+          {
+            focus: 'Power & Explosiveness',
+            goal: 'Execute plyometric movements with high intent.',
+            outcome: 'Increased vertical leap and metabolic rate.',
+            tasks: [
+              { day: 1, title: 'Plyo Upper', description: 'Clap push-ups and explosive dips.' },
+              { day: 3, title: 'Plyo Lower', description: 'Jump squats and Tuck jumps.' }
+            ]
+          },
+          {
+            focus: 'The Final Grind',
+            goal: 'Complete "Murph" style bodyweight circuit.',
+            outcome: 'Peak conditioning and 6-week completion.',
+            tasks: [
+              { day: 1, title: 'AMRAP 20', description: 'As many rounds as possible of 5-10-15.' },
+              { day: 6, title: 'The Final Test', description: 'Measure max reps on core movements.' }
             ]
           }
         ]
@@ -207,28 +331,21 @@ const SYSTEM_PRESETS: SystemPreset[] = [
 
         <div class="grid min-h-0 flex-1 grid-cols-1 gap-6 xl:grid-cols-12">
 
-          <aside class="xl:col-span-3 min-h-0">
-            <div class="flex h-full min-h-[720px] flex-col gap-4 bg-white rounded-lg shadow-gentle p-5 border border-taupe/10">
+          <aside class="xl:col-span-3 flex flex-col gap-4 min-h-0">
+            <!-- Systems Library -->
+            <div class="flex flex-col bg-white rounded-lg shadow-gentle p-5 border border-taupe/10 min-h-0 max-h-[500px]">
               <div class="border-b border-taupe/10 pb-4">
                 <span class="text-xs font-bold uppercase tracking-wider text-taupe">Library</span>
                 <h3 class="font-heading text-xl font-bold text-charcoal mt-1">Systems</h3>
                 <div class="mt-3 space-y-3">
                   <input
                     [(ngModel)]="systemSearch"
-                    placeholder="Search title/category/tag"
+                    placeholder="Search title or tag"
                     class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2.5 text-sm font-medium outline-none focus:border-orange-500 text-charcoal transition-colors" />
-                  <select
-                    [(ngModel)]="categoryFilter"
-                    class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal">
-                    <option value="All">All categories</option>
-                    @for (category of availableCategories(); track category) {
-                      <option [value]="category">{{ category }}</option>
-                    }
-                  </select>
                 </div>
               </div>
 
-              <div class="space-y-2 overflow-y-auto custom-scrollbar pr-1 flex-1">
+              <div class="space-y-2 overflow-y-auto custom-scrollbar pr-1 flex-1 mt-4">
                 @for (system of filteredSystems(); track system.id ?? system.title) {
                   <button
                     (click)="selectSystem(system)"
@@ -241,7 +358,6 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                     [class.hover:bg-sand-dark]="selectedSystem()?.id !== system.id">
                     <p class="text-sm font-bold truncate">{{ system.title }}</p>
                     <div class="mt-1.5 flex items-center justify-between text-xs opacity-80">
-                      <span>{{ system.category || 'General' }}</span>
                       <span>{{ system.items.length }} tasks</span>
                     </div>
                   </button>
@@ -251,19 +367,49 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                   </div>
                 }
               </div>
+            </div>
 
-              <div class="border-t border-taupe/10 pt-4">
-                <span class="text-xs font-bold uppercase tracking-wider text-taupe mb-2 block">Starter Presets</span>
-                <div class="space-y-2">
-                  @for (preset of presets; track preset.id) {
-                    <button
-                      (click)="applyPreset(preset.id)"
-                      class="w-full bg-sand rounded-lg text-left p-3.5 hover:bg-sand-dark transition-colors">
-                      <p class="text-sm font-bold text-charcoal">{{ preset.label }}</p>
-                      <p class="mt-1 text-xs text-taupe">{{ preset.description }}</p>
-                    </button>
+            <!-- Health Check (Sidebar) -->
+            @if (selectedSystem() || isCreating()) {
+              <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-taupe">Health Check</span>
+                    <h3 class="mt-1 font-heading text-xl font-bold text-charcoal">Validation</h3>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="bg-sand rounded-lg px-2 py-1 text-[10px] font-bold text-charcoal">
+                      {{ getMetrics().resources }} Res
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                  @for (issue of getValidationIssues(); track issue) {
+                    <div class="rounded-lg border border-red-200 bg-red-50 p-2 text-[11px] font-medium text-red-800">
+                      {{ issue }}
+                    </div>
+                  } @empty {
+                    <div class="rounded-lg border border-green-200 bg-green-50 p-2 text-[11px] font-medium text-green-800">
+                      Ready to launch.
+                    </div>
                   }
                 </div>
+              </section>
+            }
+
+            <!-- Starter Presets -->
+            <div class="bg-white rounded-lg shadow-gentle p-5 border border-taupe/10">
+              <span class="text-xs font-bold uppercase tracking-wider text-taupe mb-2 block">Starter Presets</span>
+              <div class="space-y-2">
+                @for (preset of presets; track preset.id) {
+                  <button
+                    (click)="applyPreset(preset.id)"
+                    class="w-full bg-sand rounded-lg text-left p-3.5 hover:bg-sand-dark transition-colors">
+                    <p class="text-sm font-bold text-charcoal">{{ preset.label }}</p>
+                    <p class="mt-1 text-xs text-taupe">{{ preset.description }}</p>
+                  </button>
+                }
               </div>
             </div>
           </aside>
@@ -272,69 +418,112 @@ const SYSTEM_PRESETS: SystemPreset[] = [
             @if (selectedSystem() || isCreating()) {
               <div class="flex h-full min-h-[720px] flex-col gap-4">
 
-                <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
-                  <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div class="flex-1">
-                      <span class="text-xs font-bold uppercase tracking-wider text-taupe">Step 1 — Define</span>
-                      <input
-                        [(ngModel)]="editForm.title"
-                        placeholder="System title"
-                        class="mt-2 w-full bg-transparent font-heading text-3xl font-bold outline-none text-charcoal md:text-4xl" />
-                      <textarea
-                        [(ngModel)]="editForm.description"
-                        rows="3"
-                        placeholder="Describe intent and expected result."
-                        class="mt-3 w-full resize-none border border-taupe/20 bg-sand rounded-lg p-3 text-sm font-medium outline-none focus:border-orange-500 text-charcoal"></textarea>
+                <div class="grid gap-6 lg:grid-cols-2">
+                  <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div class="flex-1">
+                        <span class="text-xs font-bold uppercase tracking-wider text-taupe">Step 1 — Define</span>
+                        <input
+                          [(ngModel)]="editForm.title"
+                          placeholder="System title"
+                          class="mt-2 w-full bg-transparent font-heading text-3xl font-bold outline-none text-charcoal md:text-2xl" />
+                        <textarea
+                          [(ngModel)]="editForm.description"
+                          rows="2"
+                          placeholder="Describe intent..."
+                          class="mt-3 w-full resize-none border border-taupe/20 bg-sand rounded-lg p-3 text-sm font-medium outline-none focus:border-orange-500 text-charcoal"></textarea>
+                      </div>
+
+                      <div class="grid w-full sm:w-auto sm:min-w-[200px] grid-cols-2 gap-2">
+                        <div class="bg-sand rounded-lg p-3">
+                          <span class="text-xs font-bold uppercase tracking-wider text-taupe">Readiness</span>
+                          <p class="mt-1 text-2xl font-bold text-charcoal">{{ readinessScore() }}%</p>
+                        </div>
+                        <div class="bg-sand rounded-lg p-3">
+                          <span class="text-xs font-bold uppercase tracking-wider text-taupe">Issues</span>
+                          <p class="mt-1 text-2xl font-bold text-charcoal">{{ getValidationIssues().length }}</p>
+                        </div>
+                        <button
+                          (click)="saveSystem()"
+                          class="inline-flex items-center justify-center gap-2 bg-sage text-white rounded-lg px-2 py-2.5 text-xs font-bold hover:opacity-90 transition-all">
+                          <span class="material-symbols-outlined text-sm">save</span>
+                          Save
+                        </button>
+                        <button
+                          (click)="deleteSystem()"
+                          [disabled]="!selectedSystem()?.id"
+                          class="inline-flex items-center justify-center gap-2 bg-red-500 text-white rounded-lg px-2 py-2.5 text-xs font-bold hover:bg-red-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                          <span class="material-symbols-outlined text-sm">delete</span>
+                          Delete
+                        </button>
+                      </div>
                     </div>
 
-                    <div class="grid w-full sm:w-auto sm:min-w-[260px] grid-cols-2 gap-3">
-                      <div class="bg-sand rounded-lg p-4">
-                        <span class="text-xs font-bold uppercase tracking-wider text-taupe">Readiness</span>
-                        <p class="mt-2 text-3xl font-bold text-charcoal">{{ readinessScore() }}%</p>
-                      </div>
-                      <div class="bg-sand rounded-lg p-4">
-                        <span class="text-xs font-bold uppercase tracking-wider text-taupe">Issues</span>
-                        <p class="mt-2 text-3xl font-bold text-charcoal">{{ getValidationIssues().length }}</p>
-                      </div>
-                      <button
-                        (click)="saveSystem()"
-                        class="inline-flex items-center justify-center gap-2 bg-sage text-white rounded-lg px-3 py-3 text-sm font-bold hover:opacity-90 transition-all">
-                        <span class="material-symbols-outlined text-sm">save</span>
-                        Save
-                      </button>
-                      <button
-                        (click)="deleteSystem()"
-                        [disabled]="!selectedSystem()?.id"
-                        class="inline-flex items-center justify-center gap-2 bg-red-500 text-white rounded-lg px-3 py-3 text-sm font-bold hover:bg-red-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                        <span class="material-symbols-outlined text-sm">delete</span>
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="mt-4 grid gap-4 lg:grid-cols-3">
-                    <div>
-                      <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Category</label>
-                      <input
-                        [(ngModel)]="editForm.category"
-                        list="category-list"
-                        class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none focus:border-orange-500 text-charcoal" />
-                      <datalist id="category-list">
-                        @for (cat of availableCategories(); track cat) {
-                          <option [value]="cat"></option>
-                        }
-                      </datalist>
-                    </div>
-                    <div class="lg:col-span-2">
-                      <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Tags (comma separated)</label>
+                    <div class="mt-4">
+                      <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Tags</label>
                       <input
                         [(ngModel)]="tagsInput"
                         (blur)="syncTagsFromInput()"
-                        placeholder="python, interview, backend"
-                        class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none focus:border-orange-500 text-charcoal" />
+                        placeholder="python, interview..."
+                        class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none focus:border-orange-500 text-charcoal" />
                     </div>
-                  </div>
-                </section>
+                  </section>
+
+                  <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
+                    <span class="text-xs font-bold uppercase tracking-wider text-taupe">Step 3 — Launch</span>
+                    <h3 class="mt-1 font-heading text-xl font-bold text-charcoal">Instantiate</h3>
+
+                    @if (selectedSystem()?.id) {
+                      <div class="mt-4 space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                          <div>
+                            <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Parent habit</label>
+                            <select
+                              [(ngModel)]="selectedHabitId"
+                              class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal">
+                              <option [ngValue]="null" disabled>Select parent habit</option>
+                              @for (habit of habits(); track habit.id) {
+                                <option [value]="habit.id">{{ habit.name }}</option>
+                              }
+                            </select>
+                          </div>
+
+                          <div>
+                            <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Start date</label>
+                            <input
+                              type="date"
+                              [(ngModel)]="instantiateDate"
+                              class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal" />
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3">
+                          <div class="flex-1 rounded-lg bg-sand/70 border border-taupe/10 p-2.5 text-[10px] font-medium text-taupe line-clamp-2">
+                            {{ launchSummary() }}
+                          </div>
+
+                          <button
+                            (click)="applySystem()"
+                            [disabled]="isRunning() || getValidationIssues().length > 0"
+                            class="whitespace-nowrap inline-flex items-center justify-center gap-2 bg-orange-500 text-white rounded-lg px-4 py-2.5 text-sm font-bold hover:bg-orange-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                            <span class="material-symbols-outlined text-sm">{{ isRunning() ? 'hourglass_top' : 'play_arrow' }}</span>
+                            {{ isRunning() ? 'Launching...' : 'Launch' }}
+                          </button>
+                        </div>
+
+                        @if (lastResult()) {
+                          <div class="rounded-lg border border-green-200 bg-green-50 p-2 text-[11px] font-bold text-green-800">
+                            {{ lastResult()!.message }} | Tasks: {{ lastResult()!.totalTasks }}
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="mt-4 rounded-lg border border-dashed border-taupe/30 p-4 text-sm font-medium text-taupe">
+                        Save this draft first to enable launch.
+                      </div>
+                    }
+                  </section>
+                </div>
 
                 <!-- ── View Tabs ── -->
                 <div class="flex items-center justify-between">
@@ -360,8 +549,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                 }
 
                 @if (currentView() === 'form') {
-                <section class="grid gap-4 xl:grid-cols-12">
-                  <div class="xl:col-span-8 flex flex-col gap-4">
+                  <section class="flex flex-col gap-4">
                     <div class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
                       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-taupe/10 pb-4">
                         <div>
@@ -455,57 +643,17 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                                         placeholder="Success criteria for this week"
                                         class="w-full resize-none border border-taupe/20 bg-sand rounded-lg p-3 text-sm font-medium outline-none text-charcoal"></textarea>
 
-                                      <div class="grid gap-3 md:grid-cols-[1fr,1fr,auto]">
-                                        <div class="flex items-center gap-2">
-                                          <input
-                                            [matTimepicker]="weekStartPicker"
-                                            [(ngModel)]="week.time_block_start"
-                                            placeholder="Start"
-                                            class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
-                                          <mat-timepicker #weekStartPicker />
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                          <input
-                                            [matTimepicker]="weekEndPicker"
-                                            [(ngModel)]="week.time_block_end"
-                                            placeholder="End"
-                                            class="w-full border border-taupe/20 bg-sand rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
-                                          <mat-timepicker #weekEndPicker />
-                                        </div>
-                                        <div class="flex flex-wrap gap-2">
-                                          <button
-                                            (click)="duplicateWeek(phase, weekIndex)"
-                                            class="bg-sand border border-taupe/20 rounded-lg px-3 py-2 text-xs font-bold text-charcoal hover:bg-sand-dark transition-colors">
-                                            Duplicate
-                                          </button>
-                                          <button
-                                            (click)="removeWeek(phase, weekIndex)"
-                                            class="bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-red-400 transition-colors">
-                                            Remove
-                                          </button>
-                                        </div>
-                                      </div>
 
-                                      <div class="flex flex-wrap gap-2">
+                                      <div class="flex flex-wrap gap-2 mb-3">
                                         <button
-                                          (click)="injectTaskBundle(week, 'study')"
-                                          class="bg-blue-50 text-blue-700 border border-blue-200 rounded-lg px-3 py-2 text-xs font-bold hover:bg-blue-100 transition-colors">
-                                          + Study Bundle
-                                        </button>
-                                        <button
-                                          (click)="injectTaskBundle(week, 'project')"
-                                          class="bg-green-50 text-green-700 border border-green-200 rounded-lg px-3 py-2 text-xs font-bold hover:bg-green-100 transition-colors">
-                                          + Project Bundle
-                                        </button>
-                                        <button
-                                          (click)="addTask(week)"
-                                          class="bg-orange-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-orange-400 transition-colors">
-                                          + Task
-                                        </button>
-                                        <button
-                                          (click)="sortWeekTasks(week)"
+                                          (click)="duplicateWeek(phase, weekIndex)"
                                           class="bg-sand border border-taupe/20 rounded-lg px-3 py-2 text-xs font-bold text-charcoal hover:bg-sand-dark transition-colors">
-                                          Sort Days
+                                          Duplicate
+                                        </button>
+                                        <button
+                                          (click)="removeWeek(phase, weekIndex)"
+                                          class="bg-red-500 text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-red-400 transition-colors">
+                                          Remove
                                         </button>
                                       </div>
 
@@ -548,29 +696,13 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                                             </div>
                                           </div>
 
-                                          <div class="mt-3 grid gap-3 lg:grid-cols-[1.6fr,130px,130px]">
-                                            <div>
-                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Description</label>
-                                              <textarea
-                                                [(ngModel)]="item.description"
-                                                rows="2"
-                                                placeholder="Task description"
-                                                class="w-full resize-none border border-taupe/20 bg-white rounded-lg p-3 text-sm font-medium outline-none text-charcoal"></textarea>
-                                            </div>
-                                            <div>
-                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Start</label>
-                                              <input
-                                                type="time"
-                                                [(ngModel)]="item.time_block_start"
-                                                class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
-                                            </div>
-                                            <div>
-                                              <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">End</label>
-                                              <input
-                                                type="time"
-                                                [(ngModel)]="item.time_block_end"
-                                                class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2 text-sm font-medium outline-none text-charcoal" />
-                                            </div>
+                                          <div class="mt-3">
+                                            <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Description</label>
+                                            <textarea
+                                              [(ngModel)]="item.description"
+                                              rows="2"
+                                              placeholder="Task description"
+                                              class="w-full resize-none border border-taupe/20 bg-white rounded-lg p-3 text-sm font-medium outline-none text-charcoal"></textarea>
                                           </div>
                                         </div>
                                       } @empty {
@@ -591,94 +723,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
                         }
                       </div>
                     </div>
-                  </div>
-
-                  <div class="xl:col-span-4 flex flex-col gap-4">
-
-                    <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
-                      <span class="text-xs font-bold uppercase tracking-wider text-taupe">Health Check</span>
-                      <h3 class="mt-1 font-heading text-xl font-bold text-charcoal">Validation</h3>
-
-                      <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="bg-sand rounded-lg p-4">
-                          <span class="text-xs font-bold uppercase tracking-wider text-taupe">Timed</span>
-                          <p class="mt-2 text-2xl font-bold text-charcoal">{{ getMetrics().timed }}</p>
-                        </div>
-                        <div class="bg-sand rounded-lg p-4">
-                          <span class="text-xs font-bold uppercase tracking-wider text-taupe">Resources</span>
-                          <p class="mt-2 text-2xl font-bold text-charcoal">{{ getMetrics().resources }}</p>
-                        </div>
-                      </div>
-
-                      <div class="mt-4 space-y-2">
-                        @for (issue of getValidationIssues(); track issue) {
-                          <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-800">
-                            {{ issue }}
-                          </div>
-                        } @empty {
-                          <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-xs font-medium text-green-800">
-                            Looks good. Save and launch.
-                          </div>
-                        }
-                      </div>
-                    </section>
-
-                    <section class="bg-white rounded-lg shadow-gentle p-6 border border-taupe/10">
-                      <span class="text-xs font-bold uppercase tracking-wider text-taupe">Step 3 — Launch</span>
-                      <h3 class="mt-1 font-heading text-xl font-bold text-charcoal">Instantiate</h3>
-
-                      @if (selectedSystem()?.id) {
-                        <div class="mt-4 space-y-3">
-                          <div>
-                            <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Parent habit</label>
-                            <select
-                              [(ngModel)]="selectedHabitId"
-                              class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal">
-                              <option [ngValue]="null">No parent habit</option>
-                              @for (habit of habits(); track habit.id) {
-                                <option [value]="habit.id">{{ habit.name }}</option>
-                              }
-                            </select>
-                          </div>
-
-                          <div>
-                            <label class="mb-1 block text-xs font-bold uppercase tracking-wider text-taupe">Start date</label>
-                            <input
-                              type="date"
-                              [(ngModel)]="instantiateDate"
-                              class="w-full border border-taupe/20 bg-white rounded-lg px-3 py-2.5 text-sm font-medium outline-none text-charcoal" />
-                          </div>
-
-                          <div class="rounded-lg bg-sand/70 border border-taupe/10 p-3 text-xs font-medium text-taupe">
-                            {{ launchSummary() }}
-                          </div>
-
-                          <button
-                            (click)="applySystem()"
-                            [disabled]="isRunning() || getValidationIssues().length > 0"
-                            class="w-full inline-flex items-center justify-center gap-2 bg-orange-500 text-white rounded-lg px-4 py-3 text-sm font-bold hover:bg-orange-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                            <span class="material-symbols-outlined text-sm">{{ isRunning() ? 'hourglass_top' : 'play_arrow' }}</span>
-                            {{ isRunning() ? 'Launching...' : 'Launch System' }}
-                          </button>
-
-                          @if (lastResult()) {
-                            <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-xs font-bold text-green-800">
-                              {{ lastResult()!.message }}<br/>
-                              Starts: {{ lastResult()!.startDate }} | Tasks: {{ lastResult()!.totalTasks }}
-                              @if (lastResult()!.habitName) {
-                                <br/>Linked: {{ lastResult()!.habitName }}
-                              }
-                            </div>
-                          }
-                        </div>
-                      } @else {
-                        <div class="mt-4 rounded-lg border border-dashed border-taupe/30 p-4 text-sm font-medium text-taupe">
-                          Save this draft first to enable launch.
-                        </div>
-                      }
-                    </section>
-                  </div>
-                </section>
+                  </section>
                 } <!-- end form view -->
               </div>
             } @else {
@@ -712,7 +757,7 @@ const SYSTEM_PRESETS: SystemPreset[] = [
           <div class="mt-4 grid gap-4 md:grid-cols-3 text-sm">
             <div class="rounded-lg p-4 bg-sand border border-taupe/10 text-charcoal">
               <p class="font-bold mb-2">1. Define</p>
-              <p>Add title, category, description, and tags.</p>
+              <p>Add title, description, and tags.</p>
             </div>
             <div class="rounded-lg p-4 bg-sand border border-taupe/10 text-charcoal">
               <p class="font-bold mb-2">2. Structure</p>
@@ -857,13 +902,11 @@ export class SystemManagerComponent implements OnInit {
   aiWeeks = 4;
 
   systemSearch = '';
-  categoryFilter = 'All';
   tagsInput = '';
 
   editForm: LearningSystem = {
     title: '',
     description: '',
-    category: 'General',
     tags: [],
     items: []
   };
@@ -882,22 +925,13 @@ export class SystemManagerComponent implements OnInit {
   filteredSystems(): LearningSystem[] {
     const q = this.systemSearch.trim().toLowerCase();
     return this.systems().filter((s) => {
-      const category = s.category || 'General';
-      const categoryMatch = this.categoryFilter === 'All' || category === this.categoryFilter;
-      if (!categoryMatch) return false;
       if (!q) return true;
       const tags = (s.tags || []).join(' ');
-      const haystack = `${s.title} ${s.description || ''} ${category} ${tags}`.toLowerCase();
+      const haystack = `${s.title} ${s.description || ''} ${tags}`.toLowerCase();
       return haystack.includes(q);
     });
   }
 
-  availableCategories(): string[] {
-    const set = new Set<string>();
-    this.systems().forEach((s) => set.add(s.category || 'General'));
-    if (this.editForm.category?.trim()) set.add(this.editForm.category.trim());
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }
 
   selectSystem(system: LearningSystem) {
     this.selectedSystem.set(system);
@@ -915,7 +949,6 @@ export class SystemManagerComponent implements OnInit {
     this.editForm = {
       title: 'New System',
       description: '',
-      category: 'General',
       tags: [],
       items: []
     };
@@ -930,7 +963,6 @@ export class SystemManagerComponent implements OnInit {
     this.createNewSystem();
     this.editForm.title = preset.label;
     this.editForm.description = preset.description;
-    this.editForm.category = preset.category;
     this.editForm.tags = [...preset.tags];
     this.tagsInput = this.editForm.tags.join(', ');
 
@@ -990,9 +1022,7 @@ export class SystemManagerComponent implements OnInit {
             goal: '',
             outcome: '',
             items: wItems.sort((a, b) => (a.day_number || 0) - (b.day_number || 0)),
-            isExpanded: true,
-            time_block_start: first?.time_block_start || null,
-            time_block_end: first?.time_block_end || null
+            isExpanded: true
           };
         });
 
@@ -1018,8 +1048,7 @@ export class SystemManagerComponent implements OnInit {
             phase: phase.name.trim() || 'Phase',
             week_number: Number(week.weekNum) || 1,
             week_focus: week.focus.trim() || `Week ${week.weekNum}`,
-            time_block_start: item.time_block_start || week.time_block_start || undefined,
-            time_block_end: item.time_block_end || week.time_block_end || undefined
+            resource_link: item.resource_link?.trim() || ''
           });
         });
       });
@@ -1040,16 +1069,15 @@ export class SystemManagerComponent implements OnInit {
 
   addWeek(phase: PhaseNode) {
     const nextWeek = phase.weeks.length ? Math.max(...phase.weeks.map((w) => w.weekNum)) + 1 : 1;
-    phase.weeks.push({
+    const newWeek: WeekNode = {
       weekNum: nextWeek,
       focus: `Week ${nextWeek}`,
       goal: '',
       outcome: '',
       items: [],
-      isExpanded: true,
-      time_block_start: null,
-      time_block_end: null
-    });
+      isExpanded: true
+    };
+    phase.weeks.push(newWeek);
   }
 
   duplicateWeek(phase: PhaseNode, weekIndex: number) {
@@ -1078,9 +1106,7 @@ export class SystemManagerComponent implements OnInit {
       day_number: nextDay,
       phase: '',
       week_focus: '',
-      resource_link: '',
-      time_block_start: week.time_block_start || undefined,
-      time_block_end: week.time_block_end || undefined
+      resource_link: ''
     });
   }
 
@@ -1111,9 +1137,7 @@ export class SystemManagerComponent implements OnInit {
         day_number: nextDay++,
         phase: '',
         week_focus: '',
-        resource_link: '',
-        time_block_start: week.time_block_start || undefined,
-        time_block_end: week.time_block_end || undefined
+        resource_link: ''
       });
     });
   }
@@ -1135,7 +1159,6 @@ export class SystemManagerComponent implements OnInit {
     this.flattenHierarchy();
 
     this.editForm.title = this.editForm.title.trim() || 'Untitled System';
-    this.editForm.category = this.editForm.category?.trim() || 'General';
     this.editForm.description = this.editForm.description?.trim() || '';
 
     if (this.isCreating()) {
@@ -1173,7 +1196,6 @@ export class SystemManagerComponent implements OnInit {
       this.editForm = {
         title: '',
         description: '',
-        category: 'General',
         tags: [],
         items: []
       };
@@ -1185,7 +1207,7 @@ export class SystemManagerComponent implements OnInit {
 
   applySystem() {
     const systemId = this.selectedSystem()?.id;
-    if (!systemId || this.isRunning() || this.getValidationIssues().length > 0) return;
+    if (!systemId || !this.selectedHabitId || this.isRunning() || this.getValidationIssues().length > 0) return;
 
     this.isRunning.set(true);
     this.lastResult.set(null);
@@ -1275,15 +1297,12 @@ export class SystemManagerComponent implements OnInit {
       description: row.Description || row.description || '',
       phase: row.Phase || row.phase || 'Phase 1',
       week_focus: row.WeekFocus || row.week_focus || row.Focus || row.focus || 'General',
-      time_block_start: row.StartTime || row.start_time || undefined,
-      time_block_end: row.EndTime || row.end_time || undefined,
       resource_link: row.Resource || row.resource || row.Link || row.link || ''
     }));
 
     this.editForm = {
       title: 'Imported Strategy',
       description: 'Imported from spreadsheet/CSV.',
-      category: 'Imported',
       tags: ['imported'],
       items
     };
@@ -1298,7 +1317,6 @@ export class SystemManagerComponent implements OnInit {
     const phases = this.hierarchy();
     let weeks = 0;
     let tasks = 0;
-    let timed = 0;
     let resources = 0;
 
     phases.forEach((phase) => {
@@ -1306,13 +1324,12 @@ export class SystemManagerComponent implements OnInit {
       phase.weeks.forEach((week) => {
         tasks += week.items.length;
         week.items.forEach((item) => {
-          if (item.time_block_start || item.time_block_end) timed += 1;
           if (item.resource_link?.trim()) resources += 1;
         });
       });
     });
 
-    return { phases: phases.length, weeks, tasks, timed, resources };
+    return { phases: phases.length, weeks, tasks, resources };
   }
 
   readinessScore(): number {
@@ -1320,7 +1337,6 @@ export class SystemManagerComponent implements OnInit {
     let score = 0;
     if (this.editForm.title.trim()) score += 20;
     if ((this.editForm.description || '').trim()) score += 10;
-    if ((this.editForm.category || '').trim()) score += 10;
     if ((this.editForm.tags || []).length > 0) score += 10;
     if (metrics.phases > 0) score += 15;
     if (metrics.weeks > 0) score += 10;
@@ -1333,10 +1349,7 @@ export class SystemManagerComponent implements OnInit {
     const focus = week.focus?.trim() || `Week ${week.weekNum}`;
     const goal = week.goal?.trim() ? ` Goal: ${week.goal.trim()}.` : '';
     const outcome = week.outcome?.trim() ? ` Outcome: ${week.outcome.trim()}.` : '';
-    const time = week.time_block_start || week.time_block_end
-      ? ` Default time ${week.time_block_start || '--'} to ${week.time_block_end || '--'}.`
-      : '';
-    return `${focus}.${goal}${outcome}${time}`;
+    return `${focus}.${goal}${outcome}`;
   }
 
   launchSummary(): string {
@@ -1349,7 +1362,7 @@ export class SystemManagerComponent implements OnInit {
     const issues: string[] = [];
 
     if (!this.editForm.title.trim()) issues.push('System title is required.');
-    if (!(this.editForm.category || '').trim()) issues.push('Category is required.');
+    if (!this.selectedHabitId) issues.push('Parent habit is required for launch.');
     if (this.hierarchy().length === 0) issues.push('At least one phase is required.');
 
     this.hierarchy().forEach((phase, phaseIndex) => {
@@ -1357,11 +1370,7 @@ export class SystemManagerComponent implements OnInit {
       if (phase.weeks.length === 0) issues.push(`${phase.name || `Phase ${phaseIndex + 1}`}: add at least one week.`);
 
       phase.weeks.forEach((week, weekIndex) => {
-        if (!week.focus.trim()) issues.push(`${phase.name || `Phase ${phaseIndex + 1}`} week ${weekIndex + 1}: focus is required.`);
         if (week.items.length === 0) issues.push(`${phase.name || `Phase ${phaseIndex + 1}`} week ${week.weekNum}: add at least one task.`);
-        if (week.time_block_start && week.time_block_end && week.time_block_start >= week.time_block_end) {
-          issues.push(`${phase.name || `Phase ${phaseIndex + 1}`} week ${week.weekNum}: invalid time range.`);
-        }
 
         const daySet = new Set<number>();
         week.items.forEach((item, taskIndex) => {
@@ -1376,10 +1385,6 @@ export class SystemManagerComponent implements OnInit {
             issues.push(`${phase.name || `Phase ${phaseIndex + 1}`} week ${week.weekNum}: duplicate day ${day}.`);
           }
           daySet.add(day);
-
-          if (item.time_block_start && item.time_block_end && item.time_block_start >= item.time_block_end) {
-            issues.push(`${phase.name || `Phase ${phaseIndex + 1}`} week ${week.weekNum} task "${item.title || taskIndex + 1}": invalid time range.`);
-          }
         });
       });
     });
@@ -1399,9 +1404,7 @@ export class SystemManagerComponent implements OnInit {
           goal: '',
           outcome: '',
           items: [],
-          isExpanded: true,
-          time_block_start: null,
-          time_block_end: null
+          isExpanded: true
         }
       ]
     };

@@ -6,8 +6,6 @@ export interface SystemItem {
   day_number: number;
   title: string;
   description?: string;
-  time_block_start?: string;
-  time_block_end?: string;
   resource_link?: string;
 }
 
@@ -15,7 +13,6 @@ export interface LearningSystem {
   id?: string;
   title: string;
   description?: string;
-  category?: string;
   tags: string[];
   items: SystemItem[];
   created_at?: string;
@@ -35,8 +32,6 @@ export interface SystemInstanceTask {
   date: string;             // YYYY-MM-DD
   weekNumber: number;
   dayNumber: number;
-  timeBlockStart?: string;  // HH:mm
-  timeBlockEnd?: string;    // HH:mm
   durationMinutes?: number;
   resourceLink?: string;
   completed: boolean;

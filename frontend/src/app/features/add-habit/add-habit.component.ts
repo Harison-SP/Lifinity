@@ -189,13 +189,20 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
             <!-- Time Block -->
             <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Daily Reminder (Optional)</label>
-                <div class="w-full">
+                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Time Block (Optional)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <mat-form-field appearance="outline" class="w-full soft-input">
-                        <mat-label>Reminder Time</mat-label>
-                        <input matInput formControlName="timeBlockStart" [matTimepicker]="reminderPicker">
-                        <mat-timepicker-toggle matSuffix [for]="reminderPicker"></mat-timepicker-toggle>
-                        <mat-timepicker #reminderPicker panelClass="soft-datepicker"></mat-timepicker>
+                        <mat-label>Start Time</mat-label>
+                        <input matInput formControlName="timeBlockStart" [matTimepicker]="startPicker">
+                        <mat-timepicker-toggle matSuffix [for]="startPicker"></mat-timepicker-toggle>
+                        <mat-timepicker #startPicker panelClass="soft-datepicker"></mat-timepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full soft-input">
+                        <mat-label>End Time</mat-label>
+                        <input matInput formControlName="timeBlockEnd" [matTimepicker]="endPicker">
+                        <mat-timepicker-toggle matSuffix [for]="endPicker"></mat-timepicker-toggle>
+                        <mat-timepicker #endPicker panelClass="soft-datepicker"></mat-timepicker>
                     </mat-form-field>
                 </div>
             </div>
@@ -619,7 +626,7 @@ export class AddHabitComponent implements OnInit {
                 startDate: this.dateToString(formVal.startDate as any),
                 endDate: this.dateToString(formVal.endDate as any),
                 timeBlockStart: this.timeToString(formVal.timeBlockStart as any),
-                timeBlockEnd: this.timeToString(formVal.timeBlockStart as any), // Set end time same as start for single point reminder
+                timeBlockEnd: this.timeToString(formVal.timeBlockEnd as any),
 
                 icon: 'star',
                 color: this.color(),

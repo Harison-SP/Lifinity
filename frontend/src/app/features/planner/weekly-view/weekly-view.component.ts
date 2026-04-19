@@ -1,4 +1,4 @@
-﻿import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, DragDropModule } from '@angular/cdk/drag-drop';
@@ -218,17 +218,6 @@ interface WeekDay {
                          {{ stask.title }}
                        </h5>
 
-                       @if(stask.timeBlockStart) {
-                         <div class="flex items-center gap-1.5 mt-1">
-                           <span class="material-symbols-outlined text-sm text-taupe">schedule</span>
-                           <span class="text-[11px] font-bold text-taupe tracking-wide">
-                             {{ stask.timeBlockStart }}{{ stask.timeBlockEnd ? ' — ' + stask.timeBlockEnd : '' }}
-                           </span>
-                           @if(stask.durationMinutes) {
-                             <span class="text-[10px] text-taupe/60 italic">({{ stask.durationMinutes }}m)</span>
-                           }
-                         </div>
-                       }
                      </div>
 
                      <!-- Subtle background accent -->

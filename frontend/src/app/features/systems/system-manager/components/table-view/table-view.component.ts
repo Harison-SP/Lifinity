@@ -131,22 +131,7 @@ import { SystemItem } from '../../../../../models/system.model';
                     class="w-full bg-transparent border-b border-transparent hover:border-taupe/20 focus:border-orange-500 outline-none py-1 text-charcoal transition-colors"
                     placeholder="Description" />
                 </td>
-                <!-- Start -->
-                <td class="px-3 py-2">
-                  <input
-                    type="time"
-                    [(ngModel)]="row.timeBlockStart"
-                    (blur)="onCellChange()"
-                    class="w-24 bg-transparent border-b border-transparent hover:border-taupe/20 focus:border-orange-500 outline-none py-1 text-charcoal transition-colors" />
-                </td>
-                <!-- End -->
-                <td class="px-3 py-2">
-                  <input
-                    type="time"
-                    [(ngModel)]="row.timeBlockEnd"
-                    (blur)="onCellChange()"
-                    class="w-24 bg-transparent border-b border-transparent hover:border-taupe/20 focus:border-orange-500 outline-none py-1 text-charcoal transition-colors" />
-                </td>
+
                 <!-- Resource -->
                 <td class="px-3 py-2">
                   <input
@@ -229,8 +214,6 @@ export class TableViewComponent implements OnChanges {
             dayNumber: item.day_number,
             title: item.title,
             description: item.description || '',
-            timeBlockStart: item.time_block_start || '',
-            timeBlockEnd: item.time_block_end || '',
             resourceLink: item.resource_link || ''
           });
         });
@@ -257,8 +240,6 @@ export class TableViewComponent implements OnChanges {
         week_number: row.weekNum,
         phase: row.phaseName,
         week_focus: row.weekFocus,
-        time_block_start: row.timeBlockStart || undefined,
-        time_block_end: row.timeBlockEnd || undefined,
         resource_link: row.resourceLink || undefined
       });
     });
@@ -279,9 +260,7 @@ export class TableViewComponent implements OnChanges {
           goal: existingWeek?.goal || '',
           outcome: existingWeek?.outcome || '',
           items: entry.items.sort((a, b) => (Number(a.day_number) || 0) - (Number(b.day_number) || 0)),
-          isExpanded: existingWeek?.isExpanded ?? true,
-          time_block_start: existingWeek?.time_block_start || null,
-          time_block_end: existingWeek?.time_block_end || null
+          isExpanded: existingWeek?.isExpanded ?? true
         });
       });
 
@@ -310,8 +289,6 @@ export class TableViewComponent implements OnChanges {
       dayNumber: (lastRow?.dayNumber ?? 0) + 1,
       title: 'New Task',
       description: '',
-      timeBlockStart: '',
-      timeBlockEnd: '',
       resourceLink: ''
     });
     this.onCellChange();
