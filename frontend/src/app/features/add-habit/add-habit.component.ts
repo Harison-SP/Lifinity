@@ -33,63 +33,63 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatAutocompleteModule
 ],
     template: `
-    <div class="min-h-screen bg-white px-4 py-6 md:py-8 lg:px-12 font-body pb-24 transition-colors duration-300 overflow-x-hidden paper-texture">
-        <header class="mb-8 md:mb-10">
-            <button (click)="goBack()" class="flex items-center gap-2 text-taupe hover:text-charcoal transition-colors font-body text-sm md:text-base group mb-4">
-                <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+    <div class="min-h-screen bg-white px-3 py-4 md:py-8 lg:px-12 font-body pb-24 transition-colors duration-300 overflow-x-hidden paper-texture">
+        <header class="mb-3 md:mb-10">
+            <button (click)="goBack()" class="flex items-center gap-1.5 text-taupe hover:text-charcoal transition-colors font-body text-xs md:text-base group mb-1.5 md:mb-4">
+                <span class="material-symbols-outlined text-base group-hover:-translate-x-1 transition-transform">arrow_back</span>
                 Back
             </button>
-            <h1 class="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-charcoal">
+            <h1 class="font-heading text-xl md:text-4xl lg:text-5xl font-bold text-charcoal">
                 {{ isEditMode() ? 'Edit Habit' : 'Add Habit' }}
             </h1>
         </header>
 
-        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-3xl mx-auto bg-alabaster rounded-lg shadow-gentle p-6 md:p-8 lg:p-10">
+        <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="max-w-3xl mx-auto bg-alabaster rounded-lg shadow-gentle p-4 md:p-8 lg:p-10">
             <!-- Habit Name -->
-            <div class="mb-10 relative">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-2">Habit Name</label>
-                <input formControlName="name" class="w-full text-xl border-b-2 border-taupe/30 focus:border-orange-500 outline-none py-2 bg-transparent text-charcoal transition-colors" placeholder="e.g., Morning meditation" type="text"/>
+            <div class="mb-4 md:mb-10 relative">
+                <label class="block text-[9px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-1 md:mb-2">Habit Name</label>
+                <input formControlName="name" class="w-full text-base md:text-xl border-b-2 border-taupe/30 focus:border-orange-500 outline-none py-1 md:py-2 bg-transparent text-charcoal transition-colors" placeholder="e.g., Morning meditation" type="text"/>
                 @if (habitForm.get('name')?.invalid && habitForm.get('name')?.touched) {
-                    <p class="text-orange-500 text-xs mt-1">Please enter a habit name</p>
+                    <p class="text-orange-500 text-[9px] mt-0.5">Please enter a habit name</p>
                 }
             </div>
 
             <!-- Habit Type -->
-            <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Habit Type</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="mb-4 md:mb-10">
+                <label class="block text-[9px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Habit Type</label>
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-2 md:gap-4">
                     <button type="button" (click)="setHabitType('yes_no')"
-                            class="p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group"
+                            class="p-2 md:p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group transition-all"
                             [class.bg-primary]="habitType() === 'yes_no'"
                             [class.border-primary]="habitType() === 'yes_no'"
                             [class.text-white]="habitType() === 'yes_no'">
-                        <span class="material-symbols-outlined text-4xl mb-3 transition-transform group-hover:scale-110"
-                              [class.text-primary]="habitType() !== 'yes_no'"
-                              [class.text-white]="habitType() === 'yes_no'">check_circle</span>
-                        <span class="font-heading text-xl font-bold block mb-2">Yes/No Habit</span>
-                        <span class="text-sm text-taupe transition-colors"
-                              [class.text-white]="habitType() === 'yes_no'">Simple completion check</span>
+                        <span class="material-symbols-outlined text-xl md:text-4xl mb-1 md:mb-3 transition-transform group-hover:scale-110"
+                               [class.text-primary]="habitType() !== 'yes_no'"
+                               [class.text-white]="habitType() === 'yes_no'">check_circle</span>
+                        <span class="font-heading text-xs md:text-xl font-bold block mb-0 md:mb-2">Yes/No</span>
+                        <span class="text-[8px] md:text-sm text-taupe transition-colors hidden sm:block"
+                               [class.text-white]="habitType() === 'yes_no'">Simple check</span>
                     </button>
                     <button type="button" (click)="setHabitType('measurable')"
-                            class="p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group"
+                            class="p-2 md:p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group transition-all"
                             [class.bg-primary]="habitType() === 'measurable'"
                             [class.border-primary]="habitType() === 'measurable'"
                             [class.text-white]="habitType() === 'measurable'">
-                        <span class="material-symbols-outlined text-4xl mb-3 transition-transform group-hover:scale-110"
-                              [class.text-primary]="habitType() !== 'measurable'"
-                              [class.text-white]="habitType() === 'measurable'">assessment</span>
-                        <span class="font-heading text-xl font-bold block mb-2">Measurable Habit</span>
-                        <span class="text-sm text-taupe transition-colors"
-                              [class.text-white/70]="habitType() === 'measurable'">Track numbers, minutes, pages...</span>
+                        <span class="material-symbols-outlined text-xl md:text-4xl mb-1 md:mb-3 transition-transform group-hover:scale-110"
+                               [class.text-primary]="habitType() !== 'measurable'"
+                               [class.text-white]="habitType() === 'measurable'">assessment</span>
+                        <span class="font-heading text-xs md:text-xl font-bold block mb-0 md:mb-2">Measurable</span>
+                        <span class="text-[8px] md:text-sm text-taupe transition-colors hidden sm:block"
+                               [class.text-white/70]="habitType() === 'measurable'">Track numbers</span>
                     </button>
                 </div>
             </div>
 
             <!-- Measurable Options (Conditional) -->
             @if (habitType() === 'measurable') {
-                <div class="bg-sand/30 p-6 rounded-lg mb-10 border border-taupe/20">
-                    <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Target Settings</label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <div class="bg-sand/30 p-3 md:p-6 rounded-lg mb-4 md:mb-10 border border-taupe/20">
+                    <label class="block text-[9px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Target Settings</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 items-end">
                         <div class="flex-1">
                             <mat-form-field appearance="outline" class="w-full soft-input">
                                 <mat-label>Goal Type</mat-label>
@@ -125,29 +125,29 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
             }
 
             <!-- Frequency -->
-            <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Frequency</label>
-                <div class="flex flex-wrap gap-2 mb-4">
+            <div class="mb-4 md:mb-10">
+                <label class="block text-[9px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Frequency</label>
+                <div class="flex flex-wrap gap-1.5 mb-2 md:mb-4">
                     <button type="button" (click)="setFrequencyType('daily')"
-                            class="px-5 py-2 rounded-full border border-taupe/30 text-sm transition-all hover:bg-sand"
+                            class="px-4 py-1.5 rounded-full border border-taupe/30 text-xs md:text-sm transition-all hover:bg-sand"
                             [class.bg-charcoal]="frequencyType() === 'daily'"
                             [class.text-white]="frequencyType() === 'daily'"
                             [class.border-charcoal]="frequencyType() === 'daily'">
                         Daily
                     </button>
                     <button type="button" (click)="setFrequencyType('interval')"
-                            class="px-5 py-2 rounded-full border border-taupe/30 text-sm transition-all hover:bg-sand"
+                            class="px-4 py-1.5 rounded-full border border-taupe/30 text-xs md:text-sm transition-all hover:bg-sand"
                             [class.bg-charcoal]="frequencyType() === 'interval'"
                             [class.text-white]="frequencyType() === 'interval'"
                             [class.border-charcoal]="frequencyType() === 'interval'">
-                        Every X Days
+                        Interval
                     </button>
                     <button type="button" (click)="setFrequencyType('specific_days')"
-                            class="px-5 py-2 rounded-full border border-taupe/30 text-sm transition-all hover:bg-sand"
+                            class="px-3 py-1 rounded-full border border-taupe/30 text-[10px] md:text-sm transition-all hover:bg-sand"
                             [class.bg-charcoal]="frequencyType() === 'specific_days'"
                             [class.text-white]="frequencyType() === 'specific_days'"
                             [class.border-charcoal]="frequencyType() === 'specific_days'">
-                        Specific Days
+                        Specific
                     </button>
                 </div>
 
@@ -155,7 +155,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                     <div class="flex flex-wrap gap-2">
                         @for (day of daysOfWeek; track day.value) {
                             <button type="button" (click)="toggleDay(day.value)"
-                                    class="w-10 h-10 flex items-center justify-center rounded-full border border-taupe/30 text-sm font-medium transition-all hover:bg-sand"
+                                    class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full border border-taupe/30 text-[10px] md:text-sm font-medium transition-all hover:bg-sand"
                                     [class.bg-sage]="selectedDays().includes(day.value)"
                                     [class.text-white]="selectedDays().includes(day.value)"
                                     [class.border-sage]="selectedDays().includes(day.value)"
@@ -167,26 +167,26 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                 }
 
                 @if (frequencyType() === 'interval') {
-                    <div class="flex items-center gap-3 p-4 bg-sand/20 rounded-lg mt-4">
-                        <span class="text-sm text-taupe font-body">Repeat every</span>
-                        <input formControlName="frequencyInterval" type="number" min="1" class="w-16 p-2 border border-taupe/30 rounded text-center font-body text-charcoal bg-alabaster"/>
-                        <span class="text-sm text-taupe font-body">days</span>
+                    <div class="flex items-center gap-3 p-3 bg-sand/20 rounded-lg mt-3">
+                        <span class="text-xs text-taupe font-body">Repeat every</span>
+                        <input formControlName="frequencyInterval" type="number" min="1" class="w-14 p-1.5 border border-taupe/30 rounded text-center font-body text-xs text-charcoal bg-alabaster"/>
+                        <span class="text-xs text-taupe font-body">days</span>
                     </div>
                 }
             </div>
 
             <!-- Date Range -->
-            <div class="mb-10">
-                <div class="flex items-center justify-between mb-4">
-                    <label class="block text-sm font-bold uppercase tracking-wider text-taupe">Habit Duration</label>
-                    <div class="flex items-center gap-2 px-3 py-1 bg-sand/20 rounded-full border border-taupe/10">
-                        <span class="text-[10px] font-black uppercase tracking-widest" [class.text-sage]="isEndless()" [class.text-taupe]="!isEndless()">Endless Habit</span>
+            <div class="mb-6 md:mb-10">
+                <div class="flex items-center justify-between mb-3 md:mb-4">
+                    <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe">Duration</label>
+                    <div class="flex items-center gap-2 px-2 py-0.5 bg-sand/20 rounded-full border border-taupe/10">
+                        <span class="text-[9px] font-black uppercase tracking-widest" [class.text-sage]="isEndless()" [class.text-taupe]="!isEndless()">Endless</span>
                         <button type="button" 
                                 (click)="toggleEndless()"
-                                class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                class="relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
                                 [class.bg-sage]="isEndless()"
                                 [class.bg-taupe/30]="!isEndless()">
-                            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                            <span class="pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
                                   [class.translate-x-4]="isEndless()"
                                   [class.translate-x-0]="!isEndless()"></span>
                         </button>
@@ -210,39 +210,38 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                             <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="When do you begin?">
                             <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
                             <mat-datepicker #startPicker panelClass="soft-datepicker"></mat-datepicker>
-                            <mat-hint class="text-[10px] text-sage font-bold uppercase tracking-widest mt-1">This protocol has no defined end date.</mat-hint>
                         </mat-form-field>
                     }
                 </div>
             </div>
 
             <!-- Time Block Configuration (Optional) -->
-            <div class="mb-10 bg-sand/10 rounded-2xl p-6 border border-taupe/10 transition-all duration-500">
+            <div class="mb-4 md:mb-10 bg-sand/10 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 transition-all duration-500">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary">schedule</span>
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <div class="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-base md:text-xl">schedule</span>
                         </div>
                         <div>
-                            <h3 class="font-heading text-lg font-bold text-charcoal">Execution Window</h3>
-                            <p class="text-xs text-taupe">Define a specific time block for this protocol</p>
+                            <h3 class="font-heading text-xs md:text-lg font-bold text-charcoal">Execution Window</h3>
+                            <p class="text-[9px] md:text-xs text-taupe">Specific time block</p>
                         </div>
                     </div>
                     <button type="button" 
                             (click)="showTimeBlock.set(!showTimeBlock())"
-                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                            class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
                             [class.bg-primary]="showTimeBlock()"
                             [class.bg-taupe/30]="!showTimeBlock()">
-                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                              [class.translate-x-5]="showTimeBlock()"
+                        <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                              [class.translate-x-4]="showTimeBlock()"
                               [class.translate-x-0]="!showTimeBlock()"></span>
                     </button>
                 </div>
 
                 @if (showTimeBlock()) {
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-taupe/10 animate-fade-in">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Window Starts</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-taupe/10 animate-fade-in">
+                        <div class="space-y-1 md:space-y-2">
+                            <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Starts</label>
                             <mat-form-field appearance="outline" class="w-full soft-input no-label-field">
                                 <input matInput formControlName="timeBlockStart" [matTimepicker]="startPicker" placeholder="09:00 AM">
                                 <mat-timepicker-toggle matSuffix [for]="startPicker"></mat-timepicker-toggle>
@@ -250,50 +249,45 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                             </mat-form-field>
                         </div>
 
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Window Ends</label>
+                        <div class="space-y-1 md:space-y-2">
+                            <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Ends</label>
                             <mat-form-field appearance="outline" class="w-full soft-input no-label-field">
                                 <input matInput formControlName="timeBlockEnd" [matTimepicker]="endPicker" placeholder="10:00 AM">
                                 <mat-timepicker-toggle matSuffix [for]="endPicker"></mat-timepicker-toggle>
                                 <mat-timepicker #endPicker panelClass="soft-datepicker"></mat-timepicker>
                             </mat-form-field>
                         </div>
-                        
-                        <div class="md:col-span-2 flex items-center gap-2 text-xs text-primary/70 bg-primary/5 p-3 rounded-lg border border-primary/10">
-                            <span class="material-symbols-outlined text-sm">info</span>
-                            Setting a time window enables focused AI scheduling and proximity-based protocol alerts.
-                        </div>
                     </div>
                 }
             </div>
 
             <!-- Advanced Configuration Toggle -->
-            <div class="mb-8 pt-4 border-t border-taupe/10">
+            <div class="mb-4 md:mb-8 pt-3 border-t border-taupe/10">
                 <button type="button" 
                         (click)="showAdvancedOptions.set(!showAdvancedOptions())"
-                        class="w-full py-4 px-6 rounded-2xl bg-charcoal/5 border border-charcoal/10 flex items-center justify-between hover:bg-charcoal/10 transition-all group">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-charcoal/10 flex items-center justify-center group-hover:bg-charcoal/20 transition-colors">
-                            <span class="material-symbols-outlined text-charcoal">{{ showAdvancedOptions() ? 'settings_suggest' : 'tune' }}</span>
+                        class="w-full py-2.5 md:py-4 px-3 md:px-6 rounded-xl md:rounded-2xl bg-charcoal/5 border border-charcoal/10 flex items-center justify-between hover:bg-charcoal/10 transition-all group">
+                    <div class="flex items-center gap-2 md:gap-4">
+                        <div class="w-7 h-7 md:w-10 md:h-10 rounded-full bg-charcoal/10 flex items-center justify-center group-hover:bg-charcoal/20 transition-colors">
+                            <span class="material-symbols-outlined text-charcoal text-base md:text-xl">{{ showAdvancedOptions() ? 'settings_suggest' : 'tune' }}</span>
                         </div>
                         <div class="text-left">
-                            <h3 class="font-heading text-base font-bold text-charcoal">Advanced Configuration</h3>
-                            <p class="text-xs text-taupe">{{ showAdvancedOptions() ? 'Hide refined protocol settings' : 'Micro-habits, sobriety tracker, stacking & priorities' }}</p>
+                            <h3 class="font-heading text-xs md:text-base font-bold text-charcoal">Advanced</h3>
+                            <p class="text-[9px] md:text-xs text-taupe">{{ showAdvancedOptions() ? 'Hide refined settings' : 'Micro-habits, sobriety, stacking' }}</p>
                         </div>
                     </div>
-                    <span class="material-symbols-outlined transition-transform duration-300" [class.rotate-180]="showAdvancedOptions()">expand_more</span>
+                    <span class="material-symbols-outlined text-base md:text-xl transition-transform duration-300" [class.rotate-180]="showAdvancedOptions()">expand_more</span>
                 </button>
             </div>
 
             @if (showAdvancedOptions()) {
-                <div class="animate-fade-in space-y-10 pb-10">
+                <div class="animate-fade-in space-y-6 md:space-y-10 pb-10">
                     <!-- Color -->
-                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
-                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Protocol Identity (Color)</label>
-                        <div class="flex flex-wrap gap-3 items-center">
+                    <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Protocol Identity (Color)</label>
+                        <div class="flex flex-wrap gap-2 md:gap-3 items-center">
                             @for (c of presetColors; track c) {
                                 <button type="button" (click)="color.set(c)"
-                                        class="w-8 h-8 rounded-full border-2 transition-all hover:scale-110 shadow-gentle"
+                                        class="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 transition-all hover:scale-110 shadow-gentle"
                                         [style.background-color]="c"
                                         [class.border-primary]="color() === c"
                                         [class.border-taupe]="color() !== c"
@@ -305,8 +299,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                     </div>
 
                     <!-- Habit Stacking -->
-                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
-                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-2">Habit Stacking
+                    <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-1 md:mb-2">Habit Stacking
                             <span class="text-taupe/60 normal-case tracking-normal font-normal">(optional)</span>
                         </label>
                         <p class="text-xs text-taupe/80 mb-4 font-body">Build consistency by linking this protocol to a daily anchor event.</p>
@@ -330,39 +324,39 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                     </div>
 
                     <!-- Category -->
-                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
-                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Protocol Category</label>
-                        <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Protocol Category</label>
+                        <div class="grid grid-cols-2 gap-3 md:gap-4">
                             <button type="button" (click)="setCategory('protocol')"
-                                    class="p-5 rounded-xl border-2 flex flex-col items-center text-center gap-2 transition-all"
+                                    class="p-3 md:p-5 rounded-xl border-2 flex flex-col items-center text-center gap-1 md:gap-2 transition-all"
                                     [class.border-sage]="habitCategory() === 'protocol'"
                                     [class.bg-sage/10]="habitCategory() === 'protocol'"
                                     [class.border-taupe/30]="habitCategory() !== 'protocol'">
-                                <span class="material-symbols-outlined text-3xl" [class.text-sage]="habitCategory() === 'protocol'" [class.text-taupe]="habitCategory() !== 'protocol'">verified</span>
-                                <span class="font-bold text-charcoal text-sm">Protocol</span>
-                                <span class="text-xs text-taupe">Build a positive habit</span>
+                                <span class="material-symbols-outlined text-2xl md:text-3xl" [class.text-sage]="habitCategory() === 'protocol'" [class.text-taupe]="habitCategory() !== 'protocol'">verified</span>
+                                <span class="font-bold text-charcoal text-xs md:text-sm">Protocol</span>
+                                <span class="text-[10px] md:text-xs text-taupe">Positive habit</span>
                             </button>
                             <button type="button" (click)="setCategory('bad_habit')"
-                                    class="p-5 rounded-xl border-2 flex flex-col items-center text-center gap-2 transition-all"
+                                    class="p-3 md:p-5 rounded-xl border-2 flex flex-col items-center text-center gap-1 md:gap-2 transition-all"
                                     [class.border-orange-500]="habitCategory() === 'bad_habit'"
                                     [class.bg-orange-500/10]="habitCategory() === 'bad_habit'"
                                     [class.border-taupe/30]="habitCategory() !== 'bad_habit'">
-                                <span class="material-symbols-outlined text-3xl" [class.text-orange-500]="habitCategory() === 'bad_habit'" [class.text-taupe]="habitCategory() !== 'bad_habit'">block</span>
-                                <span class="font-bold text-charcoal text-sm">Bad Habit</span>
-                                <span class="text-xs text-taupe">Break a negative habit</span>
+                                <span class="material-symbols-outlined text-2xl md:text-3xl" [class.text-orange-500]="habitCategory() === 'bad_habit'" [class.text-taupe]="habitCategory() !== 'bad_habit'">block</span>
+                                <span class="font-bold text-charcoal text-xs md:text-sm">Bad Habit</span>
+                                <span class="text-[10px] md:text-xs text-taupe">Break negative</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Priority -->
-                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
-                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Priority & Enforcement</label>
-                        <div class="flex gap-3">
+                    <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Priority & Enforcement</label>
+                        <div class="grid grid-cols-3 gap-2 md:gap-3">
                             @for (p of priorityOptions; track p.value) {
                                 <button type="button" (click)="habitPriority.set(p.value)"
-                                        class="flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all flex items-center justify-center gap-2"
+                                        class="py-2.5 md:py-3 rounded-xl border-2 text-[11px] md:text-sm font-bold transition-all flex items-center justify-center gap-1.5 md:gap-2"
                                         [class]="getPriorityClass(p.value)">
-                                    <span class="material-symbols-outlined text-sm">{{ p.icon }}</span>
+                                    <span class="material-symbols-outlined text-sm md:text-base">{{ p.icon }}</span>
                                     {{ p.label }}
                                 </button>
                             }
@@ -376,12 +370,12 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                     </div>
 
                     <!-- Micro-Habits Builder -->
-                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
-                        <div class="flex items-center justify-between mb-4">
-                            <label class="block text-sm font-bold uppercase tracking-wider text-taupe">Micro-Habits (Steps)</label>
+                    <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe">Micro-Habits (Steps)</label>
                             <button type="button" (click)="showSubtaskForm.set(!showSubtaskForm())"
-                                    class="text-xs px-4 py-1.5 bg-sage text-white rounded-full font-bold hover:bg-sage/90 transition-colors flex items-center gap-1 shadow-gentle">
-                                <span class="material-symbols-outlined text-sm">add</span>
+                                    class="text-[9px] md:text-xs px-3 py-1 bg-sage text-white rounded-full font-bold hover:bg-sage/90 transition-colors flex items-center gap-1 shadow-gentle">
+                                <span class="material-symbols-outlined text-xs md:text-sm">add</span>
                                 Add Step
                             </button>
                         </div>
@@ -468,15 +462,15 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
                     <!-- Sobriety / Avoidance Tracker (for bad_habit) -->
                     @if (habitCategory() === 'bad_habit') {
-                        <div class="bg-charcoal/5 rounded-2xl p-6 border border-charcoal/10">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-charcoal/10 flex items-center justify-center">
-                                        <span class="material-symbols-outlined text-charcoal">timer</span>
+                        <div class="bg-charcoal/5 rounded-xl md:rounded-2xl p-3 md:p-6 border border-charcoal/10">
+                            <div class="flex items-center justify-between mb-2 md:mb-4">
+                                <div class="flex items-center gap-2 md:gap-3">
+                                    <div class="w-7 h-7 md:w-10 md:h-10 rounded-full bg-charcoal/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-charcoal text-base md:text-xl">timer</span>
                                     </div>
                                     <div>
-                                        <h3 class="font-heading text-base font-bold text-charcoal">Sobriety Countdown</h3>
-                                        <p class="text-xs text-taupe">Track avoidance time since last slip</p>
+                                        <h3 class="font-heading text-xs md:text-base font-bold text-charcoal leading-tight">Sobriety Countdown</h3>
+                                        <p class="text-[9px] md:text-xs text-taupe">Track avoidance time</p>
                                     </div>
                                 </div>
                                 <button type="button" 
@@ -505,11 +499,11 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
             }
 
             <!-- Actions -->
-            <div class="flex flex-col-reverse md:flex-row gap-4 pt-6 border-t border-taupe/30">
-                <button type="button" (click)="goBack()" class="flex-1 py-4 border-2 border-taupe text-taupe font-bold uppercase tracking-wider hover:bg-sand hover:border-charcoal transition-colors rounded-lg">
+            <div class="flex flex-col-reverse md:flex-row gap-3 pt-4 md:pt-6 border-t border-taupe/30">
+                <button type="button" (click)="goBack()" class="flex-1 py-3 md:py-4 border-2 border-taupe text-taupe font-bold uppercase tracking-wider hover:bg-sand hover:border-charcoal transition-colors rounded-lg text-xs md:text-sm">
                     Cancel
                 </button>
-                <button type="submit" [disabled]="habitForm.invalid" class="flex-[2] py-4 bg-primary text-white font-bold uppercase tracking-wider border-2 border-transparent hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-lg shadow-gentle">
+                <button type="submit" [disabled]="habitForm.invalid" class="flex-[2] py-3 md:py-4 bg-primary text-white font-bold uppercase tracking-wider border-2 border-transparent hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-lg shadow-gentle text-xs md:text-sm">
                     {{ isEditMode() ? 'Update Habit' : 'Save Habit' }}
                 </button>
             </div>

@@ -22,20 +22,20 @@ interface MonthlyHabit {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, MultiSelectChipsComponent, RouterModule],
   template: `
-    <div class="h-full flex flex-col font-body p-4 sm:p-6 gap-6 overflow-x-hidden bg-white paper-texture">
+    <div class="h-full flex flex-col font-body p-3 md:p-6 gap-4 md:gap-6 overflow-x-hidden bg-white paper-texture">
       <!-- Header -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
+        <div class="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-between md:justify-start">
           <button (click)="changeMonth(-1)" 
-                  class="p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
-            <span class="material-symbols-outlined">chevron_left</span>
+                  class="p-1.5 md:p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
+            <span class="material-symbols-outlined text-xl md:text-2xl">chevron_left</span>
           </button>
-          <h2 class="text-2xl font-bold text-charcoal font-heading px-2 min-w-[180px] text-center">
+          <h2 class="text-lg md:text-2xl font-bold text-charcoal font-heading px-2 min-w-[140px] md:min-w-[180px] text-center">
             {{ getMonthName(currentMonth()) }} {{ currentYear() }}
           </h2>
           <button (click)="changeMonth(1)" 
-                  class="p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
-            <span class="material-symbols-outlined">chevron_right</span>
+                  class="p-1.5 md:p-2 bg-white rounded-lg shadow-gentle border border-taupe/10 hover:bg-sand transition-all text-charcoal">
+            <span class="material-symbols-outlined text-xl md:text-2xl">chevron_right</span>
           </button>
         </div>
       </div>
@@ -43,11 +43,11 @@ interface MonthlyHabit {
       <!-- Monthly Grid -->
       <div class="bg-white rounded-xl shadow-gentle border border-taupe/10 overflow-hidden">
         <div class="overflow-x-auto custom-scrollbar">
-          <div class="grid" [style.grid-template-columns]="'180px repeat(' + daysInMonth().length + ', 44px)'">
+          <div class="grid" [style.grid-template-columns]="(isMobile() ? '100px' : '180px') + ' repeat(' + daysInMonth().length + ', 40px)'">
             <!-- Header -->
-            <div class="sticky left-0 bg-white font-bold text-xs uppercase tracking-widest text-taupe p-4 border-r border-b border-taupe/10 z-20 font-heading">Habit</div>
+            <div class="sticky left-0 bg-white font-bold text-[10px] md:text-xs uppercase tracking-widest text-taupe p-3 md:p-4 border-r border-b border-taupe/10 z-20 font-heading">Habit</div>
             @for(day of daysInMonth(); track day) {
-              <div class="font-bold text-xs text-center p-4 border-b border-taupe/10 text-taupe flex items-center justify-center min-h-[50px]"
+              <div class="font-bold text-[10px] md:text-xs text-center p-3 md:p-4 border-b border-taupe/10 text-taupe flex items-center justify-center min-h-[40px] md:min-h-[50px]"
                    [class.bg-orange-50]="isToday(day)"
                    [class.text-orange-600]="isToday(day)"
                    [class.font-black]="isToday(day)">{{ day }}</div>
@@ -56,39 +56,39 @@ interface MonthlyHabit {
             <!-- Body -->
             @for(habit of monthHabits(); track habit.id) {
               <a [routerLink]="['/notes', habit.id]"
-                 class="sticky left-0 bg-white font-bold text-sm text-charcoal p-4 border-r border-b border-taupe/5 z-20 truncate flex items-center gap-2 hover:bg-sand/30 transition-all group"
+                 class="sticky left-0 bg-white font-bold text-xs md:text-sm text-charcoal p-3 md:p-4 border-r border-b border-taupe/5 z-20 truncate flex items-center gap-1.5 md:gap-2 hover:bg-sand/30 transition-all group"
                  [title]="habit.name">
-                <span class="material-symbols-outlined text-base text-orange-500 opacity-60 group-hover:opacity-100 transition-opacity">sticky_note_2</span>
+                <span class="material-symbols-outlined text-sm md:text-base text-orange-500 opacity-60 group-hover:opacity-100 transition-opacity">sticky_note_2</span>
                 <span class="truncate font-heading">{{ habit.name }}</span>
               </a>
               @for(day of daysInMonth(); track day) {
-                <div class="flex items-center justify-center border-b border-r border-taupe/5 min-h-[52px] group/cell"
+                <div class="flex items-center justify-center border-b border-r border-taupe/5 min-h-[44px] md:min-h-[52px] group/cell"
                      [class.bg-orange-50/30]="isToday(day)">
                   <button (click)="toggleCompletion(habit, day)" 
                           class="w-full h-full flex items-center justify-center transition-all py-1 hover:bg-sand/20"
                           [class.cursor-not-allowed]="isFutureDay(day)"
                           [disabled]="isFutureDay(day)">
                     @if(habit.completions[day] === true) { 
-                      <div class="w-6 h-6 rounded-full bg-sage flex items-center justify-center shadow-sm">
-                        <span class="material-symbols-outlined text-white text-base">check</span> 
+                      <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-sage flex items-center justify-center shadow-sm">
+                        <span class="material-symbols-outlined text-white text-[12px] md:text-base">check</span> 
                       </div>
                     }
                     @else if(habit.completions[day] === false) { 
-                      <div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
-                        <span class="material-symbols-outlined text-orange-500 text-base">close</span> 
+                      <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
+                        <span class="material-symbols-outlined text-orange-500 text-[12px] md:text-base">close</span> 
                       </div>
                     }
                     @else if(habit.type === 'measurable' && isNumber(habit.completions[day])) { 
-                      <span class="text-orange-600 text-xs font-bold font-mono">{{ habit.completions[day] }}</span> 
+                      <span class="text-orange-600 text-[10px] md:text-xs font-bold font-mono">{{ habit.completions[day] }}</span> 
                     }
                     @else { 
-                      <div class="w-2 h-2 rounded-full bg-taupe/10 group-hover/cell:bg-taupe/20 transition-colors"></div>
+                      <div class="w-1.5 h-1.5 rounded-full bg-taupe/10 group-hover/cell:bg-taupe/20 transition-colors"></div>
                     }
                   </button>
                 </div>
               }
             } @empty {
-              <div class="p-12 text-center text-taupe italic font-body" [style.grid-column]="'1 / -1'">
+              <div class="p-8 md:p-12 text-center text-taupe italic font-body text-xs md:text-base" [style.grid-column]="'1 / -1'">
                 No habits active for this period.
               </div>
             }
@@ -97,16 +97,16 @@ interface MonthlyHabit {
       </div>
 
       <!-- Sections -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <!-- Focus Themes -->
-        <div class="bg-white rounded-xl shadow-gentle p-8 border border-taupe/10">
-          <h3 class="text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-4 mb-8 flex items-center gap-2">
+        <div class="bg-white rounded-xl shadow-gentle p-4 md:p-8 border border-taupe/10">
+          <h3 class="text-lg md:text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-3 md:pb-4 mb-4 md:mb-8 flex items-center gap-2">
             <span class="material-symbols-outlined text-orange-500">sparkles</span>
             Monthly Intentions
           </h3>
-          <div class="space-y-8">
+          <div class="space-y-4 md:space-y-8">
             <div class="group">
-              <label class="text-[11px] font-bold text-taupe uppercase tracking-[0.2em] block mb-4 ml-1 group-focus-within:text-orange-500 transition-colors">Primary Focus</label>
+              <label class="text-[10px] md:text-[11px] font-bold text-taupe uppercase tracking-[0.2em] block mb-2 md:mb-4 ml-1 group-focus-within:text-orange-500 transition-colors">Primary Focus</label>
               <div class="p-1 bg-alabaster rounded-xl border border-taupe/5 group-focus-within:border-orange-500/20 transition-all">
                 <app-multi-select-chips
                   [options]="monthHabitOptions()"
@@ -117,7 +117,7 @@ interface MonthlyHabit {
               </div>
             </div>
             <div class="group">
-              <label class="text-[11px] font-bold text-taupe uppercase tracking-[0.2em] block mb-4 ml-1 group-focus-within:text-orange-500 transition-colors">Secondary Focus</label>
+              <label class="text-[10px] md:text-[11px] font-bold text-taupe uppercase tracking-[0.2em] block mb-2 md:mb-4 ml-1 group-focus-within:text-orange-500 transition-colors">Secondary Focus</label>
               <div class="p-1 bg-alabaster rounded-xl border border-taupe/5 group-focus-within:border-orange-500/20 transition-all">
                 <app-multi-select-chips
                   [options]="monthHabitOptions()"
@@ -131,35 +131,35 @@ interface MonthlyHabit {
         </div>
 
         <!-- Progress Tracker -->
-        <div class="bg-white rounded-xl shadow-gentle p-8 border border-taupe/10">
-          <h3 class="text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-4 mb-8 flex items-center gap-2">
+        <div class="bg-white rounded-xl shadow-gentle p-4 md:p-8 border border-taupe/10">
+          <h3 class="text-lg md:text-xl font-bold text-charcoal font-heading border-b border-taupe/10 pb-3 md:pb-4 mb-4 md:mb-8 flex items-center gap-2">
             <span class="material-symbols-outlined text-sage">analytics</span>
             Monthly Pulse
           </h3>
-           <div class="space-y-8">
+           <div class="space-y-4 md:space-y-8">
               <div>
-                  <div class="flex justify-between items-baseline mb-4">
-                    <label class="text-[11px] font-bold text-taupe uppercase tracking-[0.2em] ml-1">Overall Consistency</label>
-                    <span class="text-2xl font-bold text-sage font-heading">{{ completionPercentage() | number:'1.0-0' }}%</span>
+                  <div class="flex justify-between items-baseline mb-3 md:mb-4">
+                    <label class="text-[10px] md:text-[11px] font-bold text-taupe uppercase tracking-[0.2em] ml-1">Overall Consistency</label>
+                    <span class="text-xl md:text-2xl font-bold text-sage font-heading">{{ completionPercentage() | number:'1.0-0' }}%</span>
                   </div>
-                  <div class="w-full bg-sand rounded-full h-3 overflow-hidden shadow-inner border border-taupe/5">
+                  <div class="w-full bg-sand rounded-full h-2 md:h-3 overflow-hidden shadow-inner border border-taupe/5">
                       <div class="bg-sage h-full rounded-full transition-all duration-1000 ease-out" [style.width.%]="completionPercentage()">
                       </div>
                   </div>
               </div>
-              <div class="p-6 bg-alabaster rounded-xl border border-taupe/5 flex items-center justify-between group hover:border-taupe/20 transition-all">
+              <div class="p-4 md:p-6 bg-alabaster rounded-xl border border-taupe/5 flex items-center justify-between group hover:border-taupe/20 transition-all">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
-                      <span class="material-symbols-outlined">auto_stories</span>
+                    <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
+                      <span class="material-symbols-outlined text-xl md:text-2xl">auto_stories</span>
                     </div>
                     <div>
-                      <label class="text-[10px] font-bold text-taupe uppercase tracking-widest block">Study Commitment</label>
-                      <span class="text-lg font-bold text-charcoal font-heading leading-tight">Monthly Accumulation</span>
+                      <label class="text-[9px] md:text-[10px] font-bold text-taupe uppercase tracking-widest block">Study Commitment</label>
+                      <span class="text-sm md:text-lg font-bold text-charcoal font-heading leading-tight">Monthly Accumulation</span>
                     </div>
                   </div>
                   <div class="text-right">
-                    <span class="text-2xl font-bold text-orange-500 font-heading">{{ reflection().study_hours | number:'1.1-1' }}</span>
-                    <span class="text-xs font-bold text-taupe uppercase ml-1">HRS</span>
+                    <span class="text-xl md:text-2xl font-bold text-orange-500 font-heading">{{ reflection().study_hours | number:'1.1-1' }}</span>
+                    <span class="text-[10px] font-bold text-taupe uppercase ml-1">HRS</span>
                   </div>
               </div>
           </div>
@@ -207,6 +207,10 @@ export class MonthlyViewComponent implements OnInit, OnDestroy {
   // Helper for template
   isNumber(val: any): boolean {
     return typeof val === 'number';
+  }
+
+  isMobile(): boolean {
+    return window.innerWidth < 768;
   }
 
   currentDate = signal(new Date());

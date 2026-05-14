@@ -42,24 +42,24 @@ interface DragState {
     <div class="yearly-grid-container w-full h-full flex flex-col bg-white text-charcoal overflow-auto custom-scrollbar select-none font-body relative transition-colors duration-300 paper-texture" #container>
       
       <!-- Header Row (Days) -->
-      <div class="grid grid-cols-[80px_repeat(31,1fr)] gap-0 border-b border-taupe/10 sticky top-0 bg-white/95 backdrop-blur-sm z-20 pb-2 shadow-sm">
-        <div class="text-[10px] text-taupe font-bold uppercase tracking-widest text-center self-end pb-2 font-heading">Month</div>
+      <div class="grid grid-cols-[60px_repeat(31,30px)] md:grid-cols-[80px_repeat(31,1fr)] gap-0 border-b border-taupe/10 sticky top-0 bg-white/95 backdrop-blur-sm z-20 pb-1 md:pb-2 shadow-sm min-w-max md:min-w-0">
+        <div class="text-[9px] md:text-[10px] text-taupe font-bold uppercase tracking-widest text-center self-end pb-2 font-heading sticky left-0 bg-white/95 z-30 px-2 border-r border-taupe/10">Month</div>
         @for (day of daysHeader; track day) {
-          <div class="text-[9px] text-center text-taupe font-bold flex items-center justify-center h-8 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default relative group">
+          <div class="text-[8px] md:text-[9px] text-center text-taupe font-bold flex items-center justify-center h-6 md:h-8 hover:bg-orange-50 hover:text-orange-600 transition-colors cursor-default relative group">
               <span class="group-hover:scale-110 transition-transform">{{ day }}</span>
           </div>
         }
       </div>
 
       <!-- Month Rows -->
-      <div class="flex flex-col gap-0 relative z-10">
+      <div class="flex flex-col gap-0 relative z-10 min-w-max md:min-w-0">
         @for (row of monthRows(); track row.name) {
           <!-- Row container -->
-          <div class="grid grid-cols-[80px_repeat(31,1fr)] gap-0 transition-colors relative group border-b border-taupe/5 hover:bg-white/50"
-               [style.height.px]="math.max(row.maxLanes * 36 + 12, 56)">
+          <div class="grid grid-cols-[60px_repeat(31,30px)] md:grid-cols-[80px_repeat(31,1fr)] gap-0 transition-colors relative group border-b border-taupe/5 hover:bg-white/50"
+               [style.height.px]="math.max(row.maxLanes * 32 + 10, 48)">
             
             <!-- Month Label -->
-            <div class="text-xs font-bold text-charcoal flex items-center justify-center border-r border-taupe/10 uppercase tracking-widest bg-white sticky left-0 z-10 select-none cursor-pointer group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors font-heading"
+            <div class="text-[10px] md:text-xs font-bold text-charcoal flex items-center justify-center border-r border-taupe/10 uppercase tracking-widest bg-white sticky left-0 z-10 select-none cursor-pointer group-hover:bg-orange-50 group-hover:text-orange-600 transition-colors font-heading"
                  (dblclick)="onCellDoubleClick(row.index, 1)">
               {{ row.name }}
             </div>
@@ -75,7 +75,7 @@ interface DragState {
                     (dblclick)="onCellDoubleClick(row.index, day)">
                     @if (day <= row.days) {
                       <div class="absolute inset-0 opacity-0 group-hover/cell:opacity-100 bg-orange-50/50 transition-opacity"></div>
-                      <span class="absolute inset-x-0 bottom-1 text-[7px] text-center text-taupe pointer-events-none uppercase font-bold tracking-tighter">
+                      <span class="absolute inset-x-0 bottom-1 text-[6px] md:text-[7px] text-center text-taupe pointer-events-none uppercase font-bold tracking-tighter">
                         {{ getWeekdayLabel(row.index, day) }}
                       </span>
                     }
@@ -83,30 +83,30 @@ interface DragState {
             }
             
             <!-- Events Overlay for this Row -->
-            <div class="absolute inset-0 left-[80px] right-0 pointer-events-none grid grid-cols-[repeat(31,1fr)]">
+            <div class="absolute inset-0 left-[60px] md:left-[80px] right-0 pointer-events-none grid grid-cols-[repeat(31,1fr)]">
                @for (seg of row.segments; track seg.id + '-' + seg.startDay) {
                  <!-- Event Segment -->
-                 <div class="absolute rounded-md pointer-events-auto flex items-center px-2 overflow-hidden transition-all shadow-gentle border border-black/5"
+                 <div class="absolute rounded-md pointer-events-auto flex items-center px-1 md:px-2 overflow-hidden transition-all shadow-gentle border border-black/5"
                       [class.z-30]="isSegmentActive(seg)"
                       [class.z-10]="!isSegmentActive(seg)"
-                      [class.ring-2]="isSegmentActive(seg)"
+                      [class.ring-1]="isSegmentActive(seg)"
                       [class.ring-orange-500]="isSegmentActive(seg)"
                       [class.scale-[1.01]]="isSegmentActive(seg)"
                       [style.left.%]="getSegmentLeft(seg, row)"
                       [style.width.%]="getSegmentWidth(seg, row)"
-                      [style.top.px]="(seg.lane || 0) * 36 + 6"
-                      [style.height.px]="30"
+                      [style.top.px]="(seg.lane || 0) * 32 + 4"
+                      [style.height.px]="26"
                       [style.background-color]="seg.color || '#fff'"
                       (mousedown)="onMouseDown($event, seg, row, 'move')"
                       (click)="$event.stopPropagation(); onEventClick(seg.originalEvent)">
                    
                    <!-- Content -->
-                   <span class="text-[10px] font-bold text-black/80 whitespace-nowrap truncate w-full pointer-events-none relative z-10 tracking-tight uppercase px-1">{{ seg.title }}</span>
+                   <span class="text-[8px] md:text-[10px] font-bold text-black/80 whitespace-nowrap truncate w-full pointer-events-none relative z-10 tracking-tight uppercase px-0.5 md:px-1">{{ seg.title }}</span>
 
                    <!-- Resize Handles -->
-                   <div class="resize-handle left absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-black/10 z-20 transition-colors"
+                   <div class="resize-handle left absolute left-0 top-0 bottom-0 w-1 md:w-1.5 cursor-ew-resize hover:bg-black/10 z-20 transition-colors"
                         (mousedown)="onMouseDown($event, seg, row, 'resize-start')"></div>
-                   <div class="resize-handle right absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-black/10 z-20 transition-colors"
+                   <div class="resize-handle right absolute right-0 top-0 bottom-0 w-1 md:w-1.5 cursor-ew-resize hover:bg-black/10 z-20 transition-colors"
                         (mousedown)="onMouseDown($event, seg, row, 'resize-end')"></div>
                  </div>
                }
@@ -329,8 +329,10 @@ export class LinearCalendarComponent implements OnInit, OnChanges {
 
     mouseEvent.preventDefault();
 
+    const isMobile = window.innerWidth < 768;
+    const monthWidth = isMobile ? 60 : 80;
     const containerWidth = this.containerRef.nativeElement.clientWidth || 1000;
-    const dayWidth = (containerWidth - 60) / 31;
+    const dayWidth = isMobile ? 30 : (containerWidth - monthWidth) / 31;
     const deltaX = mouseEvent.clientX - state.startX;
     let deltaDays = Math.round(deltaX / dayWidth);
 
@@ -358,10 +360,12 @@ export class LinearCalendarComponent implements OnInit, OnChanges {
     const state = this.dragState();
     if (!state.isDragging || !state.segment || !state.row) return;
 
+    const isMobile = window.innerWidth < 768;
+    const monthWidth = isMobile ? 60 : 80;
     const targetRow = this.dragState().currentRow || state.row;
     
     const containerWidth = this.containerRef.nativeElement.clientWidth || 1000;
-    const dayWidth = (containerWidth - 60) / 31;
+    const dayWidth = isMobile ? 30 : (containerWidth - monthWidth) / 31;
     const deltaX = mouseEvent.clientX - state.startX;
     const deltaDays = Math.round(deltaX / dayWidth);
 

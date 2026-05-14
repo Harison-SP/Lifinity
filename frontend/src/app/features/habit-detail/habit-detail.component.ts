@@ -8,66 +8,67 @@ import { SystemInstanceTask } from '../../models/system.model';
 import { ToastService } from '../../services/toast.service';
 import { UserSettingsService } from '../../services/user-settings.service';
 import { YesterdayReflectionComponent } from './components/yesterday-reflection/yesterday-reflection.component';
+import { SubtaskMatrixComponent } from '../habit-activity/components/subtask-matrix/subtask-matrix.component';
 
 @Component({
     selector: 'app-habit-detail',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, YesterdayReflectionComponent],
+    imports: [CommonModule, FormsModule, RouterLink, YesterdayReflectionComponent, SubtaskMatrixComponent],
     template: `
-    <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body pb-24 relative transition-colors duration-300 overflow-x-hidden paper-texture">
+    <div class="min-h-screen bg-white px-3 md:px-6 py-3 md:py-8 font-body pb-24 relative transition-colors duration-300 overflow-x-hidden paper-texture">
       <!-- Timer Overlay (Full Screen) -->
       @if (timerRunning()) {
-        <div class="fixed inset-0 z-[100] bg-charcoal flex flex-col items-center justify-center text-white p-6 animate-in fade-in duration-500">
-          <button (click)="pauseTimer()" class="absolute top-6 right-6 md:right-12 text-white/60 hover:text-white flex items-center gap-2 px-6 py-3 border border-white/20 rounded-full transition-all group hover:bg-white/5">
-            <span class="material-symbols-outlined text-xl group-hover:rotate-90 transition-transform">close</span>
-            <span class="text-sm font-bold uppercase tracking-widest">Exit Focus</span>
+        <div class="fixed inset-0 z-[100] bg-charcoal flex flex-col items-center justify-center text-white p-4 md:p-6 animate-in fade-in duration-500">
+          <button (click)="pauseTimer()" class="absolute top-4 right-4 md:top-6 md:right-12 text-white/60 hover:text-white flex items-center gap-1 md:gap-2 px-4 md:px-6 py-2 md:py-3 border border-white/20 rounded-full transition-all group hover:bg-white/5">
+            <span class="material-symbols-outlined text-base md:text-xl group-hover:rotate-90 transition-transform">close</span>
+            <span class="text-[10px] md:text-sm font-bold uppercase tracking-widest">Exit</span>
           </button>
 
-          <div class="absolute top-6 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 w-[90%] md:max-w-2xl text-center md:text-left">
-            <h2 class="text-primary font-heading text-[10px] md:text-xs font-black tracking-widest uppercase mb-1 md:mb-2 opacity-60">System Habit focus</h2>
-            <h3 class="text-white text-2xl md:text-5xl font-black leading-tight mb-2 md:mb-4">{{ parentHabit()?.name || habit()?.name }}</h3>
+          <div class="absolute top-4 left-4 right-4 md:top-6 md:left-8 md:right-auto md:translate-x-0 text-center md:text-left">
+            <h2 class="text-primary font-heading text-[8px] md:text-xs font-black tracking-widest uppercase mb-1 opacity-60">System Habit focus</h2>
+            <h3 class="text-white text-lg md:text-5xl font-black leading-tight mb-1 md:mb-4 truncate">{{ parentHabit()?.name || habit()?.name }}</h3>
             @if (todaySystemTask()?.title) {
-              <p class="text-white/40 italic text-sm md:text-lg border-l-0 md:border-l-2 border-white/20 px-4 md:pl-4 line-clamp-2 md:line-clamp-none">Active Task: {{ todaySystemTask()?.title }}</p>
+              <p class="text-white/40 italic text-xs md:text-lg px-2 md:pl-4 line-clamp-1 md:line-clamp-none">Task: {{ todaySystemTask()?.title }}</p>
             }
           </div>
     
-          <div class="text-8xl md:text-[12rem] lg:text-[16rem] font-mono font-bold tracking-tighter mb-12 text-primary drop-shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+          <div class="text-6xl md:text-[12rem] lg:text-[16rem] font-mono font-bold tracking-tighter mb-8 md:mb-12 text-primary drop-shadow-[0_0_20px_rgba(249,115,22,0.3)]">
             {{ formattedTimer() }}
           </div>
     
-          <div class="mt-20 flex flex-col items-center">
-            <div class="flex items-center justify-center gap-4 h-24">
-              <span class="material-symbols-outlined transition-all duration-1000 animate-pulse text-sage" [style.fontSize]="'4rem'">
+          <div class="mt-10 md:mt-20 flex flex-col items-center">
+            <div class="flex items-center justify-center gap-4 h-16 md:h-24">
+              <span class="material-symbols-outlined transition-all duration-1000 animate-pulse text-sage" [style.fontSize]="isMobile() ? '2.5rem' : '4rem'">
                 {{ getTreeIcon() }}
               </span>
             </div>
-            <p class="text-white/60 uppercase tracking-widest text-sm mt-4">Focus Garden Growing...</p>
+            <p class="text-white/60 uppercase tracking-widest text-[10px] md:text-sm mt-2 md:mt-4">Focus Garden Growing...</p>
           </div>
         </div>
       }
     
       <!-- Header -->
-      <header class="mb-8 md:mb-10 bg-alabaster border-b border-taupe/20 p-4 sm:p-6 rounded-lg shadow-gentle">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div class="flex items-start gap-3 w-full md:w-auto">
-            <button (click)="goBack()" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-taupe/30 bg-alabaster flex items-center justify-center hover:bg-sand transition-colors group shrink-0">
-              <span class="material-symbols-outlined text-lg md:text-xl text-taupe group-hover:text-charcoal">arrow_back</span>
+      <header class="mb-6 md:mb-10 bg-alabaster border-b border-taupe/20 p-3 md:p-6 rounded-lg shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
+          <div class="flex items-start gap-2 md:gap-3 w-full md:w-auto">
+            <button (click)="goBack()" class="w-8 h-8 md:w-12 md:h-12 rounded-full border border-taupe/30 bg-alabaster flex items-center justify-center hover:bg-sand transition-colors group shrink-0">
+              <span class="material-symbols-outlined text-base md:text-xl text-taupe group-hover:text-charcoal">arrow_back</span>
             </button>
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-taupe mb-1 block">Habit Detail</span>
-              <h1 class="font-heading text-2xl md:text-4xl font-bold text-charcoal leading-tight">
+            <div class="min-w-0 flex-1">
+              <span class="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-taupe mb-0.5 block">Habit Detail</span>
+              <h1 class="font-heading text-xl md:text-4xl font-bold text-charcoal leading-tight truncate">
                 {{ habit()?.name || 'Loading...' }}
               </h1>
               @if (habit()?.parentId) {
-                <p class="text-taupe text-sm md:text-base mt-1">
+                <p class="text-taupe text-xs md:text-base mt-0.5 truncate">
                   Part of: {{ parentHabit()?.name }}
                 </p>
               }
-              <div class="flex items-center gap-2 mt-2">
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-charcoal/5 border border-charcoal/10 text-charcoal font-bold uppercase tracking-wider">
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="text-[8px] md:text-[10px] px-2 py-0.5 rounded-full bg-charcoal/5 border border-charcoal/10 text-charcoal font-bold uppercase tracking-wider">
                   {{ habit()?.category || 'General' }}
                 </span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 font-bold uppercase tracking-wider">
+                <span class="text-[8px] md:text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 font-bold uppercase tracking-wider">
                   {{ habit()?.frequencyType || 'Daily' }}
                 </span>
               </div>
@@ -77,92 +78,134 @@ import { YesterdayReflectionComponent } from './components/yesterday-reflection/
       </header>
     
       @if (habit()) {
+        <!-- Sobriety / Avoidance Tracker -->
+        @if (habit()?.category === 'bad_habit' && habit()?.soberStartDate) {
+            <div class="mb-6 md:mb-10 bg-charcoal text-white rounded-xl md:rounded-2xl p-5 md:p-8 shadow-gentle border border-white/10 relative overflow-hidden group">
+                <!-- Background Accent -->
+                <div class="absolute top-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-orange-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl md:blur-3xl group-hover:bg-orange-500/20 transition-colors duration-700"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 text-center md:text-left">
+                    <div class="w-full">
+                        <div class="flex items-center justify-center md:justify-start gap-2 mb-1.5 md:mb-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                            <span class="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-orange-400">Avoidance Active</span>
+                        </div>
+                        <h2 class="text-3xl md:text-6xl font-heading font-bold mb-1 md:mb-2">{{ soberTime().days }} Days</h2>
+                        <p class="text-[10px] md:text-sm text-white/60 font-body">Since last protocol breach</p>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-5 md:gap-6 w-full md:w-auto">
+                        <div class="flex gap-2 md:gap-3 justify-center">
+                            <div class="bg-white/10 rounded-lg md:rounded-xl p-2 md:p-4 min-w-[60px] md:min-w-[80px] backdrop-blur-sm border border-white/5">
+                                <p class="text-xl md:text-3xl font-bold font-heading">{{ soberTime().hours }}</p>
+                                <p class="text-[7px] md:text-[8px] uppercase tracking-tighter text-white/50">Hours</p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg md:rounded-xl p-2 md:p-4 min-w-[60px] md:min-w-[80px] backdrop-blur-sm border border-white/5">
+                                <p class="text-xl md:text-3xl font-bold font-heading">{{ soberTime().minutes }}</p>
+                                <p class="text-[7px] md:text-[8px] uppercase tracking-tighter text-white/50">Minutes</p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg md:rounded-xl p-2 md:p-4 min-w-[60px] md:min-w-[80px] backdrop-blur-sm border border-white/5">
+                                <p class="text-xl md:text-3xl font-bold font-heading text-orange-400">{{ soberTime().seconds }}</p>
+                                <p class="text-[7px] md:text-[8px] uppercase tracking-tighter text-white/50">Seconds</p>
+                            </div>
+                        </div>
+                        
+                        <button (click)="resetSoberTimer()" 
+                                class="w-full md:w-auto px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/20 text-white rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group-hover:border-orange-500/50">
+                            <span class="material-symbols-outlined text-sm">refresh</span>
+                            Record Breach & Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
         @if (inconsistentDaysCount() >= 2) {
-          <div class="bg-primary text-white p-4 font-bold tracking-wider mb-6 border border-primary rounded-lg flex items-center gap-3 shadow-gentle">
-            <span class="material-symbols-outlined">warning</span>
+          <div class="bg-primary text-white p-3 md:p-4 font-bold tracking-wider mb-4 md:mb-6 border border-primary rounded-lg flex items-center gap-2 md:gap-3 shadow-sm text-xs md:text-sm">
+            <span class="material-symbols-outlined text-sm md:text-base">warning</span>
             <span>We missed {{ inconsistentDaysCount() }} recent days. Let's get back on track!</span>
           </div>
         }
     
         <!-- Primary Action Card (Merged Goal & Task) -->
-        <div class="bg-alabaster rounded-2xl shadow-gentle-lg p-6 md:p-10 mb-8 border-2 border-primary/20 overflow-hidden relative group">
+        <div class="bg-alabaster rounded-xl md:rounded-2xl shadow-gentle p-4 md:p-10 mb-6 md:mb-8 border-2 border-primary/20 overflow-hidden relative group">
           <!-- Decorative background -->
-          <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-1000"></div>
+          <div class="absolute -right-20 -top-20 w-48 md:w-64 h-48 md:h-64 bg-primary/5 rounded-full blur-2xl md:blur-3xl group-hover:bg-primary/10 transition-colors duration-1000"></div>
     
           <div class="relative z-10">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8">
               <div class="flex-1">
-                <div class="flex items-center gap-2 mb-4">
-                  <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Today's Focus</span>
+                <div class="flex items-center gap-2 mb-3 md:mb-4">
+                  <span class="bg-primary/10 text-primary px-2 md:py-1 rounded-full text-[8px] md:text-xs font-bold uppercase tracking-widest">Today's Focus</span>
                 </div>
     
                 <!-- Task/Habit Title -->
-                <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-charcoal mb-4 leading-tight">
+                <h2 class="text-xl md:text-4xl lg:text-5xl font-black text-charcoal mb-3 md:mb-4 leading-tight">
                   {{ todaySystemTask()?.title || habit()?.name }}
                 </h2>
     
                 @if (todaySystemTask()?.description) {
-                  <p class="text-taupe italic text-lg mb-6 max-w-2xl border-l-4 border-taupe/20 pl-4">
+                  <p class="text-taupe italic text-sm md:text-lg mb-4 md:mb-6 max-w-2xl border-l-3 md:border-l-4 border-taupe/20 pl-3 md:pl-4">
                     "{{ todaySystemTask()?.description }}"
                   </p>
                 }
     
                 <!-- Dynamic Goal Stats -->
-                <div class="flex flex-wrap items-end gap-6 mt-8">
+                <div class="flex flex-wrap items-end gap-4 md:gap-6 mt-6 md:mt-8">
                   @if (habit()?.type === 'measurable') {
-                    <div class="flex flex-col gap-2">
-                      <label class="text-xs font-bold text-taupe uppercase tracking-widest">Target</label>
-                      <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-black text-charcoal">{{ habit()?.targetValue }}</span>
-                        <span class="text-primary font-bold">{{ habit()?.targetUnit }}</span>
+                    <div class="flex flex-col gap-1 md:gap-2">
+                      <label class="text-[8px] md:text-xs font-bold text-taupe uppercase tracking-widest">Target</label>
+                      <div class="flex items-baseline gap-1 md:gap-2">
+                        <span class="text-2xl md:text-3xl font-black text-charcoal">{{ habit()?.targetValue }}</span>
+                        <span class="text-primary font-bold text-xs md:text-base">{{ habit()?.targetUnit }}</span>
                       </div>
                     </div>
     
-                    <div class="h-12 w-px bg-taupe/20 hidden md:block"></div>
+                    <div class="h-8 md:h-12 w-px bg-taupe/20 hidden md:block"></div>
     
-                    <div class="flex flex-col gap-2">
-                      <label class="text-xs font-bold text-taupe uppercase tracking-widest">Add Progress</label>
-                      <div class="flex items-center gap-3">
+                    <div class="flex flex-col gap-1 md:gap-2">
+                      <label class="text-[8px] md:text-xs font-bold text-taupe uppercase tracking-widest">Add Progress</label>
+                      <div class="flex items-center gap-2 md:gap-3">
                         <input type="number" [(ngModel)]="logValue"
-                          class="w-32 p-4 text-3xl font-black bg-white border-2 border-taupe/20 rounded-2xl text-center focus:border-primary outline-none transition-all shadow-inner focus:ring-4 focus:ring-primary/10"
+                          class="w-20 md:w-32 p-2 md:p-4 text-xl md:text-3xl font-black bg-white border-2 border-taupe/20 rounded-xl md:rounded-2xl text-center focus:border-primary outline-none transition-all shadow-inner focus:ring-2 md:focus:ring-4 focus:ring-primary/10"
                           placeholder="0" />
                         <div class="flex flex-col">
-                          <button (click)="logValue = (logValue || 0) + 1" class="p-1 hover:bg-sand rounded">
-                            <span class="material-symbols-outlined">expand_less</span>
+                          <button (click)="logValue = (logValue || 0) + 1" class="p-0.5 md:p-1 hover:bg-sand rounded">
+                            <span class="material-symbols-outlined text-base md:text-xl">expand_less</span>
                           </button>
-                          <button (click)="decrementValue()" class="p-1 hover:bg-sand rounded">
-                            <span class="material-symbols-outlined">expand_more</span>
+                          <button (click)="decrementValue()" class="p-0.5 md:p-1 hover:bg-sand rounded">
+                            <span class="material-symbols-outlined text-base md:text-xl">expand_more</span>
                           </button>
                         </div>
                       </div>
                     </div>
                   } @else {
-                    <div class="bg-sage/10 border border-sage/30 px-5 py-3 rounded-2xl flex items-center gap-3">
-                      <span class="material-symbols-outlined text-sage text-3xl">task_alt</span>
+                    <div class="bg-sage/10 border border-sage/30 px-3 md:px-5 py-2 md:py-3 rounded-xl md:rounded-2xl flex items-center gap-2 md:gap-3">
+                      <span class="material-symbols-outlined text-sage text-xl md:text-3xl">task_alt</span>
                       <div>
-                        <p class="text-charcoal font-bold">Standard Task</p>
-                        <p class="text-xs text-taupe uppercase font-bold tracking-widest">Consistency is key</p>
+                        <p class="text-charcoal font-bold text-xs md:text-base">Standard Task</p>
+                        <p class="text-[8px] md:text-xs text-taupe uppercase font-bold tracking-widest">Consistency is key</p>
                       </div>
                     </div>
                   }
     
                   @if (isCompletedToday()) {
-                    <div class="bg-sage text-white px-4 py-2 rounded-lg flex items-center gap-2 animate-bounce-short">
-                      <span class="material-symbols-outlined text-sm">check_circle</span>
-                      <span class="text-xs font-bold uppercase">Already Logged</span>
+                    <div class="bg-sage text-white px-3 md:px-4 py-1 md:py-2 rounded-lg flex items-center gap-1.5 md:gap-2 animate-bounce-short">
+                      <span class="material-symbols-outlined text-[10px] md:text-sm">check_circle</span>
+                      <span class="text-[8px] md:text-xs font-bold uppercase">Already Logged</span>
                     </div>
                   }
                 </div>
               </div>
     
-              <!-- Huge Primary Action Button -->
-              <div class="shrink-0 flex flex-col items-center gap-4">
+              <!-- Huge Primary Action Button (Optimized for Mobile) -->
+              <div class="shrink-0 flex flex-col items-center gap-3 md:gap-4">
                 <button (click)="handlePrimaryAction()"
-                  class="relative group overflow-hidden w-full sm:w-64 h-64 rounded-3xl font-black text-2xl transition-all active:scale-95 shadow-gentle-lg flex flex-col items-center justify-center gap-4 border-b-8"
+                  class="relative group overflow-hidden w-full md:w-64 h-32 md:h-64 rounded-2xl md:rounded-3xl font-black text-lg md:text-2xl transition-all active:scale-95 shadow-gentle flex flex-row md:flex-col items-center justify-center gap-3 md:gap-4 border-b-4 md:border-b-8"
                                     [class]="(isCompletedToday() || todaySystemTask()?.completed) 
                                         ? 'bg-sage border-sage-dark text-white' 
                                         : 'bg-primary border-primary-dark text-white hover:brightness-110'">
-                  <span class="material-symbols-outlined text-7xl transition-transform group-hover:scale-110 duration-300">
+                  <span class="material-symbols-outlined text-4xl md:text-7xl transition-transform group-hover:scale-110 duration-300">
                     {{ (isCompletedToday() || todaySystemTask()?.completed) ? 'verified' : 'bolt' }}
                   </span>
                   <span class="tracking-tighter">
@@ -174,46 +217,52 @@ import { YesterdayReflectionComponent } from './components/yesterday-reflection/
                 </button>
                 
                 @if (isCompletedToday() || todaySystemTask()?.completed) {
-                  <button (click)="unmarkHabit()" class="text-taupe hover:text-red-500 text-xs font-bold uppercase tracking-widest flex items-center gap-1 transition-colors opacity-60 hover:opacity-100">
-                    <span class="material-symbols-outlined text-sm">undo</span> Unmark Completion
+                  <button (click)="unmarkHabit()" class="text-taupe hover:text-red-500 text-[8px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-1 transition-colors opacity-60 hover:opacity-100">
+                    <span class="material-symbols-outlined text-xs md:text-sm">undo</span> Unmark
                   </button>
                 }
-                <p class="text-taupe text-xs font-bold uppercase tracking-widest opacity-60">One click to rule them all</p>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Subtask Matrix -->
+        @if (habit()?.subtasks?.length) {
+            <div class="mb-6 md:mb-8">
+                <app-subtask-matrix [habit]="habit()!" [date]="getLocalDateString()"></app-subtask-matrix>
+            </div>
+        }
     
         <!-- Habit Stacking Indicator -->
         @if (habit()?.stackedWith) {
-          <div class="mb-8 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/5 rounded-2xl p-6 border border-orange-500/20 relative overflow-hidden shadow-gentle">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full -translate-y-12 translate-x-12"></div>
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
-              <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0 text-orange-600 shadow-sm border border-orange-500/10">
-                  <span class="material-symbols-outlined text-2xl">link</span>
+          <div class="mb-6 md:mb-8 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/5 rounded-xl md:rounded-2xl p-4 md:p-6 border border-orange-500/20 relative overflow-hidden shadow-sm">
+            <div class="absolute top-0 right-0 w-24 md:w-32 h-24 md:h-32 bg-orange-500/5 rounded-full -translate-y-12 translate-x-12"></div>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 md:gap-6 relative z-10">
+              <div class="flex items-start gap-3 md:gap-4">
+                <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0 text-orange-600 shadow-sm border border-orange-500/10">
+                  <span class="material-symbols-outlined text-xl md:text-2xl">link</span>
                 </div>
                 <div>
-                  <p class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600 mb-1">Behavioral Association</p>
-                  <p class="text-lg font-bold text-charcoal">Stacked with: <span class="text-orange-500">{{ habit()?.stackedWith }}</span></p>
-                  <p class="text-sm text-taupe mt-1 font-medium">
+                  <p class="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-orange-600 mb-0.5 md:mb-1">Behavioral Association</p>
+                  <p class="text-base md:text-lg font-bold text-charcoal">Stacked: <span class="text-orange-500">{{ habit()?.stackedWith }}</span></p>
+                  <p class="text-[10px] md:text-sm text-taupe mt-0.5 font-medium">
                     @if (stackDaysRemaining() > 0) {
-                      {{ stackDaysRemaining() }} days remaining to solidify this stack
+                      {{ stackDaysRemaining() }} days left
                     } @else {
                       <span class="text-sage font-bold flex items-center gap-1">
-                        <span class="material-symbols-outlined text-base">verified</span>
-                        Stacking period complete! Protocol established.
+                        <span class="material-symbols-outlined text-xs md:text-base">verified</span>
+                        Stack solidified!
                       </span>
                     }
                   </p>
                 </div>
               </div>
-              <div class="w-full sm:w-64 flex-shrink-0">
-                <div class="flex items-center justify-between text-xs font-bold text-taupe mb-2 uppercase tracking-tighter">
-                  <span>Formation Progress</span>
+              <div class="w-full sm:w-48 md:w-64 flex-shrink-0">
+                <div class="flex items-center justify-between text-[9px] md:text-xs font-bold text-taupe mb-1.5 md:mb-2 uppercase tracking-tighter">
+                  <span>Formation</span>
                   <span class="text-orange-500">{{ stackProgress() }}%</span>
                 </div>
-                <div class="w-full h-3 bg-taupe/10 rounded-full overflow-hidden p-0.5 border border-taupe/5">
+                <div class="w-full h-2 md:h-3 bg-taupe/10 rounded-full overflow-hidden p-0.5 border border-taupe/5">
                   <div class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-1000 ease-out shadow-sm"
                        [style.width.%]="stackProgress()"></div>
                 </div>
@@ -222,108 +271,107 @@ import { YesterdayReflectionComponent } from './components/yesterday-reflection/
           </div>
         }
     
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
           <!-- Focus Timer Card -->
-          <div class="bg-charcoal text-white rounded-2xl shadow-gentle p-8 relative overflow-hidden">
-            <div class="flex items-center justify-between mb-8">
+          <div class="bg-charcoal text-white rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-6 md:mb-8">
               <div>
-                <h3 class="font-heading text-xl font-bold flex items-center gap-2">
-                  <span class="material-symbols-outlined text-primary">timer</span> Deep Work Timer
+                <h3 class="font-heading text-lg md:text-xl font-bold flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary">timer</span> Focus Timer
                 </h3>
-                <p class="text-white/50 text-xs uppercase tracking-widest font-bold mt-1">Start a focus session</p>
+                <p class="text-white/50 text-[10px] uppercase tracking-widest font-bold mt-0.5">Start deep work</p>
               </div>
-              <span class="text-xs bg-white/10 px-3 py-1.5 rounded-full text-white/80 border border-white/10">2-minute rule</span>
+              <span class="text-[9px] bg-white/10 px-2 py-1 rounded-full text-white/80 border border-white/10">2-minute rule</span>
             </div>
     
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-8">
-              <div class="text-6xl font-mono font-bold tracking-tighter text-primary">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 md:gap-8">
+              <div class="text-5xl md:text-6xl font-mono font-bold tracking-tighter text-primary">
                 {{ formattedTimer() }}
               </div>
     
-              <div class="flex items-center bg-white/10 border border-white/20 rounded-2xl overflow-hidden backdrop-blur-sm">
-                <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="w-20 p-4 text-center font-bold text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
-                <div class="flex flex-col md:flex-row">
-                  <button (click)="startCustomTimer()" class="px-6 py-4 bg-primary text-white font-black text-sm hover:bg-primary-light transition-all">START FOCUS</button>
-                </div>
+              <div class="flex items-center bg-white/10 border border-white/20 rounded-xl md:rounded-2xl overflow-hidden backdrop-blur-sm w-full sm:w-auto">
+                <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="flex-1 sm:w-16 p-3 md:p-4 text-center font-bold text-base md:text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
+                <button (click)="startCustomTimer()" class="px-5 md:px-6 py-3 md:py-4 bg-primary text-white font-black text-xs md:text-sm hover:bg-primary-light transition-all whitespace-nowrap uppercase">START</button>
               </div>
             </div>
     
             <!-- Focus Garden Stats -->
-            <div class="mt-10 pt-8 border-t border-white/10">
-              <div class="flex justify-between items-end mb-4">
+            <div class="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-white/10">
+              <div class="flex justify-between items-end mb-3 md:mb-4">
                 <div>
-                  <span class="text-xs uppercase tracking-widest text-white/40 font-bold block mb-1">Session Progress</span>
-                  <span class="text-sm font-medium text-white/80">{{ totalFocusedMinutes() }} minutes focused today</span>
+                  <span class="text-[9px] md:text-xs uppercase tracking-widest text-white/40 font-bold block mb-0.5 md:mb-1">Daily Progress</span>
+                  <span class="text-[11px] md:text-sm font-medium text-white/80">{{ totalFocusedMinutes() }} mins focused</span>
                 </div>
-                <span class="material-symbols-outlined transition-all duration-700 animate-pulse" [ngClass]="getTreeStyle()">
+                <span class="material-symbols-outlined transition-all duration-700 animate-pulse" [ngClass]="getTreeStyle()" [style.fontSize]="isMobile() ? '2rem' : ''">
                   {{ getTreeIcon() }}
                 </span>
               </div>
               @if (totalFocusedMinutes() < 120) {
-                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                <div class="w-full h-2 md:h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
                   <div class="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
                 </div>
               }
             </div>
           </div>
     
-          <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10 flex flex-col h-full">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="font-heading text-xl font-bold text-charcoal flex items-center gap-2">
+          <div class="bg-alabaster rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 border border-taupe/10 flex flex-col h-full">
+            <div class="flex items-center justify-between mb-4 md:mb-6">
+              <h3 class="font-heading text-lg md:text-xl font-bold text-charcoal flex items-center gap-2">
                 <span class="material-symbols-outlined text-taupe">notes</span> Personal Notes
               </h3>
-
+              <a [routerLink]="['/notes', habitId()]"
+                  [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
+                  class="flex items-center gap-1 px-4 py-1.5 bg-primary text-white rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider hover:bg-primary-light transition-all shadow-sm">
+                  <span class="material-symbols-outlined text-base">edit_note</span> Notes
+                </a>
             </div>
-            <a [routerLink]="['/notes', habitId()]"
-                [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
-                class="flex items-center gap-1.5 px-6 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary hover:text-white transition-all shadow-sm">
-                <span class="material-symbols-outlined text-xl">edit_note</span> Notes
-              </a>
-    
+
+            <div class="flex-1 flex flex-col items-center justify-center p-6 bg-white/50 rounded-xl border border-taupe/5 border-dashed">
+               <span class="material-symbols-outlined text-taupe/20 text-4xl mb-2">sticky_note_2</span>
+               <p class="text-[10px] md:text-xs text-taupe italic text-center leading-relaxed">Document your process. Maintain cognitive clarity through written reflection.</p>
+            </div>
     
             <div class="mt-4 flex justify-between items-center">
               @if (habit()?.parentId) {
-                <div class="flex items-center gap-1.5 px-3 py-1 bg-charcoal text-white rounded-full text-[10px] font-black uppercase tracking-tighter">
+                <div class="flex items-center gap-1.5 px-3 py-1 bg-charcoal text-white rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter">
                   <span class="material-symbols-outlined text-xs">settings_input_component</span> System Habit
                 </div>
-              } @else {
-                <div></div>
               }
             </div>
           </div>
         </div>
     
         <!-- Pending Past Tasks -->
-        <div class="bg-alabaster rounded-2xl shadow-gentle p-8 border border-taupe/10">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="font-heading text-2xl font-bold text-charcoal flex items-center gap-2">
+        <div class="bg-alabaster rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 border border-taupe/10">
+          <div class="flex items-center justify-between mb-4 md:mb-6">
+            <h3 class="font-heading text-lg md:text-2xl font-bold text-charcoal flex items-center gap-2">
               <span class="material-symbols-outlined text-primary">history</span> Catch Up
             </h3>
             @if (pendingPastTasks().length > 0) {
-              <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">
-                {{ pendingPastTasks().length }} MISSING
+              <span class="px-2 md:py-1 bg-primary/10 text-primary text-[10px] md:text-xs font-bold rounded-full uppercase tracking-widest">
+                {{ pendingPastTasks().length }} Missing
               </span>
             }
           </div>
     
           @if (pendingPastTasks().length === 0) {
-            <div class="flex flex-col items-center justify-center p-12 bg-sage/5 rounded-2xl border border-dashed border-sage/20">
-              <span class="material-symbols-outlined text-sage text-5xl mb-4">verified</span>
-              <p class="text-taupe font-bold text-center">You're all caught up! Amazing work.</p>
+            <div class="flex flex-col items-center justify-center p-8 md:p-12 bg-sage/5 rounded-xl md:rounded-2xl border border-dashed border-sage/20">
+              <span class="material-symbols-outlined text-sage text-4xl md:text-5xl mb-3 md:mb-4">verified</span>
+              <p class="text-taupe font-bold text-xs md:text-base text-center">Protocol maintained. All tasks cleared.</p>
             </div>
           } @else {
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               @for (task of pendingPastTasks(); track task.date + task.title) {
-                <div class="flex items-center justify-between p-4 bg-white border border-taupe/10 rounded-2xl hover:border-primary/30 transition-all group">
+                <div class="flex items-center justify-between p-3 md:p-4 bg-white border border-taupe/10 rounded-xl md:rounded-2xl hover:border-primary/30 transition-all group">
                   <div class="flex-1 min-w-0">
-                    <p class="font-bold text-charcoal truncate">{{ task.title }}</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs text-primary font-bold">{{ task.date }}</span>
-                      <span class="text-[10px] text-taupe uppercase font-black opacity-40">Phase {{ task.phase }}</span>
+                    <p class="font-bold text-charcoal text-sm md:text-base truncate">{{ task.title }}</p>
+                    <div class="flex items-center gap-2 mt-0.5 md:mt-1">
+                      <span class="text-[10px] md:text-xs text-primary font-bold">{{ task.date }}</span>
+                      <span class="text-[9px] md:text-[10px] text-taupe uppercase font-black opacity-40">Phase {{ task.phase }}</span>
                     </div>
                   </div>
-                  <button (click)="toggleMission(task)" class="w-12 h-12 bg-sand hover:bg-sage hover:text-white rounded-xl transition-all flex items-center justify-center">
-                    <span class="material-symbols-outlined">{{ task.completed ? 'check_circle' : 'circle' }}</span>
+                  <button (click)="toggleMission(task)" class="w-10 h-10 md:w-12 md:h-12 bg-sand hover:bg-sage hover:text-white rounded-lg md:rounded-xl transition-all flex items-center justify-center">
+                    <span class="material-symbols-outlined text-xl md:text-2xl">{{ task.completed ? 'check_circle' : 'circle' }}</span>
                   </button>
                 </div>
               }
@@ -343,7 +391,7 @@ import { YesterdayReflectionComponent } from './components/yesterday-reflection/
       <!-- Celebration Overlay -->
       @if (celebrationMessage()) {
         <div class="fixed inset-0 pointer-events-none z-[110] flex items-center justify-center p-4 backdrop-blur-sm bg-black/10">
-          <div class="animate-bounce-slow text-4xl md:text-6xl lg:text-8xl font-black text-primary uppercase font-display bg-white px-10 py-8 border-8 border-charcoal shadow-2xl text-center rotate-[-2deg]">
+          <div class="animate-bounce-slow text-3xl md:text-6xl lg:text-8xl font-black text-primary uppercase font-display bg-white px-6 md:px-10 py-4 md:py-8 border-4 md:border-8 border-charcoal shadow-2xl text-center rotate-[-2deg]">
             {{ celebrationMessage() }}
           </div>
         </div>
@@ -396,6 +444,8 @@ export class HabitDetailComponent implements OnInit, OnDestroy {
     toastService = inject(ToastService);
     settingsService = inject(UserSettingsService);
     today = new Date();
+
+    isMobile = signal(window.innerWidth < 768);
 
     getLocalDateString(): string {
         const now = new Date();
@@ -487,6 +537,8 @@ export class HabitDetailComponent implements OnInit, OnDestroy {
     initialTimerValue = signal(this.settingsService.settings().focusSessionLength * 60);
     timerRunning = signal(false);
     timerInterval: any;
+    private soberTimerInterval: any;
+    soberTime = signal({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     celebrationMessage = signal('');
 
     stackDaysRemaining = computed(() => {
@@ -559,15 +611,51 @@ export class HabitDetailComponent implements OnInit, OnDestroy {
                 tasks.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 this.pendingPastTasks.set(tasks);
             });
+
+            this.startSoberTimer();
         }
     }
 
     ngOnDestroy() {
         if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.soberTimerInterval) clearInterval(this.soberTimerInterval);
     }
 
     goBack() {
         this.location.back();
+    }
+
+    private startSoberTimer() {
+        this.soberTimerInterval = setInterval(() => {
+            const currentHabit = this.habit();
+            if (currentHabit?.category === 'bad_habit' && currentHabit?.soberStartDate) {
+                const start = new Date(currentHabit.soberStartDate);
+                const now = new Date();
+                const diff = now.getTime() - start.getTime();
+
+                if (diff > 0) {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                    const seconds = Math.floor((diff / 1000) % 60);
+                    this.soberTime.set({ days, hours, minutes, seconds });
+                }
+            }
+        }, 1000);
+    }
+
+    resetSoberTimer() {
+        const currentHabit = this.habit();
+        if (!currentHabit) return;
+
+        if (confirm('Confirm protocol breach? This will reset your avoidance timer to zero.')) {
+            const now = new Date().toISOString();
+            this.habitService.updateHabit(currentHabit.id, { soberStartDate: now }).subscribe({
+                next: (updated) => {
+                    // Signal updates automatically via service state
+                }
+            });
+        }
     }
 
     startCustomTimer() {

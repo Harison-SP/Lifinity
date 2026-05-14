@@ -13,106 +13,107 @@ import { MicroHabit } from '../../models/habit.model';
     selector: 'app-dashboard',
     imports: [RouterLink, FormsModule, CommonModule],
     template: `
-    <div class="min-h-screen bg-white dark:bg-dark-bg px-4 py-5 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture">
+    <div class="min-h-screen bg-white dark:bg-dark-bg px-4 py-4 sm:p-6 md:p-8 font-body transition-colors duration-300 overflow-x-hidden paper-texture">
         <!-- Dashboard Header -->
-        <header class="flex flex-col md:flex-row items-start justify-between gap-4 mb-8">
-            <div class="space-y-2">
-                <div class="flex items-center gap-3 bg-alabaster dark:bg-dark-surface p-1 rounded-xl border border-taupe/10 shadow-sm w-fit">
-                    <button (click)="changeDate(-1)" class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-taupe/10 transition-all text-charcoal dark:text-dark-text">
-                        <span class="material-symbols-outlined">chevron_left</span>
+        <header class="flex flex-col md:flex-row items-start justify-between gap-3 mb-4 md:mb-8">
+            <div class="w-full md:w-auto">
+                <div class="flex items-center gap-2 bg-alabaster dark:bg-dark-surface p-1 rounded-xl border border-taupe/10 shadow-sm w-full md:w-fit justify-between md:justify-start">
+                    <button (click)="changeDate(-1)" class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-taupe/10 transition-all text-charcoal dark:text-dark-text">
+                        <span class="material-symbols-outlined text-xl">chevron_left</span>
                     </button>
                     
-                    <div class="px-4 py-1 flex flex-col items-center min-w-[140px] cursor-pointer relative group">
-                        <span class="text-sm font-bold text-charcoal dark:text-dark-text">{{ getDateDisplay() }}</span>
-                        <span class="text-[10px] text-taupe dark:text-dark-text-secondary uppercase tracking-widest font-black">{{ getDayName() }}</span>
+                    <div class="px-2 py-0.5 flex flex-col items-center min-w-[120px] cursor-pointer relative group">
+                        <span class="text-xs md:text-sm font-bold text-charcoal dark:text-dark-text">{{ getDateDisplay() }}</span>
+                        <span class="text-[9px] text-taupe dark:text-dark-text-secondary uppercase tracking-widest font-black">{{ getDayName() }}</span>
                         <input type="date" 
                                [ngModel]="selectedDate()" 
                                (ngModelChange)="onDateSelected($event)"
                                class="absolute inset-0 opacity-0 cursor-pointer">
                     </div>
 
-                    <button (click)="changeDate(1)" class="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-taupe/10 transition-all text-charcoal dark:text-dark-text">
-                        <span class="material-symbols-outlined">chevron_right</span>
+                    <button (click)="changeDate(1)" class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-taupe/10 transition-all text-charcoal dark:text-dark-text">
+                        <span class="material-symbols-outlined text-xl">chevron_right</span>
                     </button>
                     
                     @if (selectedDate() !== getLocalDateString()) {
-                        <button (click)="resetToToday()" class="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-600 transition-all border-l border-taupe/10">
+                        <button (click)="resetToToday()" class="px-2 py-1 text-[9px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-600 transition-all border-l border-taupe/10">
                             Today
                         </button>
                     }
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                <a routerLink="/statistics" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-sage/10 text-sage font-bold py-3 px-6 rounded-lg border border-sage/20 hover:bg-sage/20 transition-all">
-                    <span class="material-symbols-outlined">bar_chart</span>
-                    Statistics
+            <div class="flex flex-row items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                <a routerLink="/statistics" class="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 bg-sage/10 text-sage font-bold py-2 px-3 rounded-lg border border-sage/20 hover:bg-sage/20 transition-all text-xs">
+                    <span class="material-symbols-outlined text-lg">bar_chart</span>
+                    <span class="hidden md:inline">Statistics</span>
+                    <span class="md:hidden">Stats</span>
                 </a>
-                <a routerLink="/systems" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-charcoal/5 dark:bg-white/5 text-charcoal dark:text-dark-text font-bold py-3 px-6 rounded-lg border border-charcoal/20 dark:border-white/10 hover:bg-charcoal/10 dark:hover:bg-white/10 transition-all">
-                    <span class="material-symbols-outlined">hub</span>
+                <a routerLink="/systems" class="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 bg-charcoal/5 dark:bg-white/5 text-charcoal dark:text-dark-text font-bold py-2 px-3 rounded-lg border border-charcoal/20 dark:border-white/10 hover:bg-charcoal/10 dark:hover:bg-white/10 transition-all text-xs">
+                    <span class="material-symbols-outlined text-lg">hub</span>
                     Systems
                 </a>
-                <a routerLink="/add" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3 px-6 rounded-lg shadow-gentle hover:bg-orange-400 transition-all">
-                    <span class="material-symbols-outlined">add</span>
-                    Add Habit
+                <a routerLink="/add" class="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 bg-orange-500 text-white font-bold py-2 px-3 rounded-lg shadow-gentle hover:bg-orange-400 transition-all text-xs">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    Add <span class="hidden md:inline">Habit</span>
                 </a>
             </div>
         </header>
 
         <!-- Stats Grid -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
+        <section class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
             <!-- Completion Rate -->
-            <div class="bg-alabaster dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-6 border border-taupe/10 dark:border-dark-border">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-bold uppercase tracking-wider text-taupe dark:text-dark-text-secondary">Completion Rate</span>
-                    <span class="material-symbols-outlined text-orange-500 text-xl">trending_up</span>
+            <div class="bg-alabaster dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-3 md:p-6 border border-taupe/10 dark:border-dark-border">
+                <div class="flex items-center justify-between mb-2 md:mb-4">
+                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-taupe dark:text-dark-text-secondary">Rate</span>
+                    <span class="material-symbols-outlined text-orange-500 text-lg md:text-xl">trending_up</span>
                 </div>
-                <div class="flex items-baseline gap-2 mb-3">
-                    <span class="text-4xl font-bold text-charcoal dark:text-dark-text">{{ completionPercent() }}%</span>
-                    <span class="text-sm text-taupe dark:text-dark-text-secondary">today</span>
+                <div class="flex items-baseline gap-1 mb-2 md:mb-3">
+                    <span class="text-2xl md:text-4xl font-bold text-charcoal dark:text-dark-text">{{ completionPercent() }}%</span>
+                    <span class="text-[10px] text-taupe dark:text-dark-text-secondary">today</span>
                 </div>
-                <div class="w-full h-2 bg-sand dark:bg-dark-border rounded-full overflow-hidden">
+                <div class="w-full h-1.5 md:h-2 bg-sand dark:bg-dark-border rounded-full overflow-hidden">
                     <div class="h-full bg-orange-500 rounded-full transition-all duration-1000" [style.width.%]="completionPercent()"></div>
                 </div>
             </div>
 
             <!-- Best Streak -->
-            <div class="bg-orange-500 text-white rounded-lg shadow-gentle p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-bold uppercase tracking-wider text-white/80">Best Streak</span>
-                    <span class="material-symbols-outlined text-white">local_fire_department</span>
+            <div class="bg-orange-500 text-white rounded-lg shadow-gentle p-3 md:p-6">
+                <div class="flex items-center justify-between mb-2 md:mb-4">
+                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/80">Streak</span>
+                    <span class="material-symbols-outlined text-white text-lg md:text-xl">local_fire_department</span>
                 </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-bold">{{ bestStreak() }}</span>
-                    <span class="text-sm">days</span>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-2xl md:text-4xl font-bold">{{ bestStreak() }}</span>
+                    <span class="text-[10px]">days</span>
                 </div>
-                <p class="text-sm text-white/80 mt-2">Keep building your momentum!</p>
+                <p class="text-[10px] text-white/80 mt-1 hidden md:block">Building momentum!</p>
             </div>
 
             <!-- Active Habits -->
-            <div class="bg-alabaster dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-6 border border-taupe/10 dark:border-dark-border">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-bold uppercase tracking-wider text-taupe dark:text-dark-text-secondary">Active Habits</span>
-                    <span class="material-symbols-outlined text-sage text-xl">check_circle</span>
+            <div class="bg-alabaster dark:bg-dark-surface rounded-lg shadow-gentle dark:shadow-dark-gentle p-3 md:p-6 border border-taupe/10 dark:border-dark-border col-span-2 md:col-span-1">
+                <div class="flex items-center justify-between mb-2 md:mb-4">
+                    <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-taupe dark:text-dark-text-secondary">Active</span>
+                    <span class="material-symbols-outlined text-sage text-lg md:text-xl">check_circle</span>
                 </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-bold text-charcoal dark:text-dark-text">{{ habitService.habits().length }}</span>
-                    <span class="text-sm text-taupe dark:text-dark-text-secondary">habits</span>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-2xl md:text-4xl font-bold text-charcoal dark:text-dark-text">{{ habitService.habits().length }}</span>
+                    <span class="text-[10px] text-taupe dark:text-dark-text-secondary">habits</span>
+                    <span class="text-[10px] text-taupe dark:text-dark-text-secondary ml-auto hidden sm:inline">Active protocols</span>
                 </div>
-                <p class="text-sm text-taupe dark:text-dark-text-secondary mt-2">You're building {{ habitService.habits().length }} new habits</p>
             </div>
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Today's Habits List -->
             <section class="lg:col-span-8">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 md:mb-4">
                     <div>
-                        <h2 class="font-heading text-2xl md:text-3xl font-bold text-charcoal dark:text-dark-text">Today's Habits</h2>
-                        <p class="text-sm text-taupe dark:text-dark-text-secondary mt-1">{{ remainingHabits() }} remaining, {{ completedCount() }} completed</p>
+                        <h2 class="font-heading text-xl md:text-3xl font-bold text-charcoal dark:text-dark-text">Today's Habits</h2>
+                        <p class="text-[10px] md:text-sm text-taupe dark:text-dark-text-secondary mt-0.5">{{ remainingHabits() }} remaining, {{ completedCount() }} completed</p>
                     </div>
-                    <a routerLink="/planner" class="text-sm font-bold text-orange-500 hover:text-orange-400 transition-colors flex items-center gap-1">
+                    <a routerLink="/planner" class="text-xs md:text-sm font-bold text-orange-500 hover:text-orange-400 transition-colors flex items-center gap-1">
                         View Planner
-                        <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </a>
                 </div>
 

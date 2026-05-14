@@ -38,122 +38,105 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
   template: `
     <div class="h-full min-h-0 flex flex-col bg-slate-50 dark:bg-neutral-950 font-manrope text-slate-900 dark:text-zinc-100 overflow-x-hidden transition-colors duration-500">
       <!-- Header Section -->
-      <div class="px-6 py-6 flex flex-col gap-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div class="flex flex-col gap-1">
-            <h2 class="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3 tracking-tight font-arvo">
-              <span class="material-symbols-outlined text-4xl text-indigo-500 bg-indigo-500/10 p-2 rounded-2xl shadow-sm">view_day</span>
+      <div class="px-4 md:px-6 py-4 md:py-6 flex flex-col gap-4 md:gap-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
+          <div class="flex flex-col gap-0.5 md:gap-1">
+            <h2 class="text-xl md:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2 md:gap-3 tracking-tight font-arvo">
+              <span class="material-symbols-outlined text-2xl md:text-4xl text-indigo-500 bg-indigo-500/10 p-1.5 md:p-2 rounded-xl md:rounded-2xl shadow-sm">view_day</span>
               Daily Flow
             </h2>
-            <div class="flex items-center gap-2 ml-14">
+            <div class="flex items-center gap-2 ml-10 md:ml-14">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              <p class="text-[10px] text-slate-500 dark:text-zinc-400 font-black uppercase tracking-[0.2em]">System Optimization Active</p>
+              <p class="text-[9px] md:text-[10px] text-slate-500 dark:text-zinc-400 font-black uppercase tracking-[0.2em]">Optimization Active</p>
             </div>
           </div>
           
-          <div class="flex gap-4 items-center w-full md:w-auto flex-wrap">
+          <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full md:w-auto">
              <!-- Date Navigation -->
-             <div class="flex items-center bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-zinc-800 p-1.5 shadow-sm">
-                <button (click)="changeDate(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all text-slate-600 dark:text-zinc-400" title="Previous Day">
-                  <span class="material-symbols-outlined text-xl">chevron_left</span>
+             <div class="flex items-center bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-xl md:rounded-2xl border border-slate-200 dark:border-zinc-800 p-1 md:p-1.5 shadow-sm w-full sm:w-auto justify-between sm:justify-start">
+                <button (click)="changeDate(-1)" class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg md:rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all text-slate-600 dark:text-zinc-400">
+                  <span class="material-symbols-outlined text-lg md:text-xl">chevron_left</span>
                 </button>
                 
-                <div class="relative group">
+                <div class="relative group flex-1 sm:flex-none">
                   <input [matDatepicker]="picker" 
                          [ngModel]="selectedDateDate()" 
                          (dateChange)="onDatePickerChange($any($event).value)"
-                         class="bg-transparent border-none text-slate-900 dark:text-white font-mono font-bold text-sm px-4 cursor-pointer w-[150px] outline-none text-center h-9 hover:text-indigo-500 transition-colors">
+                         class="bg-transparent border-none text-slate-900 dark:text-white font-mono font-bold text-xs md:text-sm px-2 md:px-4 cursor-pointer w-full sm:w-[150px] outline-none text-center h-8 md:h-9 hover:text-indigo-500 transition-colors">
                   <mat-datepicker-toggle [for]="picker" class="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
                 </div>
 
-                <button (click)="changeDate(1)" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all text-slate-600 dark:text-zinc-400" title="Next Day">
-                  <span class="material-symbols-outlined text-xl">chevron_right</span>
+                <button (click)="changeDate(1)" class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg md:rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all text-slate-600 dark:text-zinc-400">
+                  <span class="material-symbols-outlined text-lg md:text-xl">chevron_right</span>
                 </button>
 
-                <div class="w-px h-5 bg-slate-200 dark:bg-zinc-800 mx-2"></div>
+                <div class="w-px h-4 md:h-5 bg-slate-200 dark:bg-zinc-800 mx-1 md:mx-2"></div>
 
                 <button (click)="goToToday()" 
-                        class="px-5 py-2 text-[11px] font-black uppercase tracking-wider rounded-xl hover:bg-indigo-600 hover:text-white dark:text-zinc-300 transition-all active:scale-95"
-                        title="Go to Today">
+                        class="px-3 md:px-5 py-1.5 md:py-2 text-[10px] md:text-[11px] font-black uppercase tracking-wider rounded-lg md:rounded-xl hover:bg-indigo-600 hover:text-white dark:text-zinc-300 transition-all active:scale-95">
                   Today
                 </button>
              </div>
 
-             <!-- Timeline Zoom -->
-             <div class="flex items-center gap-4 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-zinc-800 px-5 py-2.5 shadow-sm" title="Timeline Density Control">
-                 <span class="material-symbols-outlined text-slate-400 text-lg">unfold_more</span>
+             <!-- Timeline Zoom & Stats (Desktop Only or Compact Mobile) -->
+             <div class="hidden sm:flex items-center gap-3 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-1.5 shadow-sm">
+                 <span class="material-symbols-outlined text-slate-400 text-base">unfold_more</span>
                  <input type="range" [min]="40" [max]="200" [step]="15" 
                         [ngModel]="slotHeight()" (ngModelChange)="onSlotHeightChange($event)"
-                        class="w-24 accent-indigo-500 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full appearance-none cursor-pointer">
+                        class="w-16 md:w-24 accent-indigo-500 h-1 bg-slate-200 dark:bg-zinc-800 rounded-full appearance-none cursor-pointer">
+                 
+                 <div class="hidden md:flex items-center gap-3 border-l border-slate-200 dark:border-zinc-800 pl-3 text-[9px] font-black uppercase tracking-wider">
+                    <div class="flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                      <span class="text-indigo-600 dark:text-indigo-400">{{ completedSystemTasksCount() }}/{{ systemTasks().length }}</span>
+                    </div>
+                 </div>
              </div>
 
-             <!-- System Health Stats -->
-             <div class="hidden lg:flex items-center gap-5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-zinc-800 px-5 py-2.5 shadow-sm text-[11px] font-black font-mono uppercase tracking-wider">
-               <div class="flex items-center gap-2">
-                 <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                 <span class="text-slate-600 dark:text-zinc-400">Queue:</span>
-                 <span class="text-slate-900 dark:text-white">{{ systemTasks().length }}</span>
-               </div>
-               <div class="flex items-center gap-2 border-l border-slate-200 dark:border-zinc-800 pl-5">
-                 <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                 <span class="text-slate-600 dark:text-zinc-400">Synced:</span>
-                 <span class="text-indigo-600 dark:text-indigo-400">{{ completedSystemTasksCount() }}</span>
-               </div>
-             </div>
-
-
-            <div class="flex w-full sm:w-auto bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-zinc-800 p-1.5 ml-0 sm:ml-2 shadow-sm overflow-x-auto no-scrollbar">
+             <!-- View Switcher -->
+             <div class="flex w-full sm:w-auto bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-xl md:rounded-2xl border border-slate-200 dark:border-zinc-800 p-1 md:p-1.5 shadow-sm overflow-x-auto no-scrollbar">
                 <button (click)="changeView('timeGridDay')" 
                         [class.active]="currentView() === 'timeGridDay'" 
-                        class="view-switcher-btn px-5 py-2 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all whitespace-nowrap">Day</button>
+                        class="view-switcher-btn flex-1 sm:flex-none px-3 md:px-5 py-1.5 md:py-2 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] rounded-lg md:rounded-xl transition-all whitespace-nowrap">Day</button>
                 <button (click)="changeView('timeGridWeek')" 
                         [class.active]="currentView() === 'timeGridWeek'" 
-                        class="view-switcher-btn px-5 py-2 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all whitespace-nowrap">Week</button>
+                        class="view-switcher-btn flex-1 sm:flex-none px-3 md:px-5 py-1.5 md:py-2 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] rounded-lg md:rounded-xl transition-all whitespace-nowrap">Week</button>
                 <button (click)="changeView('dayGridMonth')" 
                         [class.active]="currentView() === 'dayGridMonth'" 
-                        class="view-switcher-btn px-5 py-2 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all whitespace-nowrap">Month</button>
+                        class="view-switcher-btn flex-1 sm:flex-none px-3 md:px-5 py-1.5 md:py-2 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] rounded-lg md:rounded-xl transition-all whitespace-nowrap">Month</button>
                 <button (click)="changeView('listDay')" 
                         [class.active]="currentView() === 'listDay'" 
-                        class="view-switcher-btn px-5 py-2 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all whitespace-nowrap">Manifest</button>
-            </div>
+                        class="view-switcher-btn flex-1 sm:flex-none px-3 md:px-5 py-1.5 md:py-2 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] rounded-lg md:rounded-xl transition-all whitespace-nowrap">List</button>
+             </div>
           </div>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div class="md:col-span-3">
-          </div>
-          @if (hasOverlap()) {
-            <div class="flex items-center gap-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/50 text-orange-800 dark:text-orange-200 px-5 py-4 rounded-3xl animate-pulse shadow-sm shadow-orange-500/10" role="alert">
-              <span class="material-symbols-outlined text-orange-500 text-2xl">warning_amber</span>
-              <div class="flex-1">
-                <p class="font-black text-[10px] uppercase tracking-widest mb-0.5">Complexity Conflict</p>
-                <p class="text-[11px] opacity-80 leading-relaxed font-medium">Overlapping system modules detected. Refactor timeline for optimal throughput.</p>
-              </div>
+
+        @if (hasOverlap()) {
+          <div class="flex items-center gap-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/50 text-orange-800 dark:text-orange-200 px-4 py-3 rounded-2xl animate-pulse shadow-sm" role="alert">
+            <span class="material-symbols-outlined text-orange-500 text-xl">warning_amber</span>
+            <div class="flex-1">
+              <p class="font-black text-[9px] uppercase tracking-widest">Overlap Conflict Detected</p>
+              <p class="text-[10px] opacity-80 leading-tight font-medium hidden sm:block">Multiple system modules overlapping. Refactor for optimal throughput.</p>
             </div>
-          }
-        </div>
+          </div>
+        }
       </div>
 
-      <div class="flex-1 flex flex-col lg:flex-row overflow-hidden px-6 gap-8 pb-8 relative">
+      <div class="flex-1 flex flex-col lg:flex-row overflow-hidden px-4 md:px-6 gap-4 md:gap-8 pb-4 md:pb-8 relative">
         <!-- Timeline Context -->
-        <div class="flex-1 overflow-hidden bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-slate-200/60 dark:border-zinc-800 flex flex-col shadow-2xl shadow-slate-200/40 dark:shadow-none transition-all duration-500">
-          <div class="flex justify-between items-center px-10 py-6 border-b border-slate-100 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-2xl z-30">
-               <div class="flex items-center gap-3">
-                 <div class="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.5)]"></div>
-                 <h3 class="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-[0.2em]">Temporal Architecture</h3>
-               </div>
-               <div class="hidden sm:flex items-center gap-4">
+        <div class="flex-1 overflow-hidden bg-white dark:bg-zinc-900 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-200/60 dark:border-zinc-800 flex flex-col shadow-2xl shadow-slate-200/40 dark:shadow-none transition-all duration-500">
+          <div class="flex justify-between items-center px-6 md:px-10 py-4 md:py-6 border-b border-slate-100 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-2xl z-30">
+               <div class="flex items-center gap-2 md:gap-3">
+                 <div class="w-2 h-2 md:w-3 md:h-3 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.5)]"></div>
+                 <h3 class="text-xs md:text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-[0.2em]">Temporal Architecture</h3>
                </div>
           </div>
           
-          <div class="flex-1 bg-white dark:bg-zinc-900 p-8 pt-4 overflow-auto custom-scrollbar">
+          <div class="flex-1 bg-white dark:bg-zinc-900 p-4 md:p-8 pt-2 md:pt-4 overflow-auto custom-scrollbar">
             <full-calendar #calendar [options]="calendarOptions()"></full-calendar>
           </div>
         </div>
-
-
-
       </div>
     </div>
   `,

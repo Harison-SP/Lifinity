@@ -15,32 +15,34 @@ type PeriodType = 'yearly' | 'monthly' | 'weekly' | 'daily';
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <div class="min-h-screen bg-white font-body paper-texture">
-        <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 lg:py-10">
+        <div class="max-w-7xl mx-auto px-4 py-3 md:py-8 lg:py-10">
             <!-- Header -->
-            <header class="planner-pagination flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 md:mb-8">
-                <div class="flex items-center gap-4 planner-header">
-                    <button (click)="goBack()" class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg border border-taupe/30 bg-alabaster hover:bg-sand transition-colors">
-                        <span class="material-symbols-outlined text-taupe">arrow_back</span>
+            <header class="planner-pagination flex flex-col md:flex-row md:items-end justify-between gap-3 md:gap-4 mb-2 md:mb-8">
+                <div class="flex items-center gap-3 md:gap-4 planner-header">
+                    <button (click)="goBack()" class="w-9 h-9 md:w-12 md:h-12 flex items-center justify-center rounded-lg border border-taupe/30 bg-alabaster hover:bg-sand transition-colors shadow-sm">
+                        <span class="material-symbols-outlined text-taupe text-xl">arrow_back</span>
                     </button>
                     <div>
-                        <h2 class="font-heading text-2xl md:text-4xl font-bold text-charcoal">
+                        <h2 class="font-heading text-xl md:text-4xl font-bold text-charcoal">
                             Planner
                         </h2>
-                        <p class="text-taupe text-sm mt-1">Plan and visualize your habits</p>
+                        <p class="text-taupe text-[10px] md:text-sm mt-0.5">Plan and visualize your habits</p>
                     </div>
                 </div>
 
                 <!-- Period Tabs -->
-                <div class="flex w-full md:w-auto gap-2 overflow-x-auto py-1 no-scrollbar">
+                <div class="flex w-full md:w-auto gap-1.5 md:gap-2 overflow-x-auto py-1 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
                     @for (period of periods; track period.value) {
                         <button
                             (click)="switchPeriod(period.value)"
-                            class="px-4 py-2 text-sm font-medium rounded-full border transition-all flex items-center gap-2 whitespace-nowrap"
+                            class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-bold rounded-full border transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm"
                             [class.bg-primary]="activePeriod() === period.value"
                             [class.text-white]="activePeriod() === period.value"
                             [class.border-primary]="activePeriod() === period.value"
-                            [class.text-charcoal]="activePeriod() !== period.value">
-                            <span class="material-symbols-outlined text-base">{{period.icon}}</span>
+                            [class.text-charcoal]="activePeriod() !== period.value"
+                            [class.bg-white]="activePeriod() !== period.value"
+                            [class.border-taupe/20]="activePeriod() !== period.value">
+                            <span class="material-symbols-outlined text-sm md:text-base">{{period.icon}}</span>
                             <span>{{period.label}}</span>
                         </button>
                     }
@@ -48,16 +50,18 @@ type PeriodType = 'yearly' | 'monthly' | 'weekly' | 'daily';
             </header>
 
             <!-- Content Area (article) -->
-            <article class="planner-content bg-alabaster rounded-lg shadow-gentle p-4 md:p-6 min-h-[520px] md:min-h-[600px] border border-taupe/10">
-                @if (activePeriod() === 'yearly') {
-                        <app-yearly-view></app-yearly-view>
-                } @else if (activePeriod() === 'monthly') {
-                        <app-monthly-view></app-monthly-view>
-                } @else if (activePeriod() === 'weekly') {
-                        <app-weekly-view></app-weekly-view>
-                } @else if (activePeriod() === 'daily') {
-                        <app-daily-view></app-daily-view>
-                }
+            <article class="planner-content bg-alabaster rounded-xl shadow-gentle p-2 md:p-6 min-h-[500px] md:min-h-[600px] border border-taupe/10 overflow-hidden">
+                <div class="w-full h-full animate-fade-in">
+                    @if (activePeriod() === 'yearly') {
+                            <app-yearly-view></app-yearly-view>
+                    } @else if (activePeriod() === 'monthly') {
+                            <app-monthly-view></app-monthly-view>
+                    } @else if (activePeriod() === 'weekly') {
+                            <app-weekly-view></app-weekly-view>
+                    } @else if (activePeriod() === 'daily') {
+                            <app-daily-view></app-daily-view>
+                    }
+                </div>
             </article>
         </div>
     </div>
