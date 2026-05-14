@@ -1,26 +1,48 @@
 export type FrequencyType = 'Daily' | 'Weekly' | 'Interval' | 'SpecificDays';
 export type HabitType = 'yes_no' | 'measurable';
 export type TargetComparator = '>=' | '<=' | '==';
+export type PriorityLevel = 'low' | 'medium' | 'high';
+export type HabitCategory = 'protocol' | 'bad_habit';
+
+export interface FrictionRule {
+  id?: string;
+  description: string;
+  requiresConfirmation: boolean;
+  confirmationPrompt?: string;
+}
+
+export interface MicroHabit {
+  id?: string;
+  name: string;
+  description?: string;
+  priority: PriorityLevel;
+  reminderOffsetMinutes?: number;
+  executionWindowStart?: string;
+  executionWindowEnd?: string;
+  completedToday?: boolean;
+  streak?: number;
+  parentId?: string;
+}
 
 export interface Habit {
   id: string;
   name: string;
   description?: string;
-  frequency: string; // Kept for display/legacy
-  
+  frequency: string;
+
   // New Fields
   type: HabitType;
   targetValue: number;
   targetUnit: string;
   targetComparator: TargetComparator;
 
-  frequencyType: string; // 'daily', 'specific_days', 'interval', 'count_per_period'
+  frequencyType: string;
   weekdays: number[];
   frequencyInterval: number;
   frequencyCount: number;
   frequencyPeriod: number;
 
-  // Hierarchy
+  // Hierarchy - Main to Micro mapping
   parentId?: string;
   tier?: 'yearly' | 'monthly' | 'weekly' | 'daily';
   systemId?: string;
@@ -30,19 +52,35 @@ export interface Habit {
   systemTaskDescription?: string;
   systemTaskResourceLink?: string;
 
+  // Subtasks (Micro-Habits)
+  subtasks?: MicroHabit[];
+
+  // Priority & Forced Consistency
+  priority?: PriorityLevel;
+
+  // Bad Habit Management
+  category?: HabitCategory;
+  soberStartDate?: string; // YYYY-MM-DD HH:mm:ss when the sobriety/avoidance streak started
+  frictionRules?: FrictionRule[];
+
+  // Temporal Defaults
   startDate?: string;
   endDate?: string;
   timeBlockStart?: string;
   timeBlockEnd?: string;
+  defaultFocusHours?: number;
+
   icon?: string;
   color?: string;
-  category?: string;
   streak: number;
   bestStreak: number;
   completionRate: number;
   completedToday: boolean;
   archived?: boolean;
-  created_at: string; // Changed from Date to string to match API response type usually
+  stackedWith?: string;
+  stackDuration?: number;
+  stackStartDate?: string;
+  created_at: string;
   latestLog?: {
       id: string;
       habit_name?: string;
@@ -57,7 +95,7 @@ export interface HabitLog {
   id: string;
   habit_id: string;
   habit_name?: string;
-  completed_at: string; // ISO UTC
+  completed_at: string;
   value?: number;
   notes?: string;
   focused_minutes?: number;
@@ -105,8 +143,8 @@ export interface BinaryHabitAnalytics {
 export interface MeasurableHabitAnalytics {
   average_value: number;
   target_achievement_rate: number;
-  best_day: number;
-  worst_day: number;
+  best_day?: number;
+  worst_day?: number;
   trend_percentage: number;
   trend_direction: 'up' | 'down' | 'flat';
 }
@@ -119,4 +157,3 @@ export interface AnalyticsResponse {
   common_stats: HabitStats;
   period_days: number;
 }
-

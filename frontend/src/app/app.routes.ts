@@ -30,12 +30,12 @@ export const routes: Routes = [
     {
         path: 'details/:id',
         canActivate: [authGuard],
-        loadComponent: () => import('./features/habit-details/habit-details.component').then(m => m.HabitDetailsComponent)
+        loadComponent: () => import('./features/habit-activity/habit-activity.component').then(m => m.HabitActivityComponent)
     },
     {
         path: 'track/:id',
         canActivate: [authGuard],
-        loadComponent: () => import('./features/daily-habit-tracker/daily-habit-tracker.component').then(m => m.DailyHabitTrackerComponent)
+        loadComponent: () => import('./features/habit-detail/habit-detail.component').then(m => m.HabitDetailComponent)
     },
     {
         path: 'settings',

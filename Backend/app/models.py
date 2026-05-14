@@ -36,6 +36,44 @@ class RefreshTokenRequest(BaseModel):
 
 # ── Habit Models ────────────────────────────────────────────────────────────
 
+# ── Micro-Habit Models ──────────────────────────────────────────────────────
+
+class FrictionRule(BaseModel):
+    id: Optional[str] = None
+    description: str
+    requiresConfirmation: bool = False
+    confirmationPrompt: Optional[str] = None
+
+class MicroHabitBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    priority: str = "medium"  # "low", "medium", "high"
+    reminderOffsetMinutes: Optional[int] = None
+    executionWindowStart: Optional[str] = None
+    executionWindowEnd: Optional[str] = None
+    completedToday: bool = False
+    streak: int = 0
+
+class MicroHabitCreate(MicroHabitBase):
+    pass
+
+class MicroHabitUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    priority: Optional[str] = None
+    reminderOffsetMinutes: Optional[int] = None
+    executionWindowStart: Optional[str] = None
+    executionWindowEnd: Optional[str] = None
+    streak: Optional[int] = None
+
+class MicroHabit(MicroHabitBase):
+    id: Optional[str] = None
+    parentId: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
 class HabitBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -52,16 +90,30 @@ class HabitBase(BaseModel):
     frequencyInterval: int = 1  # Every X days
     frequencyCount: int = 1  # X times...
     frequencyPeriod: int = 7  # ...per Y days (default week)
-    
-    # Date & Time
+
+    # Micro-Habits (Subtasks)
+    subtasks: Optional[List[MicroHabit]] = None
+
+    # Priority & Forced Consistency
+    priority: Optional[str] = "medium"  # "low", "medium", "high"
+
+    # Bad Habit Management
+    category: Optional[str] = None  # "protocol" or "bad_habit"
+    soberStartDate: Optional[str] = None # When the streak started
+    frictionRules: Optional[List[FrictionRule]] = None
+
+    # Temporal Defaults
     startDate: Optional[str] = None
     endDate: Optional[str] = None
     timeBlockStart: Optional[str] = None
     timeBlockEnd: Optional[str] = None
-    
+    defaultFocusHours: Optional[int] = 2  # Default 2 hours
+
     icon: Optional[str] = None
     color: Optional[str] = None
-    category: Optional[str] = None
+    stackedWith: Optional[str] = None  # Predefined daily event for habit stacking
+    stackDuration: Optional[int] = 21  # Number of days for stacking period
+    stackStartDate: Optional[str] = None  # YYYY-MM-DD when stacking began
     streak: int = 0
     bestStreak: int = 0
     completionRate: float = 0.0
@@ -70,11 +122,13 @@ class HabitBase(BaseModel):
 class HabitCreate(HabitBase):
     pass
 
+
+
 class HabitUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     frequency: Optional[str] = None
-    
+
     type: Optional[str] = None
     targetValue: Optional[float] = None
     targetUnit: Optional[str] = None
@@ -86,13 +140,28 @@ class HabitUpdate(BaseModel):
     frequencyCount: Optional[int] = None
     frequencyPeriod: Optional[int] = None
 
+    # Micro-Habits
+    subtasks: Optional[List[MicroHabitCreate]] = None
+
+    # Priority
+    priority: Optional[str] = None
+
+    # Bad Habit
+    category: Optional[str] = None
+    soberStartDate: Optional[str] = None
+    frictionRules: Optional[List[FrictionRule]] = None
+
+    # Temporal
     startDate: Optional[str] = None
     endDate: Optional[str] = None
     timeBlockStart: Optional[str] = None
     timeBlockEnd: Optional[str] = None
+    defaultFocusHours: Optional[int] = None
     icon: Optional[str] = None
     color: Optional[str] = None
-    category: Optional[str] = None
+    stackedWith: Optional[str] = None
+    stackDuration: Optional[int] = None
+    stackStartDate: Optional[str] = None
     streak: Optional[int] = None
     bestStreak: Optional[int] = None
     completionRate: Optional[float] = None
@@ -101,7 +170,14 @@ class HabitUpdate(BaseModel):
 class Habit(HabitBase):
     id: str
     created_at: datetime
-    
+    latestLog: Optional[dict] = None  # For compatibility with frontend
+
+    class Config:
+        from_attributes = True
+
+class HabitWithSubtasks(Habit):
+    subtasks: List[MicroHabit] = Field(default_factory=list)
+
     class Config:
         from_attributes = True
 
@@ -112,6 +188,7 @@ class HabitLogBase(BaseModel):
     value: Optional[float] = 1.0 # Default to 1.0 for yes/no, actual value for measurable
     notes: Optional[str] = None
     focused_minutes: Optional[int] = 0
+    completed_subtasks: List[str] = Field(default_factory=list)
 
 class HabitLogCreate(HabitLogBase):
     pass

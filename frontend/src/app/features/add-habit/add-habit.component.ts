@@ -1,11 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, effect, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HabitService } from '../../services/habit.service';
 import { ToastService } from '../../services/toast.service';
-import { FrequencyType } from '../../models/habit.model';
+import { FrequencyType, HabitCategory, PriorityLevel, MicroHabit, Habit } from '../../models/habit.model';
+import { FormsModule } from '@angular/forms';
 import { startWith } from 'rxjs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,6 +22,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     standalone: true,
     imports: [
     ReactiveFormsModule,
+    FormsModule,
+    CommonModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
@@ -173,62 +177,332 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
             <!-- Date Range -->
             <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Habit Duration</label>
-                <div class="w-full">
-                    <mat-form-field appearance="outline" class="w-full soft-input">
-                        <mat-label>Select Date Range</mat-label>
-                        <mat-date-range-input [rangePicker]="rangePicker">
-                            <input matStartDate formControlName="startDate" placeholder="Start date">
-                            <input matEndDate formControlName="endDate" placeholder="End date">
-                        </mat-date-range-input>
-                        <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
-                        <mat-date-range-picker #rangePicker panelClass="soft-datepicker"></mat-date-range-picker>
-                    </mat-form-field>
-                </div>
-            </div>
-
-            <!-- Time Block -->
-            <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Time Block (Optional)</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <mat-form-field appearance="outline" class="w-full soft-input">
-                        <mat-label>Start Time</mat-label>
-                        <input matInput formControlName="timeBlockStart" [matTimepicker]="startPicker">
-                        <mat-timepicker-toggle matSuffix [for]="startPicker"></mat-timepicker-toggle>
-                        <mat-timepicker #startPicker panelClass="soft-datepicker"></mat-timepicker>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="w-full soft-input">
-                        <mat-label>End Time</mat-label>
-                        <input matInput formControlName="timeBlockEnd" [matTimepicker]="endPicker">
-                        <mat-timepicker-toggle matSuffix [for]="endPicker"></mat-timepicker-toggle>
-                        <mat-timepicker #endPicker panelClass="soft-datepicker"></mat-timepicker>
-                    </mat-form-field>
-                </div>
-            </div>
-
-            <!-- Color -->
-            <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Color</label>
-                <div class="flex flex-wrap gap-3 items-center">
-                    @for (c of presetColors; track c) {
-                        <button type="button" (click)="color.set(c)"
-                                class="w-8 h-8 rounded-full border-2 transition-all hover:scale-110 shadow-gentle"
-                                [style.background-color]="c"
-                                [class.border-primary]="color() === c"
-                                [class.border-taupe]="color() !== c"
-                                [class.ring-2]="color() === c"
-                                [class.ring-primary/50]="color() === c">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="block text-sm font-bold uppercase tracking-wider text-taupe">Habit Duration</label>
+                    <div class="flex items-center gap-2 px-3 py-1 bg-sand/20 rounded-full border border-taupe/10">
+                        <span class="text-[10px] font-black uppercase tracking-widest" [class.text-sage]="isEndless()" [class.text-taupe]="!isEndless()">Endless Habit</span>
+                        <button type="button" 
+                                (click)="toggleEndless()"
+                                class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                [class.bg-sage]="isEndless()"
+                                [class.bg-taupe/30]="!isEndless()">
+                            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                  [class.translate-x-4]="isEndless()"
+                                  [class.translate-x-0]="!isEndless()"></span>
                         </button>
+                    </div>
+                </div>
+
+                <div class="w-full">
+                    @if (!isEndless()) {
+                        <mat-form-field appearance="outline" class="w-full soft-input">
+                            <mat-label>Select Date Range</mat-label>
+                            <mat-date-range-input [rangePicker]="rangePicker">
+                                <input matStartDate formControlName="startDate" placeholder="Start date">
+                                <input matEndDate formControlName="endDate" placeholder="End date">
+                            </mat-date-range-input>
+                            <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
+                            <mat-date-range-picker #rangePicker panelClass="soft-datepicker"></mat-date-range-picker>
+                        </mat-form-field>
+                    } @else {
+                        <mat-form-field appearance="outline" class="w-full soft-input">
+                            <mat-label>Start Date</mat-label>
+                            <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="When do you begin?">
+                            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #startPicker panelClass="soft-datepicker"></mat-datepicker>
+                            <mat-hint class="text-[10px] text-sage font-bold uppercase tracking-widest mt-1">This protocol has no defined end date.</mat-hint>
+                        </mat-form-field>
                     }
                 </div>
             </div>
 
-            <!-- Problem Count / Description -->
-            <div class="mb-10">
-                <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-2">How many problems solved? (optional)</label>
-                <textarea formControlName="description" rows="4" class="w-full p-4 border border-taupe/30 rounded-lg bg-alabaster text-charcoal font-body focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors resize-none" placeholder="How many problems do you aim to solve? This will be used in daily reminders."></textarea>
+            <!-- Time Block Configuration (Optional) -->
+            <div class="mb-10 bg-sand/10 rounded-2xl p-6 border border-taupe/10 transition-all duration-500">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">schedule</span>
+                        </div>
+                        <div>
+                            <h3 class="font-heading text-lg font-bold text-charcoal">Execution Window</h3>
+                            <p class="text-xs text-taupe">Define a specific time block for this protocol</p>
+                        </div>
+                    </div>
+                    <button type="button" 
+                            (click)="showTimeBlock.set(!showTimeBlock())"
+                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                            [class.bg-primary]="showTimeBlock()"
+                            [class.bg-taupe/30]="!showTimeBlock()">
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                              [class.translate-x-5]="showTimeBlock()"
+                              [class.translate-x-0]="!showTimeBlock()"></span>
+                    </button>
+                </div>
+
+                @if (showTimeBlock()) {
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-taupe/10 animate-fade-in">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Window Starts</label>
+                            <mat-form-field appearance="outline" class="w-full soft-input no-label-field">
+                                <input matInput formControlName="timeBlockStart" [matTimepicker]="startPicker" placeholder="09:00 AM">
+                                <mat-timepicker-toggle matSuffix [for]="startPicker"></mat-timepicker-toggle>
+                                <mat-timepicker #startPicker panelClass="soft-datepicker"></mat-timepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Window Ends</label>
+                            <mat-form-field appearance="outline" class="w-full soft-input no-label-field">
+                                <input matInput formControlName="timeBlockEnd" [matTimepicker]="endPicker" placeholder="10:00 AM">
+                                <mat-timepicker-toggle matSuffix [for]="endPicker"></mat-timepicker-toggle>
+                                <mat-timepicker #endPicker panelClass="soft-datepicker"></mat-timepicker>
+                            </mat-form-field>
+                        </div>
+                        
+                        <div class="md:col-span-2 flex items-center gap-2 text-xs text-primary/70 bg-primary/5 p-3 rounded-lg border border-primary/10">
+                            <span class="material-symbols-outlined text-sm">info</span>
+                            Setting a time window enables focused AI scheduling and proximity-based protocol alerts.
+                        </div>
+                    </div>
+                }
             </div>
+
+            <!-- Advanced Configuration Toggle -->
+            <div class="mb-8 pt-4 border-t border-taupe/10">
+                <button type="button" 
+                        (click)="showAdvancedOptions.set(!showAdvancedOptions())"
+                        class="w-full py-4 px-6 rounded-2xl bg-charcoal/5 border border-charcoal/10 flex items-center justify-between hover:bg-charcoal/10 transition-all group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-charcoal/10 flex items-center justify-center group-hover:bg-charcoal/20 transition-colors">
+                            <span class="material-symbols-outlined text-charcoal">{{ showAdvancedOptions() ? 'settings_suggest' : 'tune' }}</span>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-heading text-base font-bold text-charcoal">Advanced Configuration</h3>
+                            <p class="text-xs text-taupe">{{ showAdvancedOptions() ? 'Hide refined protocol settings' : 'Micro-habits, sobriety tracker, stacking & priorities' }}</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined transition-transform duration-300" [class.rotate-180]="showAdvancedOptions()">expand_more</span>
+                </button>
+            </div>
+
+            @if (showAdvancedOptions()) {
+                <div class="animate-fade-in space-y-10 pb-10">
+                    <!-- Color -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Protocol Identity (Color)</label>
+                        <div class="flex flex-wrap gap-3 items-center">
+                            @for (c of presetColors; track c) {
+                                <button type="button" (click)="color.set(c)"
+                                        class="w-8 h-8 rounded-full border-2 transition-all hover:scale-110 shadow-gentle"
+                                        [style.background-color]="c"
+                                        [class.border-primary]="color() === c"
+                                        [class.border-taupe]="color() !== c"
+                                        [class.ring-2]="color() === c"
+                                        [class.ring-primary/50]="color() === c">
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Habit Stacking -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-2">Habit Stacking
+                            <span class="text-taupe/60 normal-case tracking-normal font-normal">(optional)</span>
+                        </label>
+                        <p class="text-xs text-taupe/80 mb-4 font-body">Build consistency by linking this protocol to a daily anchor event.</p>
+                        <mat-form-field appearance="outline" class="w-full soft-input">
+                            <mat-label>Anchor Event</mat-label>
+                            <input matInput 
+                                   formControlName="stackedWith" 
+                                   [matAutocomplete]="autoStack"
+                                   placeholder="e.g., After brushing teeth">
+                            <mat-autocomplete #autoStack="matAutocomplete" panelClass="soft-datepicker">
+                                @for (event of filteredStackingEvents(); track event) {
+                                    <mat-option [value]="event">
+                                        <span class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-base text-orange-500">link</span>
+                                            {{ event }}
+                                        </span>
+                                    </mat-option>
+                                }
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Protocol Category</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button type="button" (click)="setCategory('protocol')"
+                                    class="p-5 rounded-xl border-2 flex flex-col items-center text-center gap-2 transition-all"
+                                    [class.border-sage]="habitCategory() === 'protocol'"
+                                    [class.bg-sage/10]="habitCategory() === 'protocol'"
+                                    [class.border-taupe/30]="habitCategory() !== 'protocol'">
+                                <span class="material-symbols-outlined text-3xl" [class.text-sage]="habitCategory() === 'protocol'" [class.text-taupe]="habitCategory() !== 'protocol'">verified</span>
+                                <span class="font-bold text-charcoal text-sm">Protocol</span>
+                                <span class="text-xs text-taupe">Build a positive habit</span>
+                            </button>
+                            <button type="button" (click)="setCategory('bad_habit')"
+                                    class="p-5 rounded-xl border-2 flex flex-col items-center text-center gap-2 transition-all"
+                                    [class.border-orange-500]="habitCategory() === 'bad_habit'"
+                                    [class.bg-orange-500/10]="habitCategory() === 'bad_habit'"
+                                    [class.border-taupe/30]="habitCategory() !== 'bad_habit'">
+                                <span class="material-symbols-outlined text-3xl" [class.text-orange-500]="habitCategory() === 'bad_habit'" [class.text-taupe]="habitCategory() !== 'bad_habit'">block</span>
+                                <span class="font-bold text-charcoal text-sm">Bad Habit</span>
+                                <span class="text-xs text-taupe">Break a negative habit</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Priority -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
+                        <label class="block text-sm font-bold uppercase tracking-wider text-taupe mb-4">Priority & Enforcement</label>
+                        <div class="flex gap-3">
+                            @for (p of priorityOptions; track p.value) {
+                                <button type="button" (click)="habitPriority.set(p.value)"
+                                        class="flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all flex items-center justify-center gap-2"
+                                        [class]="getPriorityClass(p.value)">
+                                    <span class="material-symbols-outlined text-sm">{{ p.icon }}</span>
+                                    {{ p.label }}
+                                </button>
+                            }
+                        </div>
+                        @if (habitPriority() === 'high') {
+                            <div class="mt-3 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg flex items-center gap-2">
+                                <span class="material-symbols-outlined text-orange-500 text-sm">warning</span>
+                                <p class="text-xs text-orange-700 font-medium"><strong>Forced Consistency Active:</strong> Failure to complete high-priority protocols results in severe streak penalties.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Micro-Habits Builder -->
+                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-taupe/10 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <label class="block text-sm font-bold uppercase tracking-wider text-taupe">Micro-Habits (Steps)</label>
+                            <button type="button" (click)="showSubtaskForm.set(!showSubtaskForm())"
+                                    class="text-xs px-4 py-1.5 bg-sage text-white rounded-full font-bold hover:bg-sage/90 transition-colors flex items-center gap-1 shadow-gentle">
+                                <span class="material-symbols-outlined text-sm">add</span>
+                                Add Step
+                            </button>
+                        </div>
+                        <p class="text-xs text-taupe/80 mb-6">Break down your main protocol into actionable micro-steps.</p>
+
+                        @if (showSubtaskForm()) {
+                            <div class="bg-sand/10 dark:bg-white/5 border border-taupe/20 rounded-xl p-5 mb-6 animate-fade-in">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <mat-form-field appearance="outline" class="w-full soft-input">
+                                        <mat-label>Step Name</mat-label>
+                                        <input matInput [(ngModel)]="newSubtask.name" [ngModelOptions]="{standalone: true}" placeholder="e.g., Preset coffee machine">
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="w-full soft-input">
+                                        <mat-label>Context (Optional)</mat-label>
+                                        <input matInput [(ngModel)]="newSubtask.description" [ngModelOptions]="{standalone: true}" placeholder="Short detail...">
+                                    </mat-form-field>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <mat-form-field appearance="outline" class="w-full soft-input">
+                                        <mat-label>Priority</mat-label>
+                                        <mat-select [(ngModel)]="newSubtask.priority" [ngModelOptions]="{standalone: true}">
+                                            <mat-option value="low">Low</mat-option>
+                                            <mat-option value="medium">Medium</mat-option>
+                                            <mat-option value="high">High</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="w-full soft-input">
+                                        <mat-label>Start Time</mat-label>
+                                        <input matInput [(ngModel)]="newSubtask.executionWindowStart" 
+                                               [ngModelOptions]="{standalone: true}"
+                                               [matTimepicker]="subStartPicker" placeholder="09:00 AM">
+                                        <mat-timepicker-toggle matSuffix [for]="subStartPicker"></mat-timepicker-toggle>
+                                        <mat-timepicker #subStartPicker panelClass="soft-datepicker"></mat-timepicker>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="w-full soft-input">
+                                        <mat-label>Reminder (Mins Prior)</mat-label>
+                                        <input matInput type="number" [(ngModel)]="newSubtask.reminderOffsetMinutes" [ngModelOptions]="{standalone: true}" placeholder="30">
+                                    </mat-form-field>
+                                </div>
+                                <div class="flex gap-3 justify-end">
+                                    <button type="button" (click)="showSubtaskForm.set(false)" class="text-sm font-bold text-taupe hover:text-charcoal px-4 py-2">Cancel</button>
+                                    <button type="button" (click)="addSubtask()" [disabled]="!newSubtask.name"
+                                            class="px-6 py-2 bg-charcoal text-white rounded-xl text-sm font-bold disabled:opacity-50 hover:bg-charcoal/90 transition-all shadow-gentle">
+                                        Save Step
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+                        @if (subtasks().length > 0) {
+                            <div class="space-y-3">
+                                @for (s of subtasks(); track s.name) {
+                                    <div class="flex items-center justify-between p-4 bg-white border rounded-2xl border-taupe/20 shadow-sm hover:shadow-gentle transition-all"
+                                         [class.border-orange-500/30]="s.priority === 'high'">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-2.5 h-2.5 rounded-full"
+                                                  [class.bg-sage]="s.priority === 'low'"
+                                                  [class.bg-amber-500]="s.priority === 'medium'"
+                                                  [class.bg-orange-500]="s.priority === 'high'"></div>
+                                            <div>
+                                                <p class="text-sm font-bold text-charcoal">{{ s.name }}</p>
+                                                <p class="text-[10px] uppercase tracking-wider text-taupe font-bold">
+                                                    {{ s.priority }} priority
+                                                    @if (s.executionWindowStart) { · {{ s.executionWindowStart }} }
+                                                    @if (s.reminderOffsetMinutes) { · {{ s.reminderOffsetMinutes }}m reminder }
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button type="button" (click)="removeSubtask(s)" class="w-8 h-8 rounded-full flex items-center justify-center text-taupe hover:bg-red-50 hover:text-red-500 transition-all">
+                                            <span class="material-symbols-outlined text-base">close</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <div class="text-center py-8 border-2 border-dashed border-taupe/10 rounded-2xl">
+                                <span class="material-symbols-outlined text-4xl text-taupe/20 block mb-2">list_alt</span>
+                                <p class="text-xs text-taupe/50 font-bold uppercase tracking-widest">No steps added</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Sobriety / Avoidance Tracker (for bad_habit) -->
+                    @if (habitCategory() === 'bad_habit') {
+                        <div class="bg-charcoal/5 rounded-2xl p-6 border border-charcoal/10">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-charcoal/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-charcoal">timer</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-heading text-base font-bold text-charcoal">Sobriety Countdown</h3>
+                                        <p class="text-xs text-taupe">Track avoidance time since last slip</p>
+                                    </div>
+                                </div>
+                                <button type="button" 
+                                        (click)="isSoberTrackerActive.set(!isSoberTrackerActive())"
+                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                        [class.bg-orange-500]="isSoberTrackerActive()"
+                                        [class.bg-taupe/30]="!isSoberTrackerActive()">
+                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                          [class.translate-x-5]="isSoberTrackerActive()"
+                                          [class.translate-x-0]="!isSoberTrackerActive()"></span>
+                                </button>
+                            </div>
+                            
+                            @if (isSoberTrackerActive()) {
+                                <div class="mt-6 p-4 bg-white/50 rounded-xl border border-taupe/10 animate-fade-in">
+                                    <p class="text-xs text-taupe mb-4">Activating this will start a high-precision countdown from the moment you save. If you engage with this bad habit, you'll need to manually reset the timer in the details view.</p>
+                                    <div class="flex items-center gap-2 p-3 bg-orange-500/5 rounded-lg border border-orange-500/20">
+                                        <span class="material-symbols-outlined text-orange-500 text-sm">auto_mode</span>
+                                        <span class="text-[10px] font-bold text-orange-700 uppercase tracking-widest">Active Monitoring Protocol Ready</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
 
             <!-- Actions -->
             <div class="flex flex-col-reverse md:flex-row gap-4 pt-6 border-t border-taupe/30">
@@ -244,6 +518,18 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     `,
     styles: [`
     :host { display: block; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .no-label-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none !important;
+    }
 
     /* Soft Material Input Styling */
     ::ng-deep .soft-input .mdc-notched-outline {
@@ -495,6 +781,18 @@ export class AddHabitComponent implements OnInit {
         'Portions', 'Tasks', 'Repetitions', 'Sets', 'Percent', 'Times', 'Chapters'
     ]);
 
+    stackingEvents = [
+        'After waking up',
+        'After brushing teeth',
+        'Before breakfast',
+        'After breakfast',
+        'After lunch',
+        'After work/school',
+        'Before dinner',
+        'After dinner',
+        'Before bed'
+    ];
+
     daysOfWeek = [
         { label: 'MON', value: 1 }, { label: 'TUE', value: 2 }, { label: 'WED', value: 3 },
         { label: 'THU', value: 4 }, { label: 'FRI', value: 5 }, { label: 'SAT', value: 6 },
@@ -515,18 +813,44 @@ export class AddHabitComponent implements OnInit {
         startDate: [this.getDefaultStartDate(), Validators.required],
         endDate: [this.getDefaultEndDate(), Validators.required],
         timeBlockStart: [this.getDefaultStartTime()],
-        timeBlockEnd: [this.getDefaultEndTime()]
+        timeBlockEnd: [this.getDefaultEndTime()],
+        stackedWith: ['']
     });
 
     habitType = signal<string>('yes_no');
     frequencyType = signal<string>('daily');
+    habitCategory = signal<HabitCategory>('protocol');
+    habitPriority = signal<PriorityLevel>('medium');
     color = signal<string>('#10b981');
+    showTimeBlock = signal(false);
+    showAdvancedOptions = signal(false);
+    isSoberTrackerActive = signal(false);
+    isEndless = signal(false);
+    loadedHabit: Habit | null = null;
+
+    // Subtask builder
+    showSubtaskForm = signal(false);
+    subtasks = signal<Partial<MicroHabit>[]>([]);
+    newSubtask: Partial<MicroHabit> & { name: string } = { name: '', priority: 'medium', executionWindowStart: this.getDefaultStartTime() as any };
+
+    priorityOptions = [
+        { value: 'low' as PriorityLevel, label: 'Low', icon: 'arrow_downward' },
+        { value: 'medium' as PriorityLevel, label: 'Medium', icon: 'drag_handle' },
+        { value: 'high' as PriorityLevel, label: 'High', icon: 'priority_high' },
+    ];
+
     presetColors = ['#10b981', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#eab308', '#64748b'];
 
     targetUnitValue = toSignal(this.habitForm.get('targetUnit')!.valueChanges.pipe(startWith('')));
     filteredUnits = computed(() => {
         const val = (this.targetUnitValue() || '').toLowerCase();
         return this.unitOptions().filter(u => u.toLowerCase().includes(val));
+    });
+
+    stackedWithValue = toSignal(this.habitForm.get('stackedWith')!.valueChanges.pipe(startWith('')));
+    filteredStackingEvents = computed(() => {
+        const val = (this.stackedWithValue() || '').toLowerCase();
+        return this.stackingEvents.filter(e => e.toLowerCase().includes(val));
     });
 
     constructor() {
@@ -550,14 +874,26 @@ export class AddHabitComponent implements OnInit {
                         startDate: habit.startDate ? new Date(habit.startDate) : null,
                         endDate: habit.endDate ? new Date(habit.endDate) : null,
                         timeBlockStart: habit.timeBlockStart ? this.timeStringToDate(habit.timeBlockStart) : null,
-                        timeBlockEnd: habit.timeBlockEnd ? this.timeStringToDate(habit.timeBlockEnd) : null
+                        timeBlockEnd: habit.timeBlockEnd ? this.timeStringToDate(habit.timeBlockEnd) : null,
+                        stackedWith: habit.stackedWith || ''
                     } as any, { emitEvent: false });
+
+                    if (habit.timeBlockStart || habit.timeBlockEnd) {
+                        this.showTimeBlock.set(true);
+                    }
 
                     this.habitType.set(habit.type || 'yes_no');
                     this.frequencyType.set(habit.frequencyType || 'daily');
                     this.updateValidators();
                     this.selectedDays.set(habit.weekdays || []);
                     this.color.set(habit.color || '#ec5b13');
+                    this.loadedHabit = habit;
+                    if (habit.soberStartDate) {
+                        this.isSoberTrackerActive.set(true);
+                    }
+                    if (!habit.endDate) {
+                        this.isEndless.set(true);
+                    }
                 }
             }
         });
@@ -575,6 +911,11 @@ export class AddHabitComponent implements OnInit {
         this.selectedDays.update(days =>
             days.includes(day) ? days.filter(d => d !== day) : [...days, day]
         );
+    }
+
+    toggleEndless() {
+        this.isEndless.update(v => !v);
+        this.updateValidators();
     }
 
     setHabitType(type: string) {
@@ -602,10 +943,22 @@ export class AddHabitComponent implements OnInit {
         } else {
             frequencyInterval?.clearValidators();
         }
+
+        const endDate = this.habitForm.get('endDate');
+        if (this.isEndless()) {
+            endDate?.clearValidators();
+            endDate?.setValue(null);
+        } else {
+            endDate?.setValidators([Validators.required]);
+            if (!endDate?.value) {
+                endDate?.setValue(this.getDefaultEndDate());
+            }
+        }
         
         targetValue?.updateValueAndValidity();
         targetUnit?.updateValueAndValidity();
         frequencyInterval?.updateValueAndValidity();
+        endDate?.updateValueAndValidity();
         this.habitForm.updateValueAndValidity();
     }
 
@@ -635,18 +988,26 @@ export class AddHabitComponent implements OnInit {
                 frequencyPeriod: formVal.frequencyPeriod || 7,
 
                 startDate: this.dateToString(formVal.startDate as any),
-                endDate: this.dateToString(formVal.endDate as any),
-                timeBlockStart: this.timeToString(formVal.timeBlockStart as any),
-                timeBlockEnd: this.timeToString(formVal.timeBlockEnd as any),
+                endDate: this.isEndless() ? undefined : this.dateToString(formVal.endDate as any),
+                timeBlockStart: this.showTimeBlock() ? this.timeToString(formVal.timeBlockStart as any) : undefined,
+                timeBlockEnd: this.showTimeBlock() ? this.timeToString(formVal.timeBlockEnd as any) : undefined,
 
                 icon: 'star',
                 color: this.color(),
-                category: 'General'
+                category: this.habitCategory(),
+                priority: this.habitPriority(),
+                subtasks: this.subtasks() as any,
+                soberStartDate: this.isSoberTrackerActive() 
+                    ? (this.isEditMode() ? (this.loadedHabit?.soberStartDate || new Date().toISOString()) : new Date().toISOString()) 
+                    : undefined,
+                stackedWith: formVal.stackedWith || undefined,
+                stackDuration: formVal.stackedWith ? 21 : undefined,
+                stackStartDate: formVal.stackedWith ? this.dateToString(new Date()) : undefined
             };
 
             const obs$ = (this.isEditMode() && this.habitId())
-                ? this.habitService.updateHabit(this.habitId()!, habitData)
-                : this.habitService.addHabit(habitData);
+                ? this.habitService.updateHabit(this.habitId()!, habitData as any)
+                : this.habitService.addHabit(habitData as any);
 
             obs$.subscribe({
                 next: () => {
@@ -663,6 +1024,35 @@ export class AddHabitComponent implements OnInit {
 
     goBack() {
         this.location.back();
+    }
+
+    setCategory(cat: HabitCategory) {
+        this.habitCategory.set(cat);
+    }
+
+    getPriorityClass(p: PriorityLevel): string {
+        const sel = this.habitPriority() === p;
+        if (p === 'low') return sel ? 'border-sage bg-sage/10 text-sage' : 'border-taupe/30 text-taupe';
+        if (p === 'medium') return sel ? 'border-amber-500 bg-amber-500/10 text-amber-600' : 'border-taupe/30 text-taupe';
+        return sel ? 'border-orange-500 bg-orange-500/10 text-orange-600' : 'border-taupe/30 text-taupe';
+    }
+
+    addSubtask() {
+        if (!this.newSubtask.name) return;
+        const taskToAdd = { ...this.newSubtask };
+        
+        // Convert Date object from timepicker back to HH:mm string for storage
+        if (taskToAdd.executionWindowStart && (taskToAdd.executionWindowStart as any) instanceof Date) {
+            taskToAdd.executionWindowStart = this.timeToString(taskToAdd.executionWindowStart as any);
+        }
+        
+        this.subtasks.update(s => [...s, taskToAdd]);
+        this.newSubtask = { name: '', priority: 'medium', executionWindowStart: this.getDefaultStartTime() as any };
+        this.showSubtaskForm.set(false);
+    }
+
+    removeSubtask(subtask: Partial<MicroHabit>) {
+        this.subtasks.update(s => s.filter(x => x !== subtask));
     }
 
     private dateToString(date: Date | null | undefined): string | undefined {
@@ -713,10 +1103,3 @@ export class AddHabitComponent implements OnInit {
         return d;
     }
 }
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Habit, HabitLog } from '../models/habit.model';
+import { Habit, HabitLog, MicroHabit, FrictionRule } from '../models/habit.model';
 import { Observable, forkJoin, of } from 'rxjs';
 import { tap, map, switchMap } from 'rxjs/operators';
 import { SystemService } from './system.service';
@@ -41,9 +41,10 @@ export class HabitService {
         return `${year}-${month}-${day}`;
     }
 
-    loadHabits() {
+    loadHabits(date?: string) {
+        const targetDate = date || this.getLocalDateString();
         const params = new HttpParams()
-            .set('date', this.getLocalDateString())
+            .set('date', targetDate)
             .set('timezone_offset', this.getTimezoneOffset().toString());
 
         forkJoin({
@@ -197,5 +198,58 @@ export class HabitService {
     // Helper to get habit by ID from the local signal (synchronous)
     getHabitById(id: string): Habit | undefined {
         return this._habits().find(h => h.id === id);
+    }
+
+    // ---- Micro-Habit (Subtask) methods ----
+
+    addSubtask(habitId: string, subtask: Omit<MicroHabit, 'id' | 'parentId'>): Observable<Habit> {
+        return this.http.post<Habit>(`${this.apiUrl}/${habitId}/subtasks`, subtask).pipe(
+            tap({ next: (h) => this._habits.update(habits => habits.map(x => x.id === habitId ? h : x)) })
+        );
+    }
+
+    deleteSubtask(habitId: string, subtaskId: string): Observable<Habit> {
+        return this.http.delete<Habit>(`${this.apiUrl}/${habitId}/subtasks/${subtaskId}`).pipe(
+            tap({ next: (h) => this._habits.update(habits => habits.map(x => x.id === habitId ? h : x)) })
+        );
+    }
+
+    toggleSubtask(habitId: string, subtaskId: string, date: string): Observable<Habit> {
+        const params = new HttpParams()
+            .set('date', date)
+            .set('timezone_offset', this.getTimezoneOffset().toString());
+            
+        return this.http.patch<Habit>(`${this.apiUrl}/${habitId}/subtasks/${subtaskId}/toggle`, {}, { params }).pipe(
+            tap({ next: (h) => this._habits.update(habits => habits.map(x => x.id === habitId ? h : x)) })
+        );
+    }
+
+    // ---- Friction Rule methods ----
+
+    addFrictionRule(habitId: string, rule: Omit<FrictionRule, 'id'>): Observable<Habit> {
+        return this.http.post<Habit>(`${this.apiUrl}/${habitId}/friction-rules`, rule).pipe(
+            tap({ next: (h) => this._habits.update(habits => habits.map(x => x.id === habitId ? h : x)) })
+        );
+    }
+
+    deleteFrictionRule(habitId: string, ruleId: string): Observable<Habit> {
+        return this.http.delete<Habit>(`${this.apiUrl}/${habitId}/friction-rules/${ruleId}`).pipe(
+            tap({ next: (h) => this._habits.update(habits => habits.map(x => x.id === habitId ? h : x)) })
+        );
+    }
+
+    // ---- Yesterday's Stats (derived from heatmap/logs) ----
+    getYesterdayStats(habitId: string): Observable<{ performance: number; completed: number; total: number; onTrack: boolean }> {
+        return this.getHabitStats(habitId).pipe(
+            map(stats => {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+                const yData = stats.heatmap.find(h => h.date === yStr);
+                const completed = yData ? yData.level : 0;
+                const performance = Math.min(100, completed * 25);
+                return { performance, completed: completed > 0 ? 1 : 0, total: 1, onTrack: completed > 0 };
+            })
+        );
     }
 }

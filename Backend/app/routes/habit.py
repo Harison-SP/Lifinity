@@ -70,6 +70,13 @@ async def get_habits(
                 "completed_at": {"$gte": utc_start, "$lte": utc_end}
             })
             habit["completedToday"] = bool(log)
+            
+            # Populate subtask completion states for this specific date
+            completed_subtasks = log.get("completed_subtasks", []) if log else []
+            if "subtasks" in habit and habit["subtasks"]:
+                for subtask in habit["subtasks"]:
+                    subtask["completedToday"] = subtask.get("id") in completed_subtasks
+
             if log:
                 habit["latestLog"] = {
                     "id": str(log["_id"]),
@@ -471,6 +478,13 @@ async def get_habit(id: str, date: Optional[str] = None, timezone_offset: Option
             "completed_at": {"$gte": utc_start, "$lte": utc_end}
         })
         habit["completedToday"] = True if log else False
+        
+        # Populate subtask completion states for this specific date
+        completed_subtasks = log.get("completed_subtasks", []) if log else []
+        if "subtasks" in habit and habit["subtasks"]:
+            for subtask in habit["subtasks"]:
+                subtask["completedToday"] = subtask.get("id") in completed_subtasks
+
         if log:
             habit["latestLog"] = {
                 "id": str(log["_id"]),
@@ -500,16 +514,44 @@ async def get_habit_log(id: str, date: str, timezone_offset: Optional[int] = 0):
 
 @router.post("", response_model=Habit)
 async def create_habit(habit: HabitCreate):
+    import uuid
     habit_dict = habit.dict()
     # Ensure creation time is UTC aware if possible, or naive UTC
     habit_dict["created_at"] = datetime.now(timezone.utc) 
     habit_dict["completedToday"] = False # Default to False upon creation
     
+    # Process nested subtasks
+    if habit_dict.get("subtasks"):
+        for st in habit_dict["subtasks"]:
+            if not st.get("id"):
+                st["id"] = str(uuid.uuid4())
+            if not st.get("created_at"):
+                st["created_at"] = datetime.now(timezone.utc)
+            # parentId will be set after habit insertion if we want, 
+            # but for now we can just ensure it exists
+            st["parentId"] = "pending" # Temporary placeholder
+
+    # Process nested friction rules
+    if habit_dict.get("frictionRules"):
+        for fr in habit_dict["frictionRules"]:
+            if not fr.get("id"):
+                fr["id"] = str(uuid.uuid4())
+
     # Fill legacy frequency if missing but new fields are present
     if not habit_dict.get("frequency") and habit_dict.get("frequencyType"):
          habit_dict["frequency"] = habit_dict["frequencyType"].capitalize()
 
     result = habit_collection.insert_one(habit_dict)
+    
+    # Update parentId for subtasks now that we have the inserted_id
+    if habit_dict.get("subtasks"):
+        habit_collection.update_one(
+            {"_id": result.inserted_id},
+            {"$set": {"subtasks": [
+                {**st, "parentId": str(result.inserted_id)} for st in habit_dict["subtasks"]
+            ]}}
+        )
+
     new_habit = habit_collection.find_one({"_id": result.inserted_id})
     return habit_serializer(new_habit)
 
@@ -527,6 +569,23 @@ async def update_habit(id: str, habit: HabitUpdate):
     # unless it's a migration/admin action. But for now we keep it open.
     
     if update_data:
+        import uuid
+        # Process subtasks if present in update
+        if update_data.get("subtasks"):
+            for st in update_data["subtasks"]:
+                if not st.get("id"):
+                    st["id"] = str(uuid.uuid4())
+                if not st.get("parentId"):
+                    st["parentId"] = id
+                if not st.get("created_at"):
+                    st["created_at"] = datetime.now(timezone.utc)
+        
+        # Process friction rules if present in update
+        if update_data.get("frictionRules"):
+            for fr in update_data["frictionRules"]:
+                if not fr.get("id"):
+                    fr["id"] = str(uuid.uuid4())
+
         result = habit_collection.update_one({"_id": habit_oid}, {"$set": update_data})
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Habit not found")
@@ -546,8 +605,162 @@ async def delete_habit(id: str):
     
     return {"message": "Habit deleted successfully"}
 
+
+# ---- Micro-Habit (Subtask) CRUD ----
+
+@router.post("/{id}/subtasks", response_model=Habit)
+async def add_subtask(id: str, subtask: dict):
+    """Add a micro-habit subtask to a habit."""
+    import uuid
+    habit_oid = parse_object_id(id)
+    habit = habit_collection.find_one({"_id": habit_oid})
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    new_subtask = {
+        "id": str(uuid.uuid4()),
+        "parentId": id,
+        "name": subtask.get("name", ""),
+        "description": subtask.get("description"),
+        "priority": subtask.get("priority", "medium"),
+        "reminderOffsetMinutes": subtask.get("reminderOffsetMinutes"),
+        "executionWindowStart": subtask.get("executionWindowStart"),
+        "executionWindowEnd": subtask.get("executionWindowEnd"),
+        "completedToday": False,
+        "streak": 0,
+        "created_at": datetime.now(timezone.utc)
+    }
+
+    habit_collection.update_one(
+        {"_id": habit_oid},
+        {"$push": {"subtasks": new_subtask}}
+    )
+
+    updated = habit_collection.find_one({"_id": habit_oid})
+    return habit_serializer(updated)
+
+
+@router.delete("/{id}/subtasks/{subtask_id}", response_model=Habit)
+async def delete_subtask(id: str, subtask_id: str):
+    """Remove a micro-habit subtask from a habit."""
+    habit_oid = parse_object_id(id)
+    habit = habit_collection.find_one({"_id": habit_oid})
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    habit_collection.update_one(
+        {"_id": habit_oid},
+        {"$pull": {"subtasks": {"id": subtask_id}}}
+    )
+
+    updated = habit_collection.find_one({"_id": habit_oid})
+    return habit_serializer(updated)
+
+
+@router.patch("/{id}/subtasks/{subtask_id}/toggle", response_model=Habit)
+async def toggle_subtask(
+    id: str, 
+    subtask_id: str,
+    date: Optional[str] = None,
+    timezone_offset: Optional[int] = 0
+):
+    """Toggle completion of a subtask for a specific date."""
+    habit_oid = parse_object_id(id)
+    habit = habit_collection.find_one({"_id": habit_oid})
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    if not date:
+        date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    utc_start, utc_end = get_day_range_utc(date, timezone_offset)
+    
+    # Find or create log for this day
+    log = habit_log_collection.find_one({
+        "habit_id": id,
+        "completed_at": {"$gte": utc_start, "$lte": utc_end}
+    })
+    
+    if log:
+        completed_subtasks = log.get("completed_subtasks", [])
+        if subtask_id in completed_subtasks:
+            completed_subtasks.remove(subtask_id)
+        else:
+            completed_subtasks.append(subtask_id)
+        
+        habit_log_collection.update_one(
+            {"_id": log["_id"]},
+            {"$set": {"completed_subtasks": completed_subtasks}}
+        )
+    else:
+        # Create a new log entry for this subtask completion
+        # Use mid-day UTC for the day-neutral timestamp logic
+        local_date = datetime.strptime(date, "%Y-%m-%d")
+        local_midday = local_date.replace(hour=12, minute=0, second=0)
+        completed_at = local_midday + timedelta(minutes=timezone_offset)
+        
+        new_log = {
+            "habit_id": id,
+            "habit_name": habit.get("name"),
+            "completed_at": completed_at,
+            "value": 0.0, # Doesn't count as full habit completion yet
+            "notes": "",
+            "focused_minutes": 0,
+            "completed_subtasks": [subtask_id]
+        }
+        habit_log_collection.insert_one(new_log)
+
+    # Return the habit with updated states for the given date
+    return await get_habit(id, date, timezone_offset)
+
+
+# ---- Friction Rules CRUD ----
+
+@router.post("/{id}/friction-rules", response_model=Habit)
+async def add_friction_rule(id: str, rule: dict):
+    """Add a friction rule to a bad_habit protocol."""
+    import uuid
+    habit_oid = parse_object_id(id)
+    habit = habit_collection.find_one({"_id": habit_oid})
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    new_rule = {
+        "id": str(uuid.uuid4()),
+        "description": rule.get("description", ""),
+        "requiresConfirmation": rule.get("requiresConfirmation", False),
+        "confirmationPrompt": rule.get("confirmationPrompt")
+    }
+
+    habit_collection.update_one(
+        {"_id": habit_oid},
+        {"$push": {"frictionRules": new_rule}}
+    )
+
+    updated = habit_collection.find_one({"_id": habit_oid})
+    return habit_serializer(updated)
+
+
+@router.delete("/{id}/friction-rules/{rule_id}", response_model=Habit)
+async def delete_friction_rule(id: str, rule_id: str):
+    """Remove a friction rule from a habit."""
+    habit_oid = parse_object_id(id)
+    habit = habit_collection.find_one({"_id": habit_oid})
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+
+    habit_collection.update_one(
+        {"_id": habit_oid},
+        {"$pull": {"frictionRules": {"id": rule_id}}}
+    )
+
+    updated = habit_collection.find_one({"_id": habit_oid})
+    return habit_serializer(updated)
+
+
 @router.post("/{id}/toggle", response_model=Habit)
 async def toggle_habit_completion(id: str, payload: dict):
+
     habit_oid = parse_object_id(id)
     # Payload expected: {"completed_at": "ISO_STRING", "timezone_offset": int_minutes, "value": float, "notes": str, "focused_minutes": int}
     completed_at_str = payload.get("completed_at")

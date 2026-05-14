@@ -7,11 +7,12 @@ import { SystemService } from '../../services/system.service';
 import { SystemInstanceTask } from '../../models/system.model';
 import { ToastService } from '../../services/toast.service';
 import { UserSettingsService } from '../../services/user-settings.service';
+import { YesterdayReflectionComponent } from './components/yesterday-reflection/yesterday-reflection.component';
 
 @Component({
-    selector: 'app-daily-habit-tracker',
+    selector: 'app-habit-detail',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, YesterdayReflectionComponent],
     template: `
     <div class="min-h-screen bg-white px-4 py-5 sm:p-6 md:p-8 font-body pb-24 relative transition-colors duration-300 overflow-x-hidden paper-texture">
       <!-- Timer Overlay (Full Screen) -->
@@ -53,6 +54,7 @@ import { UserSettingsService } from '../../services/user-settings.service';
               <span class="material-symbols-outlined text-lg md:text-xl text-taupe group-hover:text-charcoal">arrow_back</span>
             </button>
             <div>
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-taupe mb-1 block">Habit Detail</span>
               <h1 class="font-heading text-2xl md:text-4xl font-bold text-charcoal leading-tight">
                 {{ habit()?.name || 'Loading...' }}
               </h1>
@@ -61,6 +63,14 @@ import { UserSettingsService } from '../../services/user-settings.service';
                   Part of: {{ parentHabit()?.name }}
                 </p>
               }
+              <div class="flex items-center gap-2 mt-2">
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-charcoal/5 border border-charcoal/10 text-charcoal font-bold uppercase tracking-wider">
+                  {{ habit()?.category || 'General' }}
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 font-bold uppercase tracking-wider">
+                  {{ habit()?.frequencyType || 'Daily' }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -174,6 +184,44 @@ import { UserSettingsService } from '../../services/user-settings.service';
           </div>
         </div>
     
+        <!-- Habit Stacking Indicator -->
+        @if (habit()?.stackedWith) {
+          <div class="mb-8 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/5 rounded-2xl p-6 border border-orange-500/20 relative overflow-hidden shadow-gentle">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full -translate-y-12 translate-x-12"></div>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0 text-orange-600 shadow-sm border border-orange-500/10">
+                  <span class="material-symbols-outlined text-2xl">link</span>
+                </div>
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600 mb-1">Behavioral Association</p>
+                  <p class="text-lg font-bold text-charcoal">Stacked with: <span class="text-orange-500">{{ habit()?.stackedWith }}</span></p>
+                  <p class="text-sm text-taupe mt-1 font-medium">
+                    @if (stackDaysRemaining() > 0) {
+                      {{ stackDaysRemaining() }} days remaining to solidify this stack
+                    } @else {
+                      <span class="text-sage font-bold flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">verified</span>
+                        Stacking period complete! Protocol established.
+                      </span>
+                    }
+                  </p>
+                </div>
+              </div>
+              <div class="w-full sm:w-64 flex-shrink-0">
+                <div class="flex items-center justify-between text-xs font-bold text-taupe mb-2 uppercase tracking-tighter">
+                  <span>Formation Progress</span>
+                  <span class="text-orange-500">{{ stackProgress() }}%</span>
+                </div>
+                <div class="w-full h-3 bg-taupe/10 rounded-full overflow-hidden p-0.5 border border-taupe/5">
+                  <div class="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-1000 ease-out shadow-sm"
+                       [style.width.%]="stackProgress()"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+    
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <!-- Focus Timer Card -->
           <div class="bg-charcoal text-white rounded-2xl shadow-gentle p-8 relative overflow-hidden">
@@ -283,7 +331,15 @@ import { UserSettingsService } from '../../services/user-settings.service';
           }
         </div>
       }
-    
+
+      <!-- Yesterday's Reflection -->
+      @if (habit()) {
+        <app-yesterday-reflection
+          [habit]="habit()!"
+          [yesterdayData]="yesterdayStats()">
+        </app-yesterday-reflection>
+      }
+
       <!-- Celebration Overlay -->
       @if (celebrationMessage()) {
         <div class="fixed inset-0 pointer-events-none z-[110] flex items-center justify-center p-4 backdrop-blur-sm bg-black/10">
@@ -332,7 +388,7 @@ import { UserSettingsService } from '../../services/user-settings.service';
     `],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
+export class HabitDetailComponent implements OnInit, OnDestroy {
     location = inject(Location);
     route = inject(ActivatedRoute);
     habitService = inject(HabitService);
@@ -350,6 +406,8 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     habit = computed(() => this.habitService.habits().find(h => h.id === this.habitId()));
 
     dbFocusedMinutes = signal<number>(0);
+
+    yesterdayStats = signal<{ performance: number; completed: number; total: number; onTrack: boolean } | null>(null);
 
     todaySystemTask = signal<SystemInstanceTask | null>(null);
     pendingPastTasks = signal<SystemInstanceTask[]>([]);
@@ -431,6 +489,28 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
     timerInterval: any;
     celebrationMessage = signal('');
 
+    stackDaysRemaining = computed(() => {
+        const h = this.habit();
+        if (!h?.stackedWith || !h?.stackStartDate) return 0;
+        const start = new Date(h.stackStartDate);
+        const duration = h.stackDuration || 21;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const elapsed = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        return Math.max(0, duration - elapsed);
+    });
+
+    stackProgress = computed(() => {
+        const h = this.habit();
+        if (!h?.stackedWith || !h?.stackStartDate) return 0;
+        const start = new Date(h.stackStartDate);
+        const duration = h.stackDuration || 21;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const elapsed = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        return Math.min(100, Math.round((elapsed / duration) * 100));
+    });
+
     customTimerMinutes: number | undefined;
 
     logValue: number | undefined;
@@ -464,6 +544,10 @@ export class DailyHabitTrackerComponent implements OnInit, OnDestroy {
                 if (stats && stats.heatmap) {
                     this.fullHeatmapData.set(stats.heatmap);
                 }
+            });
+
+            this.habitService.getYesterdayStats(id).subscribe(stats => {
+                this.yesterdayStats.set(stats);
             });
 
             this.systemService.getInstanceTasksByDate(todayStr).subscribe(tasks => {
