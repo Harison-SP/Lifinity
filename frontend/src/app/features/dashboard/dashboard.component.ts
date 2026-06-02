@@ -132,7 +132,8 @@ import { MicroHabit } from '../../models/habit.model';
                             <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-sand/30 dark:hover:bg-white/5 transition-all"
                                  (click)="navigateToTrack(habit.id)">
                                 <!-- Completion Circle -->
-                                <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all shrink-0"
+                                <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer hover:scale-110 active:scale-95"
+                                     (click)="toggleHabitCompletion($event, habit)"
                                      [class.bg-sage]="habit.completedToday"
                                      [class.text-white]="habit.completedToday"
                                      [class.border-sage]="habit.completedToday"
@@ -428,7 +429,7 @@ export class DashboardComponent implements OnDestroy {
         const currentDay = selectedDate.getDay();
         const systemTasks = this.todaySystemTasks();
 
-        return this.habitService.habits().filter(h => {
+        const filtered = this.habitService.habits().filter(h => {
             if (h.completedToday) return true;
             if (h.startDate && h.endDate) {
                 if (selectedStr < h.startDate || selectedStr > h.endDate) return false;
@@ -448,6 +449,71 @@ export class DashboardComponent implements OnDestroy {
             }
             return h;
         });
+
+        // Dynamic topological habit-stacking sorting
+        const getParentName = (stackedWith?: string) => {
+            if (!stackedWith) return null;
+            const s = stackedWith.trim();
+            if (s.toLowerCase().startsWith('after:')) {
+                return s.slice(6).trim();
+            }
+            if (s.toLowerCase().startsWith('after ')) {
+                return s.slice(6).trim();
+            }
+            return s;
+        };
+
+        const roots: typeof filtered = [];
+        const childrenMap = new Map<string, typeof filtered>();
+        const nameToHabitMap = new Map<string, typeof filtered[0]>();
+
+        for (const h of filtered) {
+            if (h.name) {
+                nameToHabitMap.set(h.name.toLowerCase().trim(), h);
+            }
+        }
+
+        for (const h of filtered) {
+            const parentName = getParentName(h.stackedWith);
+            const parentHabit = parentName ? nameToHabitMap.get(parentName.toLowerCase().trim()) : null;
+            if (parentHabit && parentHabit.name) {
+                const parentKey = parentHabit.name.toLowerCase().trim();
+                const children = childrenMap.get(parentKey) || [];
+                children.push(h);
+                childrenMap.set(parentKey, children);
+            } else {
+                roots.push(h);
+            }
+        }
+
+        const sorted: typeof filtered = [];
+        const visited = new Set<string>();
+
+        const visit = (h: typeof filtered[0]) => {
+            if (visited.has(h.id)) return;
+            visited.add(h.id);
+            sorted.push(h);
+            
+            if (h.name) {
+                const children = childrenMap.get(h.name.toLowerCase().trim()) || [];
+                for (const child of children) {
+                    visit(child);
+                }
+            }
+        };
+
+        for (const root of roots) {
+            visit(root);
+        }
+
+        // Add any remaining elements in case of cycles or isolated groups
+        for (const h of filtered) {
+            if (!visited.has(h.id)) {
+                sorted.push(h);
+            }
+        }
+
+        return sorted;
     });
 
     completedCount = computed(() => this.todaysHabits().filter(h => h.completedToday).length);
@@ -513,6 +579,13 @@ export class DashboardComponent implements OnDestroy {
     toggleMicroHabits(event: Event, habitId: string) {
         event.stopPropagation();
         this.expandedHabitId.set(this.expandedHabitId() === habitId ? null : habitId);
+    }
+
+    toggleHabitCompletion(event: Event, habit: any) {
+        event.stopPropagation();
+        this.habitService.toggleCompletion(habit.id, this.selectedDate()).subscribe({
+            error: (err) => console.error('Failed to toggle completion', err)
+        });
     }
 
     toggleSubtaskStatus(event: Event, habitId: string, subtaskId: string) {

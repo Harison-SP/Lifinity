@@ -9,6 +9,8 @@ export interface UserSettings {
   longBreakLength: number;
   aiSuggestionsEnabled: boolean;
   soundEnabled: boolean;
+  enableFocusTimerWorkflow: boolean;
+  enableNotesWorkflow: boolean;
 }
 
 @Injectable({
@@ -25,7 +27,9 @@ export class UserSettingsService {
     shortBreakLength: 5,
     longBreakLength: 15,
     aiSuggestionsEnabled: true,
-    soundEnabled: true
+    soundEnabled: true,
+    enableFocusTimerWorkflow: true,
+    enableNotesWorkflow: true
   };
 
   settings = signal<UserSettings>(this.loadSettings());

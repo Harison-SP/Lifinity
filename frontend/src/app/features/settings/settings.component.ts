@@ -208,6 +208,49 @@ import { FormsModule } from '@angular/forms';
                 </div>
             </section>
 
+            <!-- Workflow Features Section -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-2 bg-purple-500/10 rounded-lg">
+                        <span class="material-symbols-outlined text-purple-500 text-2xl">insights</span>
+                    </div>
+                    <h2 class="font-heading text-2xl font-bold text-charcoal dark:text-dark-text">Workflow Features</h2>
+                    <div class="h-px flex-1 bg-taupe/10 dark:bg-dark-border ml-2"></div>
+                </div>
+
+                <div class="bg-alabaster dark:bg-dark-surface p-8 rounded-2xl border border-taupe/10 dark:border-dark-border space-y-6">
+                    <p class="text-sm text-taupe dark:text-dark-text-secondary font-medium">Configure which common tools are enabled when tracking and executing your habits.</p>
+                    
+                    <!-- Toggle Focus Timer -->
+                    <div class="flex items-center justify-between pt-4 border-t border-taupe/10 dark:border-dark-border">
+                        <div>
+                            <p class="font-bold text-charcoal dark:text-dark-text italic">Focus Timer (Pomodoro)</p>
+                            <p class="text-sm text-taupe dark:text-dark-text-secondary mt-1">Enable a dedicated deep work timer inside habit tracking workflows</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" 
+                                   [checked]="settings().enableFocusTimerWorkflow" 
+                                   (change)="updateSetting({enableFocusTimerWorkflow: !settings().enableFocusTimerWorkflow})">
+                            <div class="w-14 h-7 bg-taupe/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Toggle Notes -->
+                    <div class="flex items-center justify-between pt-4 border-t border-taupe/10 dark:border-dark-border">
+                        <div>
+                            <p class="font-bold text-charcoal dark:text-dark-text italic">Note-Taking</p>
+                            <p class="text-sm text-taupe dark:text-dark-text-secondary mt-1 font-medium">Enable quick notes and cognitive reflection blocks in habit execution</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" 
+                                   [checked]="settings().enableNotesWorkflow" 
+                                   (change)="updateSetting({enableNotesWorkflow: !settings().enableNotesWorkflow})">
+                            <div class="w-14 h-7 bg-taupe/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
             <!-- AI Section -->
             <section class="space-y-6" *ngIf="settings().aiSuggestionsEnabled !== undefined">
                 <div class="flex items-center gap-4">

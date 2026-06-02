@@ -270,76 +270,86 @@ import { SubtaskMatrixComponent } from '../habit-activity/components/subtask-mat
             </div>
           </div>
         }
-    
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
-          <!-- Focus Timer Card -->
-          <div class="bg-charcoal text-white rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 relative overflow-hidden">
-            <div class="flex items-center justify-between mb-6 md:mb-8">
-              <div>
-                <h3 class="font-heading text-lg md:text-xl font-bold flex items-center gap-2">
-                  <span class="material-symbols-outlined text-primary">timer</span> Focus Timer
-                </h3>
-                <p class="text-white/50 text-[10px] uppercase tracking-widest font-bold mt-0.5">Start deep work</p>
-              </div>
-              <span class="text-[9px] bg-white/10 px-2 py-1 rounded-full text-white/80 border border-white/10">2-minute rule</span>
-            </div>
-    
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 md:gap-8">
-              <div class="text-5xl md:text-6xl font-mono font-bold tracking-tighter text-primary">
-                {{ formattedTimer() }}
-              </div>
-    
-              <div class="flex items-center bg-white/10 border border-white/20 rounded-xl md:rounded-2xl overflow-hidden backdrop-blur-sm w-full sm:w-auto">
-                <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="flex-1 sm:w-16 p-3 md:p-4 text-center font-bold text-base md:text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
-                <button (click)="startCustomTimer()" class="px-5 md:px-6 py-3 md:py-4 bg-primary text-white font-black text-xs md:text-sm hover:bg-primary-light transition-all whitespace-nowrap uppercase">START</button>
-              </div>
-            </div>
-    
-            <!-- Focus Garden Stats -->
-            <div class="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-white/10">
-              <div class="flex justify-between items-end mb-3 md:mb-4">
-                <div>
-                  <span class="text-[9px] md:text-xs uppercase tracking-widest text-white/40 font-bold block mb-0.5 md:mb-1">Daily Progress</span>
-                  <span class="text-[11px] md:text-sm font-medium text-white/80">{{ totalFocusedMinutes() }} mins focused</span>
-                </div>
-                <span class="material-symbols-outlined transition-all duration-700 animate-pulse" [ngClass]="getTreeStyle()" [style.fontSize]="isMobile() ? '2rem' : ''">
-                  {{ getTreeIcon() }}
-                </span>
-              </div>
-              @if (totalFocusedMinutes() < 120) {
-                <div class="w-full h-2 md:h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
-                  <div class="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
-                </div>
-              }
-            </div>
-          </div>
-    
-          <div class="bg-alabaster rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 border border-taupe/10 flex flex-col h-full">
-            <div class="flex items-center justify-between mb-4 md:mb-6">
-              <h3 class="font-heading text-lg md:text-xl font-bold text-charcoal flex items-center gap-2">
-                <span class="material-symbols-outlined text-taupe">notes</span> Personal Notes
-              </h3>
-              <a [routerLink]="['/notes', habitId()]"
-                  [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
-                  class="flex items-center gap-1 px-4 py-1.5 bg-primary text-white rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider hover:bg-primary-light transition-all shadow-sm">
-                  <span class="material-symbols-outlined text-base">edit_note</span> Notes
-                </a>
-            </div>
 
-            <div class="flex-1 flex flex-col items-center justify-center p-6 bg-white/50 rounded-xl border border-taupe/5 border-dashed">
-               <span class="material-symbols-outlined text-taupe/20 text-4xl mb-2">sticky_note_2</span>
-               <p class="text-[10px] md:text-xs text-taupe italic text-center leading-relaxed">Document your process. Maintain cognitive clarity through written reflection.</p>
-            </div>
-    
-            <div class="mt-4 flex justify-between items-center">
-              @if (habit()?.parentId) {
-                <div class="flex items-center gap-1.5 px-3 py-1 bg-charcoal text-white rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter">
-                  <span class="material-symbols-outlined text-xs">settings_input_component</span> System Habit
+        <!-- Workflow Features Grid -->
+        @if (settingsService.settings().enableFocusTimerWorkflow || settingsService.settings().enableNotesWorkflow) {
+          <div class="grid grid-cols-1 gap-4 md:gap-6 mb-6 md:mb-8"
+               [class.lg:grid-cols-2]="settingsService.settings().enableFocusTimerWorkflow && settingsService.settings().enableNotesWorkflow">
+            
+            <!-- Focus Timer Card -->
+            @if (settingsService.settings().enableFocusTimerWorkflow) {
+              <div class="bg-charcoal text-white rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-6 md:mb-8">
+                  <div>
+                    <h3 class="font-heading text-lg md:text-xl font-bold flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary">timer</span> Focus Timer
+                    </h3>
+                    <p class="text-white/50 text-[10px] uppercase tracking-widest font-bold mt-0.5">Start deep work</p>
+                  </div>
+                  <span class="text-[9px] bg-white/10 px-2 py-1 rounded-full text-white/80 border border-white/10">2-minute rule</span>
                 </div>
-              }
-            </div>
+        
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 md:gap-8">
+                  <div class="text-5xl md:text-6xl font-mono font-bold tracking-tighter text-primary">
+                    {{ formattedTimer() }}
+                  </div>
+        
+                  <div class="flex items-center bg-white/10 border border-white/20 rounded-xl md:rounded-2xl overflow-hidden backdrop-blur-sm w-full sm:w-auto">
+                    <input type="number" [(ngModel)]="customTimerMinutes" placeholder="MINS" class="flex-1 sm:w-16 p-3 md:p-4 text-center font-bold text-base md:text-lg text-white bg-transparent outline-none border-r border-white/10" min="1">
+                    <button (click)="startCustomTimer()" class="px-5 md:px-6 py-3 md:py-4 bg-primary text-white font-black text-xs md:text-sm hover:bg-primary-light transition-all whitespace-nowrap uppercase">START</button>
+                  </div>
+                </div>
+        
+                <!-- Focus Garden Stats -->
+                <div class="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-white/10">
+                  <div class="flex justify-between items-end mb-3 md:mb-4">
+                    <div>
+                      <span class="text-[9px] md:text-xs uppercase tracking-widest text-white/40 font-bold block mb-0.5 md:mb-1">Daily Progress</span>
+                      <span class="text-[11px] md:text-sm font-medium text-white/80">{{ totalFocusedMinutes() }} mins focused</span>
+                    </div>
+                    <span class="material-symbols-outlined transition-all duration-700 animate-pulse" [ngClass]="getTreeStyle()" [style.fontSize]="isMobile() ? '2rem' : ''">
+                      {{ getTreeIcon() }}
+                    </span>
+                  </div>
+                  @if (totalFocusedMinutes() < 120) {
+                    <div class="w-full h-2 md:h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                      <div class="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-1000" [style.width.%]="getProgressPer()"></div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Personal Notes Card -->
+            @if (settingsService.settings().enableNotesWorkflow) {
+              <div class="bg-alabaster rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 border border-taupe/10 flex flex-col h-full">
+                <div class="flex items-center justify-between mb-4 md:mb-6">
+                  <h3 class="font-heading text-lg md:text-xl font-bold text-charcoal flex items-center gap-2">
+                    <span class="material-symbols-outlined text-taupe">notes</span> Personal Notes
+                  </h3>
+                  <a [routerLink]="['/notes', habitId()]"
+                      [queryParams]="{ mode: 'new', taskTitle: todaySystemTask()?.title, taskDesc: todaySystemTask()?.description }"
+                      class="flex items-center gap-1 px-4 py-1.5 bg-primary text-white rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider hover:bg-primary-light transition-all shadow-sm">
+                      <span class="material-symbols-outlined text-base">edit_note</span> Notes
+                    </a>
+                </div>
+    
+                <div class="flex-1 flex flex-col items-center justify-center p-6 bg-white/50 rounded-xl border border-taupe/5 border-dashed">
+                   <span class="material-symbols-outlined text-taupe/20 text-4xl mb-2">sticky_note_2</span>
+                   <p class="text-[10px] md:text-xs text-taupe italic text-center leading-relaxed">Document your process. Maintain cognitive clarity through written reflection.</p>
+                </div>
+        
+                <div class="mt-4 flex justify-between items-center">
+                  @if (habit()?.parentId) {
+                    <div class="flex items-center gap-1.5 px-3 py-1 bg-charcoal text-white rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-tighter">
+                      <span class="material-symbols-outlined text-xs">settings_input_component</span> System Habit
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           </div>
-        </div>
+        }
     
         <!-- Pending Past Tasks -->
         <div class="bg-alabaster rounded-xl md:rounded-2xl shadow-gentle p-5 md:p-8 border border-taupe/10">

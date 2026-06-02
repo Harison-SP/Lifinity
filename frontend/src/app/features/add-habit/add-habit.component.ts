@@ -16,6 +16,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { AnalogTimePickerComponent } from '../../shared/components/time-picker/time-picker.component';
 
 @Component({
     selector: 'app-add-habit',
@@ -30,7 +31,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatNativeDateModule,
     MatTimepickerModule,
     MatSelectModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    AnalogTimePickerComponent
 ],
     template: `
     <div class="min-h-screen bg-white px-3 py-4 md:py-8 lg:px-12 font-body pb-24 transition-colors duration-300 overflow-x-hidden paper-texture">
@@ -57,33 +59,83 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
             <!-- Habit Type -->
             <div class="mb-4 md:mb-10">
                 <label class="block text-[9px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Habit Type</label>
-                <div class="grid grid-cols-2 md:grid-cols-2 gap-2 md:gap-4">
-                    <button type="button" (click)="setHabitType('yes_no')"
-                            class="p-2 md:p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group transition-all"
-                            [class.bg-primary]="habitType() === 'yes_no'"
-                            [class.border-primary]="habitType() === 'yes_no'"
-                            [class.text-white]="habitType() === 'yes_no'">
+                <div class="grid grid-cols-3 gap-2 md:gap-4">
+                    <button type="button" (click)="setHabitTypeAndCategory('yes_no', 'protocol')"
+                            class="p-2 md:p-6 rounded-xl border-2 border-taupe/30 flex flex-col items-center text-center group transition-all"
+                            [class.bg-primary]="habitType() === 'yes_no' && habitCategory() === 'protocol'"
+                            [class.border-primary]="habitType() === 'yes_no' && habitCategory() === 'protocol'"
+                            [class.text-white]="habitType() === 'yes_no' && habitCategory() === 'protocol'">
                         <span class="material-symbols-outlined text-xl md:text-4xl mb-1 md:mb-3 transition-transform group-hover:scale-110"
-                               [class.text-primary]="habitType() !== 'yes_no'"
-                               [class.text-white]="habitType() === 'yes_no'">check_circle</span>
+                               [class.text-primary]="habitType() !== 'yes_no' || habitCategory() !== 'protocol'"
+                               [class.text-white]="habitType() === 'yes_no' && habitCategory() === 'protocol'">check_circle</span>
                         <span class="font-heading text-xs md:text-xl font-bold block mb-0 md:mb-2">Yes/No</span>
                         <span class="text-[8px] md:text-sm text-taupe transition-colors hidden sm:block"
-                               [class.text-white]="habitType() === 'yes_no'">Simple check</span>
+                               [class.text-white]="habitType() === 'yes_no' && habitCategory() === 'protocol'">Simple check</span>
                     </button>
-                    <button type="button" (click)="setHabitType('measurable')"
-                            class="p-2 md:p-6 rounded-xl border-2 border-taupe/30  flex flex-col items-center text-center group transition-all"
-                            [class.bg-primary]="habitType() === 'measurable'"
-                            [class.border-primary]="habitType() === 'measurable'"
-                            [class.text-white]="habitType() === 'measurable'">
+                    <button type="button" (click)="setHabitTypeAndCategory('measurable', 'protocol')"
+                            class="p-2 md:p-6 rounded-xl border-2 border-taupe/30 flex flex-col items-center text-center group transition-all"
+                            [class.bg-primary]="habitType() === 'measurable' && habitCategory() === 'protocol'"
+                            [class.border-primary]="habitType() === 'measurable' && habitCategory() === 'protocol'"
+                            [class.text-white]="habitType() === 'measurable' && habitCategory() === 'protocol'">
                         <span class="material-symbols-outlined text-xl md:text-4xl mb-1 md:mb-3 transition-transform group-hover:scale-110"
-                               [class.text-primary]="habitType() !== 'measurable'"
-                               [class.text-white]="habitType() === 'measurable'">assessment</span>
+                               [class.text-primary]="habitType() !== 'measurable' || habitCategory() !== 'protocol'"
+                               [class.text-white]="habitType() === 'measurable' && habitCategory() === 'protocol'">assessment</span>
                         <span class="font-heading text-xs md:text-xl font-bold block mb-0 md:mb-2">Measurable</span>
                         <span class="text-[8px] md:text-sm text-taupe transition-colors hidden sm:block"
-                               [class.text-white/70]="habitType() === 'measurable'">Track numbers</span>
+                               [class.text-white/70]="habitType() === 'measurable' && habitCategory() === 'protocol'">Track numbers</span>
+                    </button>
+                    <button type="button" (click)="setHabitTypeAndCategory('yes_no', 'bad_habit')"
+                            class="p-2 md:p-6 rounded-xl border-2 border-taupe/30 flex flex-col items-center text-center group transition-all"
+                            [class.bg-primary]="habitCategory() === 'bad_habit'"
+                            [class.border-primary]="habitCategory() === 'bad_habit'"
+                            [class.text-white]="habitCategory() === 'bad_habit'">
+                        <span class="material-symbols-outlined text-xl md:text-4xl mb-1 md:mb-3 transition-transform group-hover:scale-110"
+                               [class.text-primary]="habitCategory() !== 'bad_habit'"
+                               [class.text-white]="habitCategory() === 'bad_habit'">block</span>
+                        <span class="font-heading text-xs md:text-xl font-bold block mb-0 md:mb-2">Bad Habit</span>
+                        <span class="text-[8px] md:text-sm text-taupe transition-colors hidden sm:block"
+                               [class.text-white/70]="habitCategory() === 'bad_habit'">Avoid negative</span>
                     </button>
                 </div>
             </div>
+
+            <!-- Sobriety Tracker (Moved to top below Bad Habit selection) -->
+            @if (habitCategory() === 'bad_habit') {
+                <div class="mb-4 md:mb-10 bg-sand/15 dark:bg-zinc-900/60 rounded-xl md:rounded-2xl p-4 md:p-6 border border-taupe/15 shadow-sm transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2 md:mb-4">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <div class="w-7 h-7 md:w-10 md:h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-orange-500 text-base md:text-xl">timer</span>
+                            </div>
+                            <div>
+                                <h3 class="font-heading text-xs md:text-base font-bold text-charcoal dark:text-dark-text leading-tight">Sobriety Tracker</h3>
+                                <p class="text-[9px] md:text-xs text-taupe dark:text-dark-text-secondary">Track avoidance time</p>
+                            </div>
+                        </div>
+                        <button type="button" 
+                                (click)="isSoberTrackerActive.set(!isSoberTrackerActive())"
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                [class.bg-orange-500]="isSoberTrackerActive()"
+                                [class.bg-taupe/30]="!isSoberTrackerActive()">
+                            <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                  [class.translate-x-5]="isSoberTrackerActive()"
+                                  [class.translate-x-0]="!isSoberTrackerActive()"></span>
+                        </button>
+                    </div>
+                    
+                    @if (isSoberTrackerActive()) {
+                        <div class="mt-4 p-4 bg-white/40 dark:bg-zinc-950/60 rounded-xl border border-taupe/15 animate-fade-in transition-all">
+                            <p class="text-xs text-taupe dark:text-zinc-300 mb-3 leading-relaxed">
+                                Activating this will start a high-precision countdown from the moment you save. If you engage with this bad habit, you'll need to manually reset the timer in the details view.
+                            </p>
+                            <div class="flex items-center gap-2 p-2 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                                <span class="material-symbols-outlined text-orange-500 text-sm">auto_mode</span>
+                                <span class="text-[9px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest">Active Monitoring Protocol Ready</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
 
             <!-- Measurable Options (Conditional) -->
             @if (habitType() === 'measurable') {
@@ -223,8 +275,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                             <span class="material-symbols-outlined text-primary text-base md:text-xl">schedule</span>
                         </div>
                         <div>
-                            <h3 class="font-heading text-xs md:text-lg font-bold text-charcoal">Execution Window</h3>
-                            <p class="text-[9px] md:text-xs text-taupe">Specific time block</p>
+                            <h3 class="font-heading text-xs md:text-lg font-bold text-charcoal">Scheduled Time</h3>
+                            <p class="text-[9px] md:text-xs text-taupe">Preferred time to perform habit</p>
                         </div>
                     </div>
                     <button type="button" 
@@ -239,24 +291,47 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                 </div>
 
                 @if (showTimeBlock()) {
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 pt-4 md:pt-6 border-t border-taupe/10 animate-fade-in">
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-taupe/10 animate-fade-in">
+                        <span class="text-xs font-bold uppercase tracking-wider text-taupe">Only specify start time</span>
+                        <button type="button" 
+                                (click)="toggleOnlyStartTime()"
+                                class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                [class.bg-primary]="onlyStartTime()"
+                                [class.bg-taupe/30]="!onlyStartTime()">
+                            <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                  [class.translate-x-4]="onlyStartTime()"
+                                  [class.translate-x-0]="!onlyStartTime()"></span>
+                        </button>
+                    </div>
+
+                    <div class="grid gap-4 md:gap-6 mt-4 pt-4 border-t border-taupe/10 animate-fade-in"
+                         [class.grid-cols-1]="onlyStartTime()"
+                         [class.grid-cols-2]="!onlyStartTime()">
                         <div class="space-y-1 md:space-y-2">
                             <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Starts</label>
-                            <mat-form-field appearance="outline" class="w-full soft-input no-label-field">
-                                <input matInput formControlName="timeBlockStart" [matTimepicker]="startPicker" placeholder="09:00 AM">
-                                <mat-timepicker-toggle matSuffix [for]="startPicker"></mat-timepicker-toggle>
-                                <mat-timepicker #startPicker panelClass="soft-datepicker"></mat-timepicker>
-                            </mat-form-field>
+                            <div class="relative cursor-pointer" (click)="showStartPicker.set(true)">
+                                <div class="w-full border-2 border-taupe/30 focus-within:border-primary rounded-xl px-4 py-3 bg-white dark:bg-zinc-900 flex items-center justify-between transition-colors h-[50px]">
+                                    <span class="text-sm font-medium text-charcoal dark:text-dark-text font-body">
+                                        {{ formatTimeDisplay(habitForm.get('timeBlockStart')?.value) || 'Select Start Time' }}
+                                    </span>
+                                    <span class="material-symbols-outlined text-taupe">schedule</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="space-y-1 md:space-y-2">
-                            <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Ends</label>
-                            <mat-form-field appearance="outline" class="w-full soft-input no-label-field">
-                                <input matInput formControlName="timeBlockEnd" [matTimepicker]="endPicker" placeholder="10:00 AM">
-                                <mat-timepicker-toggle matSuffix [for]="endPicker"></mat-timepicker-toggle>
-                                <mat-timepicker #endPicker panelClass="soft-datepicker"></mat-timepicker>
-                            </mat-form-field>
-                        </div>
+                        @if (!onlyStartTime()) {
+                            <div class="space-y-1 md:space-y-2 animate-fade-in">
+                                <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-taupe block ml-1">Ends</label>
+                                <div class="relative cursor-pointer" (click)="showEndPicker.set(true)">
+                                    <div class="w-full border-2 border-taupe/30 focus-within:border-primary rounded-xl px-4 py-3 bg-white dark:bg-zinc-900 flex items-center justify-between transition-colors h-[50px]">
+                                        <span class="text-sm font-medium text-charcoal dark:text-dark-text font-body">
+                                            {{ formatTimeDisplay(habitForm.get('timeBlockEnd')?.value) || 'Select End Time' }}
+                                        </span>
+                                        <span class="material-symbols-outlined text-taupe">schedule</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
             </div>
@@ -281,22 +356,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
             @if (showAdvancedOptions()) {
                 <div class="animate-fade-in space-y-6 md:space-y-10 pb-10">
-                    <!-- Color -->
-                    <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
-                        <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Protocol Identity (Color)</label>
-                        <div class="flex flex-wrap gap-2 md:gap-3 items-center">
-                            @for (c of presetColors; track c) {
-                                <button type="button" (click)="color.set(c)"
-                                        class="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 transition-all hover:scale-110 shadow-gentle"
-                                        [style.background-color]="c"
-                                        [class.border-primary]="color() === c"
-                                        [class.border-taupe]="color() !== c"
-                                        [class.ring-2]="color() === c"
-                                        [class.ring-primary/50]="color() === c">
-                                </button>
-                            }
-                        </div>
-                    </div>
+
 
                     <!-- Habit Stacking -->
                     <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
@@ -323,30 +383,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                         </mat-form-field>
                     </div>
 
-                    <!-- Category -->
-                    <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
-                        <label class="block text-[10px] md:text-sm font-bold uppercase tracking-wider text-taupe mb-2 md:mb-4">Protocol Category</label>
-                        <div class="grid grid-cols-2 gap-3 md:gap-4">
-                            <button type="button" (click)="setCategory('protocol')"
-                                    class="p-3 md:p-5 rounded-xl border-2 flex flex-col items-center text-center gap-1 md:gap-2 transition-all"
-                                    [class.border-sage]="habitCategory() === 'protocol'"
-                                    [class.bg-sage/10]="habitCategory() === 'protocol'"
-                                    [class.border-taupe/30]="habitCategory() !== 'protocol'">
-                                <span class="material-symbols-outlined text-2xl md:text-3xl" [class.text-sage]="habitCategory() === 'protocol'" [class.text-taupe]="habitCategory() !== 'protocol'">verified</span>
-                                <span class="font-bold text-charcoal text-xs md:text-sm">Protocol</span>
-                                <span class="text-[10px] md:text-xs text-taupe">Positive habit</span>
-                            </button>
-                            <button type="button" (click)="setCategory('bad_habit')"
-                                    class="p-3 md:p-5 rounded-xl border-2 flex flex-col items-center text-center gap-1 md:gap-2 transition-all"
-                                    [class.border-orange-500]="habitCategory() === 'bad_habit'"
-                                    [class.bg-orange-500/10]="habitCategory() === 'bad_habit'"
-                                    [class.border-taupe/30]="habitCategory() !== 'bad_habit'">
-                                <span class="material-symbols-outlined text-2xl md:text-3xl" [class.text-orange-500]="habitCategory() === 'bad_habit'" [class.text-taupe]="habitCategory() !== 'bad_habit'">block</span>
-                                <span class="font-bold text-charcoal text-xs md:text-sm">Bad Habit</span>
-                                <span class="text-[10px] md:text-xs text-taupe">Break negative</span>
-                            </button>
-                        </div>
-                    </div>
+
 
                     <!-- Priority -->
                     <div class="bg-white dark:bg-zinc-900 rounded-xl md:rounded-2xl p-3 md:p-6 border border-taupe/10 shadow-sm">
@@ -403,14 +440,15 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                                         </mat-select>
                                     </mat-form-field>
 
-                                    <mat-form-field appearance="outline" class="w-full soft-input">
-                                        <mat-label>Start Time</mat-label>
-                                        <input matInput [(ngModel)]="newSubtask.executionWindowStart" 
-                                               [ngModelOptions]="{standalone: true}"
-                                               [matTimepicker]="subStartPicker" placeholder="09:00 AM">
-                                        <mat-timepicker-toggle matSuffix [for]="subStartPicker"></mat-timepicker-toggle>
-                                        <mat-timepicker #subStartPicker panelClass="soft-datepicker"></mat-timepicker>
-                                    </mat-form-field>
+                                    <div class="relative cursor-pointer flex flex-col justify-end" (click)="showSubtaskPicker.set(true)">
+                                        <label class="text-[10px] text-taupe uppercase tracking-wider font-bold mb-1 ml-1">Start Time</label>
+                                        <div class="w-full border border-taupe/30 rounded-xl px-4 py-3 bg-white dark:bg-zinc-900 flex items-center justify-between transition-colors h-[50px]">
+                                            <span class="text-sm font-medium text-charcoal dark:text-dark-text font-body">
+                                                {{ formatTimeDisplay(newSubtask.executionWindowStart) || 'Select Time' }}
+                                            </span>
+                                            <span class="material-symbols-outlined text-taupe text-base">schedule</span>
+                                        </div>
+                                    </div>
 
                                     <mat-form-field appearance="outline" class="w-full soft-input">
                                         <mat-label>Reminder (Mins Prior)</mat-label>
@@ -460,41 +498,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                         }
                     </div>
 
-                    <!-- Sobriety / Avoidance Tracker (for bad_habit) -->
-                    @if (habitCategory() === 'bad_habit') {
-                        <div class="bg-charcoal/5 rounded-xl md:rounded-2xl p-3 md:p-6 border border-charcoal/10">
-                            <div class="flex items-center justify-between mb-2 md:mb-4">
-                                <div class="flex items-center gap-2 md:gap-3">
-                                    <div class="w-7 h-7 md:w-10 md:h-10 rounded-full bg-charcoal/10 flex items-center justify-center">
-                                        <span class="material-symbols-outlined text-charcoal text-base md:text-xl">timer</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-heading text-xs md:text-base font-bold text-charcoal leading-tight">Sobriety Countdown</h3>
-                                        <p class="text-[9px] md:text-xs text-taupe">Track avoidance time</p>
-                                    </div>
-                                </div>
-                                <button type="button" 
-                                        (click)="isSoberTrackerActive.set(!isSoberTrackerActive())"
-                                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                                        [class.bg-orange-500]="isSoberTrackerActive()"
-                                        [class.bg-taupe/30]="!isSoberTrackerActive()">
-                                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                          [class.translate-x-5]="isSoberTrackerActive()"
-                                          [class.translate-x-0]="!isSoberTrackerActive()"></span>
-                                </button>
-                            </div>
-                            
-                            @if (isSoberTrackerActive()) {
-                                <div class="mt-6 p-4 bg-white/50 rounded-xl border border-taupe/10 animate-fade-in">
-                                    <p class="text-xs text-taupe mb-4">Activating this will start a high-precision countdown from the moment you save. If you engage with this bad habit, you'll need to manually reset the timer in the details view.</p>
-                                    <div class="flex items-center gap-2 p-3 bg-orange-500/5 rounded-lg border border-orange-500/20">
-                                        <span class="material-symbols-outlined text-orange-500 text-sm">auto_mode</span>
-                                        <span class="text-[10px] font-bold text-orange-700 uppercase tracking-widest">Active Monitoring Protocol Ready</span>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
+
                 </div>
             }
 
@@ -503,11 +507,36 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
                 <button type="button" (click)="goBack()" class="flex-1 py-3 md:py-4 border-2 border-taupe text-taupe font-bold uppercase tracking-wider hover:bg-sand hover:border-charcoal transition-colors rounded-lg text-xs md:text-sm">
                     Cancel
                 </button>
-                <button type="submit" [disabled]="habitForm.invalid" class="flex-[2] py-3 md:py-4 bg-primary text-white font-bold uppercase tracking-wider border-2 border-transparent hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-lg shadow-gentle text-xs md:text-sm">
-                    {{ isEditMode() ? 'Update Habit' : 'Save Habit' }}
+                <button type="submit" [disabled]="habitForm.invalid || isSaving()" class="flex-[2] py-3 md:py-4 bg-primary text-white font-bold uppercase tracking-wider border-2 border-transparent hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-lg shadow-gentle text-xs md:text-sm">
+                    {{ isSaving() ? 'Saving...' : (isEditMode() ? 'Update Habit' : 'Save Habit') }}
                 </button>
             </div>
         </form>
+
+        <!-- Custom Clock Time Pickers -->
+        @if (showStartPicker()) {
+            <app-analog-time-picker 
+                [initialTime]="habitForm.get('timeBlockStart')?.value ?? null"
+                (selected)="onStartTimeSelected($event)"
+                (close)="showStartPicker.set(false)">
+            </app-analog-time-picker>
+        }
+
+        @if (showEndPicker()) {
+            <app-analog-time-picker 
+                [initialTime]="habitForm.get('timeBlockEnd')?.value ?? null"
+                (selected)="onEndTimeSelected($event)"
+                (close)="showEndPicker.set(false)">
+            </app-analog-time-picker>
+        }
+
+        @if (showSubtaskPicker()) {
+            <app-analog-time-picker 
+                [initialTime]="newSubtask.executionWindowStart ?? null"
+                (selected)="onSubtaskTimeSelected($event)"
+                (close)="showSubtaskPicker.set(false)">
+            </app-analog-time-picker>
+        }
     </div>
     `,
     styles: [`
@@ -815,7 +844,12 @@ export class AddHabitComponent implements OnInit {
     frequencyType = signal<string>('daily');
     habitCategory = signal<HabitCategory>('protocol');
     habitPriority = signal<PriorityLevel>('medium');
-    color = signal<string>('#10b981');
+    color = computed(() => {
+        const p = this.habitPriority();
+        if (p === 'low') return '#10b981'; // Green
+        if (p === 'medium') return '#eab308'; // Yellow/Amber
+        return '#f97316'; // Orange/Red
+    });
     showTimeBlock = signal(false);
     showAdvancedOptions = signal(false);
     isSoberTrackerActive = signal(false);
@@ -827,13 +861,18 @@ export class AddHabitComponent implements OnInit {
     subtasks = signal<Partial<MicroHabit>[]>([]);
     newSubtask: Partial<MicroHabit> & { name: string } = { name: '', priority: 'medium', executionWindowStart: this.getDefaultStartTime() as any };
 
+    // Custom time pickers signals
+    showStartPicker = signal(false);
+    showEndPicker = signal(false);
+    showSubtaskPicker = signal(false);
+    onlyStartTime = signal(false);
+    isSaving = signal(false);
+
     priorityOptions = [
         { value: 'low' as PriorityLevel, label: 'Low', icon: 'arrow_downward' },
         { value: 'medium' as PriorityLevel, label: 'Medium', icon: 'drag_handle' },
         { value: 'high' as PriorityLevel, label: 'High', icon: 'priority_high' },
     ];
-
-    presetColors = ['#10b981', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#eab308', '#64748b'];
 
     targetUnitValue = toSignal(this.habitForm.get('targetUnit')!.valueChanges.pipe(startWith('')));
     filteredUnits = computed(() => {
@@ -844,7 +883,15 @@ export class AddHabitComponent implements OnInit {
     stackedWithValue = toSignal(this.habitForm.get('stackedWith')!.valueChanges.pipe(startWith('')));
     filteredStackingEvents = computed(() => {
         const val = (this.stackedWithValue() || '').toLowerCase();
-        return this.stackingEvents.filter(e => e.toLowerCase().includes(val));
+        
+        // Dynamic habit options (Shown first)
+        const habits = this.habitService.habits();
+        const habitOptions = habits
+            .filter(h => h.id !== this.habitId() && h.name)
+            .map(h => `After: ${h.name}`);
+            
+        const combined = [...habitOptions, ...this.stackingEvents];
+        return combined.filter(e => e.toLowerCase().includes(val));
     });
 
     constructor() {
@@ -875,12 +922,16 @@ export class AddHabitComponent implements OnInit {
                     if (habit.timeBlockStart || habit.timeBlockEnd) {
                         this.showTimeBlock.set(true);
                     }
+                    if (habit.timeBlockStart && !habit.timeBlockEnd) {
+                        this.onlyStartTime.set(true);
+                    }
 
                     this.habitType.set(habit.type || 'yes_no');
+                    this.habitCategory.set(habit.category || 'protocol');
+                    this.habitPriority.set(habit.priority || 'medium');
                     this.frequencyType.set(habit.frequencyType || 'daily');
                     this.updateValidators();
                     this.selectedDays.set(habit.weekdays || []);
-                    this.color.set(habit.color || '#ec5b13');
                     this.loadedHabit = habit;
                     if (habit.soberStartDate) {
                         this.isSoberTrackerActive.set(true);
@@ -898,6 +949,54 @@ export class AddHabitComponent implements OnInit {
         if (id) {
             this.isEditMode.set(true);
             this.habitId.set(id);
+        } else {
+            // Restore draft if any
+            const draftStr = localStorage.getItem('lifinity_add_habit_draft');
+            if (draftStr) {
+                try {
+                    const draft = JSON.parse(draftStr);
+                    if (draft.formVal) {
+                        const formVal = { ...draft.formVal };
+                        if (formVal.startDate) formVal.startDate = new Date(formVal.startDate);
+                        if (formVal.endDate) formVal.endDate = new Date(formVal.endDate);
+                        if (formVal.timeBlockStart) formVal.timeBlockStart = new Date(formVal.timeBlockStart);
+                        if (formVal.timeBlockEnd) formVal.timeBlockEnd = new Date(formVal.timeBlockEnd);
+                        
+                        this.habitForm.patchValue(formVal);
+                    }
+                    if (draft.habitType) this.habitType.set(draft.habitType);
+                    if (draft.frequencyType) this.frequencyType.set(draft.frequencyType);
+                    if (draft.habitCategory) this.habitCategory.set(draft.habitCategory);
+                    if (draft.habitPriority) this.habitPriority.set(draft.habitPriority);
+                    if (draft.showTimeBlock !== undefined) this.showTimeBlock.set(draft.showTimeBlock);
+                    if (draft.onlyStartTime !== undefined) this.onlyStartTime.set(draft.onlyStartTime);
+                    if (draft.isSoberTrackerActive !== undefined) this.isSoberTrackerActive.set(draft.isSoberTrackerActive);
+                    if (draft.isEndless !== undefined) this.isEndless.set(draft.isEndless);
+                    if (draft.subtasks) this.subtasks.set(draft.subtasks);
+                    
+                    this.updateValidators();
+                } catch (e) {
+                    console.error('Error restoring habit draft:', e);
+                }
+            }
+            
+            // Subscribe to save draft on changes
+            this.habitForm.valueChanges.subscribe(val => {
+                if (!this.isEditMode()) {
+                    localStorage.setItem('lifinity_add_habit_draft', JSON.stringify({
+                        formVal: val,
+                        habitType: this.habitType(),
+                        frequencyType: this.frequencyType(),
+                        habitCategory: this.habitCategory(),
+                        habitPriority: this.habitPriority(),
+                        showTimeBlock: this.showTimeBlock(),
+                        onlyStartTime: this.onlyStartTime(),
+                        isSoberTrackerActive: this.isSoberTrackerActive(),
+                        isEndless: this.isEndless(),
+                        subtasks: this.subtasks()
+                    }));
+                }
+            });
         }
     }
 
@@ -916,6 +1015,20 @@ export class AddHabitComponent implements OnInit {
         this.habitType.set(type);
         this.habitForm.patchValue({ type });
         this.updateValidators();
+    }
+
+    setHabitTypeAndCategory(type: string, category: HabitCategory) {
+        this.habitType.set(type);
+        this.habitCategory.set(category);
+        this.habitForm.patchValue({ type });
+        this.updateValidators();
+    }
+
+    toggleOnlyStartTime() {
+        this.onlyStartTime.update(v => !v);
+        if (this.onlyStartTime()) {
+            this.habitForm.patchValue({ timeBlockEnd: null });
+        }
     }
 
     private updateValidators() {
@@ -963,7 +1076,9 @@ export class AddHabitComponent implements OnInit {
     }
 
     onSubmit() {
+        if (this.isSaving()) return;
         if (this.habitForm.valid) {
+            this.isSaving.set(true);
             const formVal = this.habitForm.value;
             const habitData = {
                 name: formVal.name!,
@@ -984,7 +1099,7 @@ export class AddHabitComponent implements OnInit {
                 startDate: this.dateToString(formVal.startDate as any),
                 endDate: this.isEndless() ? undefined : this.dateToString(formVal.endDate as any),
                 timeBlockStart: this.showTimeBlock() ? this.timeToString(formVal.timeBlockStart as any) : undefined,
-                timeBlockEnd: this.showTimeBlock() ? this.timeToString(formVal.timeBlockEnd as any) : undefined,
+                timeBlockEnd: (this.showTimeBlock() && !this.onlyStartTime()) ? this.timeToString(formVal.timeBlockEnd as any) : undefined,
 
                 icon: 'star',
                 color: this.color(),
@@ -1005,10 +1120,12 @@ export class AddHabitComponent implements OnInit {
 
             obs$.subscribe({
                 next: () => {
+                    localStorage.removeItem('lifinity_add_habit_draft');
                     this.toastService.success(`Habit ${this.isEditMode() ? 'updated' : 'created'} successfully!`);
                     this.router.navigate(['/']);
                 },
                 error: (error) => {
+                    this.isSaving.set(false);
                     console.error('Error saving habit:', error);
                     this.toastService.error('Failed to save habit. Please try again.');
                 }
@@ -1047,6 +1164,42 @@ export class AddHabitComponent implements OnInit {
 
     removeSubtask(subtask: Partial<MicroHabit>) {
         this.subtasks.update(s => s.filter(x => x !== subtask));
+    }
+
+    formatTimeDisplay(value: any): string {
+        if (!value) return '';
+        if (typeof value === 'string') {
+            const [hStr, mStr] = value.split(':');
+            let h = Number(hStr);
+            const am = h < 12;
+            if (h > 12) h -= 12;
+            if (h === 0) h = 12;
+            return `${String(h).padStart(2, '0')}:${mStr} ${am ? 'AM' : 'PM'}`;
+        }
+        if (value instanceof Date) {
+            let h = value.getHours();
+            const m = String(value.getMinutes()).padStart(2, '0');
+            const am = h < 12;
+            if (h > 12) h -= 12;
+            if (h === 0) h = 12;
+            return `${String(h).padStart(2, '0')}:${m} ${am ? 'AM' : 'PM'}`;
+        }
+        return '';
+    }
+
+    onStartTimeSelected(date: Date) {
+        this.habitForm.patchValue({ timeBlockStart: date });
+        this.showStartPicker.set(false);
+    }
+
+    onEndTimeSelected(date: Date) {
+        this.habitForm.patchValue({ timeBlockEnd: date });
+        this.showEndPicker.set(false);
+    }
+
+    onSubtaskTimeSelected(date: Date) {
+        this.newSubtask.executionWindowStart = date as any;
+        this.showSubtaskPicker.set(false);
     }
 
     private dateToString(date: Date | null | undefined): string | undefined {
