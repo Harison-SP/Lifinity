@@ -117,6 +117,24 @@ import { MicroHabit } from '../../models/habit.model';
                     </a>
                 </div>
 
+                <!-- Loading Skeleton -->
+                @if (habitService.isLoading() && todaysHabits().length === 0) {
+                    <div class="space-y-3">
+                        @for (i of [1, 2, 3, 4]; track i) {
+                            <div class="rounded-xl shadow-gentle dark:shadow-dark-gentle border border-taupe/10 dark:border-dark-border bg-white dark:bg-dark-surface overflow-hidden animate-pulse">
+                                <div class="p-4 flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-sand dark:bg-dark-border"></div>
+                                    <div class="flex-1">
+                                        <div class="h-5 bg-sand dark:bg-dark-border rounded w-2/3 mb-2"></div>
+                                        <div class="h-3 bg-sand dark:bg-dark-border rounded w-1/3"></div>
+                                    </div>
+                                    <div class="w-20 h-5 bg-sand dark:bg-dark-border rounded"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
                 <div class="space-y-3">
                     @for (habit of todaysHabits(); track habit.id) {
                         <!-- Habit Card -->
@@ -128,10 +146,10 @@ import { MicroHabit } from '../../models/habit.model';
                              [class.dark:bg-dark-surface]="habit.category !== 'bad_habit'"
                              [class.bg-orange-500/5]="habit.category === 'bad_habit'">
 
-                            <!-- Main Row -->
+                           
                             <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-sand/30 dark:hover:bg-white/5 transition-all"
                                  (click)="navigateToTrack(habit.id)">
-                                <!-- Completion Circle -->
+                                
                                 <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all shrink-0 cursor-pointer hover:scale-110 active:scale-95"
                                      (click)="toggleHabitCompletion($event, habit)"
                                      [class.bg-sage]="habit.completedToday"
@@ -308,7 +326,7 @@ import { MicroHabit } from '../../models/habit.model';
                     }
                 </div>
 
-                @if (todaysHabits().length === 0) {
+                @if (todaysHabits().length === 0 && !habitService.isLoading()) {
                     <div class="p-8 text-center bg-alabaster dark:bg-dark-surface rounded-lg border border-dashed border-taupe/30 dark:border-dark-border">
                         <span class="material-symbols-outlined text-5xl text-taupe dark:text-dark-text-secondary mb-4">checklist</span>
                         <p class="text-taupe dark:text-dark-text-secondary font-medium">No habits scheduled for today.</p>

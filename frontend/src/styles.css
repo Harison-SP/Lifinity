@@ -438,6 +438,21 @@
 }
 
 /* ================================================
+   ICON FONT FOUC PREVENTION
+   Icons show as invisible boxes until Material Symbols
+   font fully loads. The text is clipped by overflow:hidden.
+   Combined with render-blocking <link> in index.html,
+   this ensures zero flash of icon text names.
+   ================================================ */
+.material-symbols-outlined,
+.material-symbols-rounded {
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ================================================
    BASE STYLES
    ================================================ */
 @layer base {

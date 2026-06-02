@@ -16,8 +16,13 @@ export class HabitService {
 
     private readonly _habits = signal<Habit[]>([]);
     
-    // We can keep logs if needed, but for now we focus on habits state
-    // private readonly _logs = signal<HabitLog[]>([]);
+    /** Track loading state so dashboard can show skeleton */
+    readonly isLoading = signal<boolean>(false);
+    
+    /** Cache tracking to avoid redundant fetches */
+    private lastFetchDate: string | null = null;
+    private lastFetchTime: number = 0;
+    private static readonly CACHE_TTL_MS = 30_000; // 30 seconds
 
     readonly habits = this._habits.asReadonly();
 
@@ -41,34 +46,61 @@ export class HabitService {
         return `${year}-${month}-${day}`;
     }
 
-    loadHabits(date?: string) {
+    loadHabits(date?: string, forceRefresh = false) {
         const targetDate = date || this.getLocalDateString();
+        
+        // Skip fetch if we recently loaded the same date (within cache TTL)
+        const now = Date.now();
+        if (
+            !forceRefresh &&
+            this.lastFetchDate === targetDate &&
+            now - this.lastFetchTime < HabitService.CACHE_TTL_MS &&
+            this._habits().length > 0
+        ) {
+            return;
+        }
+
+        this.isLoading.set(true);
+        
         const params = new HttpParams()
             .set('date', targetDate)
             .set('timezone_offset', this.getTimezoneOffset().toString());
 
-        forkJoin({
-            habits: this.http.get<Habit[]>(this.apiUrl, { params }),
-            systems: this.systemService.getSystems()
-        }).subscribe({
-            next: ({ habits, systems }) => {
-                const systemMap = new Map(systems.map(s => [s.id, s]));
-                const enrichedHabits = habits.map(h => {
-                    if (h.systemId) {
-                        const system = systemMap.get(h.systemId);
-                        if (system) {
-                            return {
-                                ...h,
-                                systemTitle: system.title,
-                                systemDescription: system.description
-                            };
-                        }
-                    }
-                    return h;
+        // Load habits FIRST, render immediately, then enrich with system data
+        this.http.get<Habit[]>(this.apiUrl, { params }).subscribe({
+            next: (habits) => {
+                // Set habits immediately — don't wait for systems
+                this._habits.set(habits);
+                this.lastFetchDate = targetDate;
+                this.lastFetchTime = Date.now();
+                this.isLoading.set(false);
+
+                // Enrich with system data asynchronously (non-blocking)
+                this.systemService.getSystems().subscribe({
+                    next: (systems) => {
+                        const systemMap = new Map(systems.map(s => [s.id, s]));
+                        const enrichedHabits = this._habits().map(h => {
+                            if (h.systemId) {
+                                const system = systemMap.get(h.systemId);
+                                if (system) {
+                                    return {
+                                        ...h,
+                                        systemTitle: system.title,
+                                        systemDescription: system.description
+                                    };
+                                }
+                            }
+                            return h;
+                        });
+                        this._habits.set(enrichedHabits);
+                    },
+                    error: () => { /* Systems enrichment is optional, don't fail */ }
                 });
-                this._habits.set(enrichedHabits);
             },
-            error: (error) => console.error('Failed to load habits', error)
+            error: (error) => {
+                console.error('Failed to load habits', error);
+                this.isLoading.set(false);
+            }
         });
     }
 
@@ -86,7 +118,10 @@ export class HabitService {
 
         return this.http.post<Habit>(this.apiUrl, payload).pipe(
             tap({
-                next: (newHabit) => this._habits.update(current => [...current, newHabit]),
+                next: (newHabit) => {
+                    this._habits.update(current => [...current, newHabit]);
+                    this.invalidateCache();
+                },
                 error: (error) => console.error('Failed to add habit', error)
             })
         );
@@ -99,6 +134,7 @@ export class HabitService {
                      this._habits.update(habits =>
                         habits.map(h => h.id === id ? updatedHabit : h)
                     );
+                    this.invalidateCache();
                  },
                  error: (error) => console.error('Failed to update habit', error)
              })
@@ -119,6 +155,7 @@ export class HabitService {
                     this._habits.update(habits =>
                         habits.map(h => h.id === habitId ? updatedHabit : h)
                     );
+                    this.invalidateCache();
                 },
                 error: (error) => console.error('Failed to toggle completion', error)
             })
@@ -128,7 +165,10 @@ export class HabitService {
     deleteHabit(id: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
             tap({
-                next: () => this._habits.update(current => current.filter(h => h.id !== id)),
+                next: () => {
+                    this._habits.update(current => current.filter(h => h.id !== id));
+                    this.invalidateCache();
+                },
                 error: (error) => console.error('Failed to delete habit', error)
             })
         );
@@ -251,5 +291,10 @@ export class HabitService {
                 return { performance, completed: completed > 0 ? 1 : 0, total: 1, onTrack: completed > 0 };
             })
         );
+    }
+
+    /** Invalidate cache so next loadHabits() fetches fresh data */
+    private invalidateCache() {
+        this.lastFetchTime = 0;
     }
 }

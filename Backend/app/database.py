@@ -87,3 +87,12 @@ refresh_tokens_collection = db["refresh_tokens"]
 
 # Ensure unique index on email
 users_collection.create_index("email", unique=True)
+
+# ── Performance Indexes ──────────────────────────────────────────────────────
+# Compound index for the most common query: lookup logs by user + habit + date range
+db["habit_logs"].create_index(
+    [("user_id", 1), ("habit_id", 1), ("completed_at", -1)],
+    background=True
+)
+# Index for habits by user (used on every dashboard load)
+db["habits"].create_index([("user_id", 1)], background=True)

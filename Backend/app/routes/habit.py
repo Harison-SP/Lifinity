@@ -63,12 +63,21 @@ async def get_habits(
     if date:
         utc_start, utc_end = get_day_range_utc(date, timezone_offset)
 
+        # Batch fetch ALL logs for ALL habits in one query (fixes N+1 problem)
+        habit_ids = [str(h["_id"]) for h in habits]
+        all_logs = list(habit_log_collection.find({
+            "habit_id": {"$in": habit_ids},
+            "completed_at": {"$gte": utc_start, "$lte": utc_end}
+        }))
+        
+        # Index logs by habit_id for O(1) lookups
+        log_map = {}
+        for log in all_logs:
+            log_map[log["habit_id"]] = log
+
         for habit in habits:
             habit_id = str(habit["_id"])
-            log = habit_log_collection.find_one({
-                "habit_id": habit_id,
-                "completed_at": {"$gte": utc_start, "$lte": utc_end}
-            })
+            log = log_map.get(habit_id)
             habit["completedToday"] = bool(log)
             
             # Populate subtask completion states for this specific date
